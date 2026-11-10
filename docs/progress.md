@@ -89,3 +89,40 @@ Batch 0 SELESAI. Menunggu perintah lanjut ke Batch 1 (Tema).
 
 ### Status
 Batch 1 SELESAI. Menunggu perintah lanjut ke Batch 2 (Supabase).
+
+## Batch 2 — Supabase (2026-11-10)
+
+### Konteks
+- Project Supabase: `hvjqjjqgwpmpqnchnxts` (URL: `https://hvjqjjqgwpmpqnchnxts.supabase.co` — **tanpa** `/rest/v1/`, path itu ditambahkan SDK otomatis).
+- Publishable key dipakai sebagai default di `AppConfig` (publik, dilindungi RLS; keputusan pemilik 2026-11-10). Kunci service_role/secret TIDAK PERNAH masuk repo/aplikasi.
+- Anonymous Sign-Ins **sudah aktif** di dashboard (konfirmasi pemilik).
+- CLI Supabase & Docker TIDAK tersedia di mesin dev → migrasi diterapkan manual oleh pemilik via **SQL Editor** (opsi B yang disetujui pemilik). Source of truth skema tetap file di `supabase/migrations/`.
+
+### Perubahan (kode — sudah dikerjakan & terverifikasi)
+1. Edge Function `health` ditulis (`supabase/functions/health/index.ts`; tanpa auth; roundtrip query ke tabel `ai_usage` sebagai "select 1"; 500/503 bila down) + `supabase/config.toml` (`project_id`, `verify_jwt = false` untuk health). **Deploy manual diperlukan** (lihat di bawah).
+2. `supabase_flutter ^2.15.4` ditambahkan — alasan: backend client resmi PRD §4 (Supabase Auth + Postgrest + Edge Functions); dependency baru pertama untuk data layer.
+3. Migrasi di `supabase/migrations/` (source of truth, dari PRD §5.2–5.4):
+   - `20261111000001_schema.sql` — 6 tabel (`children`, `growth_measurements`, `food_logs`, `chat_messages`, `user_consents`, `ai_usage`) + CHECK constraints, FK `on delete cascade`/`set null`, `unique(child_id, measured_on)`, index.
+   - `20261111000002_rls.sql` — RLS semua tabel; policy `own rows` (user = `authenticated` termasuk anonim); untuk tabel ber-`child_id`, WITH CHECK juga memverifikasi anak milik user; `chat_messages` mengizinkan `child_id NULL`; `ai_usage` read-only untuk user (tulis hanya `service_role`).
+   - `20261111000003_quota.sql` — `public.consume_ai_quota(p_user, p_kind, p_limit)` SECURITY DEFINER, hari = `Asia/Jakarta`, atomic increment dengan limit; REVOKE dari public/anon/authenticated; GRANT hanya `service_role`.
+4. Script uji RLS dua pengguna: `supabase/tests/test_rls.sql` — transaksi + `rollback` di akhir; "dua pengguna" disimulasikan lewat `request.jwt.claims`; memverifikasi: A bisa CRUD sendiri; B tidak bisa select/update/delete/insert lintas anak (anak, growth, food_logs, chat, consents); chat `child_id NULL` diizinkan; kuota berhenti di limit (2) dan menolak kind tidak valid; dipanggil sebagai `service_role`.
+5. Integrasi app: `Supabase.initialize()` di `main.dart` (URL + publishable key via `String.fromEnvironment`, default = nilai publik; override `--dart-define`); `AuthRepository` (abstrak, domain) + `AuthRepositoryImpl` (`supabase_flutter`) + use case `SignInAnonymously`; `auth_bootstrap.dart` — login anonim otomatis saat boot, kegagalan jaringan ditelan (offline tetap terbuka; retry di UI Batch 4+).
+
+### Verifikasi (2026-11-10, mesin dev)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **12/12 passed** (termasuk unit test `AuthRepositoryImpl` tanpa jaringan).
+- DoD §10.1: `Colors.` di `lib/features` & `lib/shared` → 0; gradien → 0; `GEMINI_API_KEY=<literal>` → 0.
+
+### MENUNGGU PEMILIK (belum bisa saya verifikasi dari mesin dev)
+1. **Terapkan migrasi** via SQL Editor, berurutan: `20261111000001_schema.sql` → `000002_rls.sql` → `000003_quota.sql`.
+2. **Uji RLS**: jalankan `supabase/tests/test_rls.sql` di SQL Editor — semua blok harus PASS tanpa ERROR. Kirim outputnya / lapor, akan saya catat di sini.
+3. **Deploy `health`** (jika diinginkan sekarang): via dashboard Edge Functions (tempel `index.ts`, Verify JWT = OFF) atau CLI: `npx supabase login` → `npx supabase link --project-ref hvjqjjqgwpmpqnchnxts` → `npx supabase functions deploy health`. Tes: `curl https://hvjqjjqgwpmpqnchnxts.supabase.co/functions/v1/health` → `{"status":"ok"}`.
+4. **Uji masuk anonim di perangkat**: jalankan `flutter run`; di dashboard Supabase → Authentication → Users harus muncul satu user anonim setelah app dibuka.
+
+### Catatan
+- Keep-alive & backup terjadwal = Batch 9 (PRD §5.6), belum sekarang.
+- `delete-account` & `ask-nutrition`/`analyze-meal` = Batch 9 / 5 & 7.
+- Batas kuota default (`SCAN_DAILY_LIMIT=15`, `CHAT_DAILY_LIMIT=30`) = env di Edge Function saat Batch 5/7, bukan di klien.
+
+### Status
+Kode Batch 2 selesai & terverifikasi analyze/test. Menunggu langkah manual pemilik di atas; setelah RLS PASS + app masuk anonim → Batch 2 resmi selesai. Menunggu perintah lanjut ke Batch 3 (butuh file tabel Permenkes 2/2020 dari pemilik).
