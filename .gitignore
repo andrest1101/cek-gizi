@@ -67,3 +67,6 @@ dump*.sql
 *.apk
 *.aab
 *.ipa
+
+# Dokumen referensi lokal (ekstraksi bahan baku — bukan bagian repo)
+.reference/
