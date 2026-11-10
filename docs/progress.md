@@ -63,3 +63,29 @@ Rencana batch berikutnya (setiap penambahan akan dicatat di sini):
 
 ### Status
 Batch 0 SELESAI. Menunggu perintah lanjut ke Batch 1 (Tema).
+
+## Batch 1 — Tema (2026-11-10)
+
+### Perubahan
+1. **Font ter-bundle (PRD §7.3):** Plus Jakarta Sans Regular/Medium/SemiBold/Bold (400/500/600/700) diunduh dari repo resmi Tokotype (`tokotype/PlusJakartaSans`) dan disertakan dengan lisensi OFL (`assets/fonts/OFL.txt`). Dideklarasikan di `pubspec.yaml` (family `PlusJakartaSans`).
+2. **Token §7.2 — `AppColors` `ThemeExtension`** (`lib/core/theme/app_colors.dart`): light & dark sesuai PRD, termasuk pemisahan `statusWatch` (isi) vs `statusWatchText` (teks, light `#8A5A12`). `copyWith`/`lerp` lengkap.
+3. **Token §7.3 — `AppTextStyles`** (`lib/core/theme/app_text_styles.dart`): heroNumber 28/34 w700, titleLarge 22/28 w700, titleMedium 17/24 w600, body/bodyTabular 16/24, bodySmall 14/20, label 13/16 w500. `FontFeature.tabularFigures()` untuk angka. Style tanpa warna (warna dari theme).
+4. **Token §7.4 —** `AppSpacing` (skala 4pt: 4/8/12/16/20/24/32 + `screenPadding` 20 + `sectionGap` 28), `AppRadius` (control 12 / card 20 / pill 999), `AppMotion` (fast 200ms, normal 250ms, ring 400ms, `easeOutCubic`).
+5. **`AppTheme.light()/dark()`** (`lib/core/theme/app_theme.dart`): `ColorScheme` M3 dari seed primer + override token PRD (`surfaceContainerHighest` = `surfaceVariant`, dsb.); `TextTheme` PlusJakartaSans dengan ukuran PRD; `CardThemeData` hairline border radius 20 tanpa elevation (PRD §7.4); `FilledButton`/`OutlinedButton` minimum 48dp radius 12; `InputDecorationTheme` hairline radius 12; `DividerTheme` hairline 1px. Helper `AppTheme.colorsOf(context)`.
+6. **Komponen dasar** (`lib/shared/widgets/`): `TonalIconCircle`, `SectionHeader`, `EmptyState`, `ErrorCard` — semua tanpa literal warna, dengan `Semantics` dan copy dari `AppStrings` (§6.9: satu kalimat + satu tombol; tombol ≥48dp).
+7. **Layar uji token** (`lib/shared/dev/token_gallery_screen.dart`): menampilkan SEMUA token warna (14), tipografi (7 style), spacing, radius, motion, tombol, dan komponen dasar di **kedua tema** (di-render dua preview side-by-side vertical via `Theme` override). Developer tool — akan diganti Beranda asli di Batch 4.
+8. **AppStrings**: tambah `retry` dan `errorTitle`.
+9. **Tidak ada dependency baru.**
+
+### Verifikasi (2026-11-10)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **10/10 passed** (boot galeri, section token kedua tema, unit test `AppTheme`/`AppColors`/spacing/radius).
+- DoD §10.1: `LinearGradient|RadialGradient|SweepGradient` di `lib/` → 0; `Colors.` di `lib/features` & `lib/shared` → 0 (galeri dev membaca token lewat `extension<AppColors>()` di dalam preview tema, bukan literal); `GEMINI_API_KEY=<literal>` → 0.
+
+### Catatan teknis
+- Grep DoD PRD `Colors\.` juga cocok pada substring `AppColors.` — dev galeri sengaja membaca token via `Theme` extension; sisa referensi `AppColors` hanya di `lib/core` dan `test/` (di luar scope grep PRD).
+- Ikon memakai varian **Rounded bawaan Flutter** (`Icons.*_rounded`) — bundling font Material Symbols Rounded belum dilakukan (akan diputuskan bila diperlukan Batch 4+, dicatat di sini).
+- `TokenGalleryScreen` masuk Batch 4: digantikan Beranda; galeri tetap sebagai dev tool.
+
+### Status
+Batch 1 SELESAI. Menunggu perintah lanjut ke Batch 2 (Supabase).
