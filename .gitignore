@@ -43,3 +43,27 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Secrets & environment (PRD §12 constraint 4 — no keys/tokens/.env in repo)
+.env
+.env.*
+!.env.example
+**/secrets/
+*.jks
+*.keystore
+key.properties
+*.p12
+*.pem
+google-services.json
+GoogleService-Info.plist
+
+# Supabase local tooling & dumps
+supabase/.temp/
+supabase/.branches/
+dump*.sql
+*.backup
+
+# Release build artifacts
+*.apk
+*.aab
+*.ipa

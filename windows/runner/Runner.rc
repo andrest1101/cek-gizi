@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "bebas_stunting" "\0"
+            VALUE "CompanyName", "com.example.cekgizi" "\0"
+            VALUE "FileDescription", "CekGizi" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "bebas_stunting" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "bebas_stunting.exe" "\0"
-            VALUE "ProductName", "bebas_stunting" "\0"
+            VALUE "InternalName", "cekgizi" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.example.cekgizi. All rights reserved." "\0"
+            VALUE "OriginalFilename", "cekgizi.exe" "\0"
+            VALUE "ProductName", "CekGizi" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
