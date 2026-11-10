@@ -11,4 +11,10 @@ abstract final class AppStrings {
       'Hasilnya bukan diagnosis dan tidak menggantikan pemeriksaan tenaga '
       'kesehatan. Jika anak sakit atau kamu khawatir, hubungi Posyandu, '
       'puskesmas, atau dokter.';
+
+  /// Label tombol coba lagi (PRD §6.9).
+  static const String retry = 'Coba lagi';
+
+  /// Judul umum kartu galat (PRD §6.9).
+  static const String errorTitle = 'Ups, terjadi kesalahan';
 }
