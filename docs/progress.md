@@ -138,4 +138,42 @@ Batch 1 SELESAI. Menunggu perintah lanjut ke Batch 2 (Supabase).
 - Batas kuota default (`SCAN_DAILY_LIMIT=15`, `CHAT_DAILY_LIMIT=30`) = env di Edge Function saat Batch 5/7, bukan di klien.
 
 ### Status
-Kode Batch 2 selesai & terverifikasi analyze/test. Menunggu langkah manual pemilik di atas; setelah RLS PASS + app masuk anonim → Batch 2 resmi selesai. Menunggu perintah lanjut ke Batch 3 (butuh file tabel Permenkes 2/2020 dari pemilik).
+Kode Batch 2 selesai & terverifikasi analyze/test; **uji RLS = Success (lulus, 2026-11-10)**; anonymous sign-in terbukti bekerja. Batch 2 SELESAI (sisa opsional: deploy `health`).
+
+## Batch 3 — Domain Gizi (dimulai 2026-11-10, sebagian SELESAI)
+
+### Perubahan (bagian yang tidak bergantung pada isi tabel)
+Logic PRD §3.1–3.8, Dart murni, tanpa Flutter, 100% unit-tested:
+1. `lib/core/errors/domain_exceptions.dart` — sealed domain exceptions (`OutOfSupportedRangeException`, `InvalidMeasurementException`, `InvalidReferenceDataException`).
+2. Entities: `Sex`, `MeasureMode`, `AnthropometryIndex`, `SdColumns`, `ZScoreResult` (statusCode null bila out-of-range), `GrowthMeasurementPoint`.
+3. `services/age_calculator.dart` — usia bulan penuh; di luar 0–60 → exception; sebelum lahir → exception.
+4. `services/measure_correction.dart` — koreksi 0,7 cm (PRD §3.2).
+5. `services/z_score.dart` — rumus SD Permenkes (PRD §3.3); pembagi nol → `InvalidReferenceDataException`.
+6. `services/growth_classification.dart` — kategori HAZ/WAZ/WHZ (PRD §3.4, batas inklusif/eksklusif persis) + tolak klasifikasi di luar rentang (PRD §3.5: HAZ ±6, WAZ −6..+5, WHZ −5..+5 → `isOutOfRange`, statusCode null).
+7. `services/growth_evaluator.dart` — orkestrasi: koreksi → cari baris → z → klasifikasi (HAZ terkoreksi, WAZ tidak, WHZ terkoreksi).
+8. `repositories/anthropometry_reference_tables.dart` — kontrak `AnthropometryReferenceTables` + `LengthHeightStep` (half-up 0,5 cm).
+9. `services/growth_trend_evaluator.dart` — tren (PRD §3.6): berat turun → `needsAttention/weight_drop`; HAZ memburuk → `haz_worsened`; <2 data → `insufficientData`.
+10. `chat/.../red_flag_checker.dart` — red flag (PRD §3.8): emergency (kejang/sesak/tersedak/biru) & referDoctor; cek emergency dulu; lowercase-insensitive.
+11. `meals/.../dietary_diversity.dart` — 8 kelompok (kode PRD), union kelompok per hari, `DiversityProfile` (mpasi_6_23 ≥5/8, balita_24_59 ≥5/7 tanpa ASI), flag protein hewani, validasi kode; **target TIDAK dihardcode — diterima sebagai parameter dari `nutrition_rules.json`**; `isScanSupportedForAge` (≥6 bln).
+12. Unit test: 62 test baru (total **73 passed**), termasuk mekanisme koreksi/pembagi/step via fixture **PALSU yang ditandai eksplisit — bukan nilai Permenkes**.
+
+### Verifikasi (2026-11-10)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **73/73 passed**
+- DoD §10.1: jaw "Colors." di features → 0; gradien → 0.
+
+### MENUNGGU PEMILIK (blocker Batch 3 — nilai tabel)
+1. **Tabel SD Permenkes 2/2020** — format apa pun (PDF/CSV/Excel/foto tabel); konversi ke `assets/reference/permenkes_2_2020_sd.json` sesuai spesifikasi di `docs/reference-notes.md` (urutan kolom −3 −2 −1 median +1 +2 +3; haz/waz per bulan; whz step 0,5 half-up). **Aku DILARANG mengetik ulang nilai dari ingatan.**
+2. **`nutrition_rules.json`** — (a) file ditinjau ahli gizi/bidan, atau (b) seed Lampiran A PRD bertanda `reviewed_by=null`. Loader JSON belum ditulis (menunggu file).
+3. Setelah tabel ada: verifikasi z-score 30 kasus (selisih ≤ 0,01; kolom −2 SD ≈ −2,00; median = 0) + rekonsiliasi terhadap WHO Anthro (PRD §9.2/9.3).
+
+### Catatan
+- `DietaryDiversity` tidak menyimpan target di kode; angka 5/8, 5/7, dan tips hanya boleh dari `nutrition_rules.json`.
+- Scanner <6 bulan dinonaktifkan (`isScanSupportedForAge`); kartu "ASI eksklusif" menyusul di UI (Batch 5/6).
+
+### MENUNGGU PEMILIK (blocker Batch 3)
+1. **Tabel SD Permenkes 2/2020** — format apa pun (PDF/CSV/Excel/foto); aku konversi ke `assets/reference/` sesuai spec di `docs/reference-notes.md`. Aku DILARANG mengetik ulang nilai tabel dari ingatan.
+2. **`nutrition_rules.json`** — boleh (a) file yang sudah ditinjau ahli gizi/bidan, atau (b) contoh Lampiran A PRD sebagai seed bertanda `reviewed_by=null` sampai ditinjau.
+
+### Status
+Domain inti terbangun + unit test hijau; nilai tabel & loader `nutrition_rules.json` menunggu file dari pemilik.

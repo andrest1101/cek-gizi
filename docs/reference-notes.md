@@ -2,6 +2,28 @@
 
 Dokumen kerja untuk tabel referensi antropometri. Isi tabel resmi **disediakan pemilik proyek** (lampiran Permenkes 2/2020) dan dimasukkan ke `assets/reference/` pada **Batch 3**. Jangan mengisi tabel dari ingatan atau sumber lain.
 
+## Format berkas referensi yang akan dipakai Batch 3 (spesifikasi)
+
+Saat tabel resmi diterima, akan dikonversi ke `assets/reference/permenkes_2_2020_sd.json` dengan struktur berikut (keputusan desain repo, bukan data gizi):
+
+```json
+{
+  "version": "permenkes-2-2020",
+  "source": "Lampiran Permenkes No. 2 Tahun 2020 (diisi pemilik, jangan diketik agen)",
+  "tables": {
+    "haz": { "by": "age_months", "step": 1,  "sex": { "male": [[sdNeg3, sdNeg2, sdNeg1, median, sdPos1, sdPos2, sdPos3], ...], "female": [[...]] } },
+    "waz": { "by": "age_months", "step": 1,  "sex": { "male": [...], "female": [...] } },
+    "whz": { "by": "length_height_cm", "step": 0.5, "sex": { "male": [...], "female": [...] } }
+  }
+}
+```
+
+- `haz`/`waz`: baris berurutan untuk umur 0–60 bulan (61 baris per jenis kelamin).
+- `whz`: baris berurutan untuk 35,0–130,0 cm step 0,5 (191 baris per jenis kelamin). Tinggi >130/<35 → di luar cakupan tabel → ditolak.
+- Urutan kolom: −3, −2, −1, median, +1, +2, +3 SD.
+- **Step length/height:** nilai cm mencocokkan ke baris step 0,5 dengan pembulatan **half-up** (`floor(cm*2 + 0.5) / 2`). *Aturan final mengikuti lampiran resmi Permenkes — dikonfirmasi saat berkas tersedia.*
+- **Verifikasi wajib (Batch 3 lanjutan):** 30 kasus dari lampiran resmi dibandingkan hasil hitung; selisih ≤ 0,01 (PRD §9.2/9.3). Nilai kolom −2 SD harus memberi z ≈ −2,00 ± 0,01; median memberi 0.
+
 ## Yang harus dicatat di sini saat Batch 3
 
 - [ ] Versi/identitas berkas tabel SD resmi yang dipakai (nama file, tanggal rilis lampiran).
