@@ -1,39 +1,36 @@
 -- ═══════════════════════════════════════════════════════════════
 -- Uji RLS DUA PENGGUNA (PRD §5.3) — jalankan di Supabase SQL Editor
--- atau psql SETELAH tiga migrasi diterapkan.
+-- atau psql SETELAH tiga migrasi + grants diterapkan.
 --
 -- Aman: seluruh skrip berjalan dalam SATU transaksi dan di-ROLLBACK
--- di akhir — tidak meninggalkan data uji. Tidak perlu dua akun nyata;
--- dua "pengguna" disimulasikan lewat request.jwt.claims.
+-- di akhir — tidak meninggalkan data uji.
 --
+-- UID prefilled dari proyek pemilik (bukan rahasia, bukan credential —
+-- auth UID anonim sekalipun hanya bisa dipakai bersama key penerbitan):
+--   USER A = 93a7d924-13e6-4573-95b6-42a545486291  (akun uji buatan sendiri)
+--   USER B = f6c5d8e8-793f-4857-911d-b8276fb8488c  (anonim, dibuat `flutter run`)
+-- Ganti kedua konstanta di bawah bila UID di proyek Anda berbeda.
+--
+-- Tanpa temp table — semua referensi pakai literal (menghindari masalah
+-- hak akses temp table saat pindah role ke service_role).
 -- LULUS = semua blok DO selesai tanpa ERROR dan notice "PASS" muncul.
 -- ═══════════════════════════════════════════════════════════════
 
 begin;
 
 set local role authenticated;
-set local request.jwt.claims = '{"sub":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","role":"authenticated"}';
-
-create temp table rls_test on commit drop as
-select 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid as user_a,
-       'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'::uuid as user_b;
+set local request.jwt.claims = '{"sub":"93a7d924-13e6-4573-95b6-42a545486291","role":"authenticated"}';
 
 -- ── Pengguna A: tulis & baca datanya sendiri ────────────────────
 
--- A insert anak (via CTE agar id bisa dibawa ke temp table)
-create temp table rls_child on commit drop as
-with new_child as (
-  insert into public.children (nickname, birth_date, sex)
-  values ('RLS-TEST-A', '2025-01-15', 'female')
-  returning id
-)
-select id as child_a from new_child;
+insert into public.children (id, nickname, birth_date, sex)
+values ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'RLS-TEST-A', '2025-01-15', 'female');
 
 do $$
 declare
-  child_a uuid := (select child_a from rls_child);
+  child_a uuid := 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+  user_a  uuid := '93a7d924-13e6-4573-95b6-42a545486291';
 begin
-  -- anak milik A terlihat oleh A
   if not exists (select 1 from public.children where id = child_a) then
     raise exception 'FAIL: A tidak bisa membaca anaknya sendiri';
   end if;
@@ -48,18 +45,19 @@ begin
   values (child_a, 'user', 'Contoh pesan uji RLS');
 
   insert into public.user_consents (user_id, version)
-  select auth.uid(), 'test-v1';
+  values (user_a, 'test-v1');
 
   raise notice 'PASS: user A dapat menulis & membaca datanya sendiri';
 end $$;
 
 -- ── Pengguna B: TIDAK boleh melihat/mengubah data A ─────────────
 
-set local request.jwt.claims = '{"sub":"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb","role":"authenticated"}';
+set local request.jwt.claims = '{"sub":"f6c5d8e8-793f-4857-911d-b8276fb8488c","role":"authenticated"}';
 
 do $$
 declare
-  child_a uuid := (select child_a from rls_child);
+  child_a uuid := 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+  user_a  uuid := '93a7d924-13e6-4573-95b6-42a545486291';
 begin
   if exists (select 1 from public.children where id = child_a) then
     raise exception 'FAIL: user B bisa MEMBACA anak user A';
@@ -82,7 +80,7 @@ begin
   if exists (select 1 from public.chat_messages where child_id = child_a) then
     raise exception 'FAIL: user B bisa membaca chat_messages user A';
   end if;
-  if exists (select 1 from public.user_consents where user_id = (select user_a from rls_test)) then
+  if exists (select 1 from public.user_consents where user_id = user_a) then
     raise exception 'FAIL: user B bisa membaca user_consents user A';
   end if;
   raise notice 'PASS: user B tidak bisa membaca growth_measurements, food_logs, chat_messages, user_consents milik A';
@@ -90,7 +88,7 @@ end $$;
 
 do $$
 declare
-  child_a uuid := (select child_a from rls_child);
+  child_a uuid := 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 begin
   -- INSERT dengan child_id milik A -> harus ditolak (with check)
   begin
@@ -123,7 +121,7 @@ set local role service_role;
 
 do $$
 declare
-  user_a uuid := (select user_a from rls_test);
+  user_a uuid := '93a7d924-13e6-4573-95b6-42a545486291';
 begin
   if not public.consume_ai_quota(user_a, 'scan', 2) then
     raise exception 'FAIL: consume_ai_quota scan ke-1 harus true';

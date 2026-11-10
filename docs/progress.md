@@ -105,6 +105,7 @@ Batch 1 SELESAI. Menunggu perintah lanjut ke Batch 2 (Supabase).
    - `20261111000001_schema.sql` — 6 tabel (`children`, `growth_measurements`, `food_logs`, `chat_messages`, `user_consents`, `ai_usage`) + CHECK constraints, FK `on delete cascade`/`set null`, `unique(child_id, measured_on)`, index.
    - `20261111000002_rls.sql` — RLS semua tabel; policy `own rows` (user = `authenticated` termasuk anonim); untuk tabel ber-`child_id`, WITH CHECK juga memverifikasi anak milik user; `chat_messages` mengizinkan `child_id NULL`; `ai_usage` read-only untuk user (tulis hanya `service_role`).
    - `20261111000003_quota.sql` — `public.consume_ai_quota(p_user, p_kind, p_limit)` SECURITY DEFINER, hari = `Asia/Jakarta`, atomic increment dengan limit; REVOKE dari public/anon/authenticated; GRANT hanya `service_role`.
+   - `20261111000004_grants.sql` — GRANT tabel ke `authenticated` (CRUD, tapi `ai_usage` SELECT-only) & `service_role`; tanpa ini RLS tidak pernah dievaluasi (error 42501 saat uji pertama).
 4. Script uji RLS dua pengguna: `supabase/tests/test_rls.sql` — transaksi + `rollback` di akhir; "dua pengguna" disimulasikan lewat `request.jwt.claims`; memverifikasi: A bisa CRUD sendiri; B tidak bisa select/update/delete/insert lintas anak (anak, growth, food_logs, chat, consents); chat `child_id NULL` diizinkan; kuota berhenti di limit (2) dan menolak kind tidak valid; dipanggil sebagai `service_role`.
 5. Integrasi app: `Supabase.initialize()` di `main.dart` (URL + publishable key via `String.fromEnvironment`, default = nilai publik; override `--dart-define`); `AuthRepository` (abstrak, domain) + `AuthRepositoryImpl` (`supabase_flutter`) + use case `SignInAnonymously`; `auth_bootstrap.dart` — login anonim otomatis saat boot, kegagalan jaringan ditelan (offline tetap terbuka; retry di UI Batch 4+).
 
@@ -113,11 +114,23 @@ Batch 1 SELESAI. Menunggu perintah lanjut ke Batch 2 (Supabase).
 - `flutter test` → **12/12 passed** (termasuk unit test `AuthRepositoryImpl` tanpa jaringan).
 - DoD §10.1: `Colors.` di `lib/features` & `lib/shared` → 0; gradien → 0; `GEMINI_API_KEY=<literal>` → 0.
 
-### MENUNGGU PEMILIK (belum bisa saya verifikasi dari mesin dev)
-1. **Terapkan migrasi** via SQL Editor, berurutan: `20261111000001_schema.sql` → `000002_rls.sql` → `000003_quota.sql`.
-2. **Uji RLS**: jalankan `supabase/tests/test_rls.sql` di SQL Editor — semua blok harus PASS tanpa ERROR. Kirim outputnya / lapor, akan saya catat di sini.
-3. **Deploy `health`** (jika diinginkan sekarang): via dashboard Edge Functions (tempel `index.ts`, Verify JWT = OFF) atau CLI: `npx supabase login` → `npx supabase link --project-ref hvjqjjqgwpmpqnchnxts` → `npx supabase functions deploy health`. Tes: `curl https://hvjqjjqgwpmpqnchnxts.supabase.co/functions/v1/health` → `{"status":"ok"}`.
-4. **Uji masuk anonim di perangkat**: jalankan `flutter run`; di dashboard Supabase → Authentication → Users harus muncul satu user anonim setelah app dibuka.
+### Perbaikan pasca-uji (2026-11-10, error 42501)
+- Uji RLS pertama di SQL Editor gagal: `42501: permission denied for table children` — hak akses tabel untuk role `authenticated` tidak otomatis diberikan untuk tabel yang dibuat lewat SQL Editor. **Bukan bug RLS**: tanpa GRANT, RLS tidak pernah dievaluasi.
+- Ditambahkan `20261111000004_grants.sql`: GRANT CRUD ke `authenticated` (CRUD data miliknya — RLS yang menyaring), `GRANT SELECT` saja di `ai_usage`, `GRANT ALL` ke `service_role`.
+- **ATURAN BARU untuk semua migrasi berikutnya: setiap migrasi yang membuat tabel WAJIB menyertakan GRANT untuk `authenticated`/`service_role` di file yang sama.**
+- Popup "Potential issue detected" di SQL Editor adalah peringatan standar untuk statement seperti DELETE/UPDATE/rollback — skrip uji aman (transaksi + `rollback` di akhir); klik "Run query" untuk melanjutkan.
+
+### Verifikasi RLS oleh pemilik (progres)
+- Anonymous Sign-In **terbukti aktif**: uid `f6c5d8e8-793f-4857-911d-b8276fb8488c` muncul di Authentication → Users setelah `flutter run` di Windows.
+- Uji pertama gagal `42501 ... permission denied for table children` → diperbaiki dengan `20261111000004_grants.sql`.
+- Uji kedua gagal `23503 ... Key is not present in table "users"` → UUID palsu tidak boleh; skrip diubah memakai UID asli pemilik (prefilled, bukan rahasia).
+- Uji ketiga gagal `42501 ... permission denied for table rls_test` → temp table dibuat sebagai `authenticated` sehingga tidak bisa dibaca `service_role`; **skrip ditulis ulang tanpa temp table** (semua UUID literal; anak A pakai id eksplisit `cccccccc-...`). Section kuota (`service_role`) kini self-contained.
+- Menunggu pemilik menjalankan ulang `supabase/tests/test_rls.sql` → semua notice PASS.
+
+### Langkah tersisa untuk pemilik
+1. Jalankan ulang `supabase/tests/test_rls.sql` di SQL Editor (klik **Run query** bila popup muncul) — semua notice PASS tanpa ERROR; jika lulus, Batch 2 resmi selesai.
+2. **Deploy `health`** (bila diinginkan sekarang): dashboard Edge Functions (tempel `index.ts`, Verify JWT = OFF) atau CLI: `npx supabase login` → `npx supabase link --project-ref hvjqjjqgwpmpqnchnxts` → `npx supabase functions deploy health`. Tes: `curl.exe https://hvjqjjqgwpmpqnchnxts.supabase.co/functions/v1/health` → `{"status":"ok"}`.
+3. Anonymous sign-in sudah terbukti (user anonim `f6c5d8e8-...` muncul di Authentication → Users).
 
 ### Catatan
 - Keep-alive & backup terjadwal = Batch 9 (PRD §5.6), belum sekarang.
