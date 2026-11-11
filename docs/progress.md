@@ -175,6 +175,46 @@ Kode Batch 2 selesai & terverifikasi analyze/test; **uji RLS = Success (lulus, 2
 - Peninjauan konten gizi oleh ahli gizi/bidan (`reviewed_by`/`reviewed_on` di isi `nutrition_rules.json`) — PRD §9.1/§13.
 - Verifikasi OWNER terhadap tabel Permenkes + sel cacat — PRD §13.
 
+## Batch 6 — Diary & Piring Hari Ini (2026-11-11)
+
+### Ruang lingkup
+Presentasi + data catatan makan (`food_logs`) + integrasi Beranda. **Tidak ada AI, tidak ada dependency baru** (scanner tetap Batch 5, butuh Cloud Billing/Gemini key — PRD §13.3). Domain lama dipakai ulang: `DietaryDiversity`, `NutritionRules`, tabel `food_logs` + RLS (Batch 2).
+
+### Dependency baru
+**Tidak ada.** Ring digambar dengan `CustomPainter` (arc) sendiri; tidak menambah paket. `fl_chart` tetap 0.71.0.
+
+### Perubahan
+1. **Domain & data (meals)**: `FoodLog` + `MealType`/`FoodLogSource`/`FoodLogItem`; `FoodLogRepository` (kontrak) + `FoodLogRepositoryImpl` (Supabase, RLS); `piring_day.dart` — evaluator murni Piring Hari Ini (union kelompok, filter hari zona perangkat, `byDay` untuk diary, profil usia dari JSON); `NutritionRules` dimuat dari asset via `loadNutritionRules()` → `nutritionRulesProvider`.
+2. **Navigasi**: destination **Makan** (PRD §6.2) di antara Beranda dan Tumbuh (`/makan`); hairline + icon `restaurant_rounded`.
+3. **Layar Makan** (PRD §6.4, tanpa scanner): `ChildIdentityRow`; kartu toggle **ASI hari ini** (matikan → hapus catatan ASI murni hari itu saja); kartu **"Bayi di bawah 6 bulan: ASI eksklusif"** menggantikan grid untuk <6 bln; grid **8 kelompok pangan** (ketuk → sheet "Untuk kapan?" Sarapan/Siang/Malam/Camilan → simpan, `source='manual'`); **Diary** per hari (ring mini + item terbaru dulu), item bisa dihapus (swipe → tanpa konfirmasi, atau tombol hapus → dialog konfirmasi, konsisten ukuran lain di app).
+4. **Beranda** (PRD §6.3): kartu hero **Piring Hari Ini** (`primaryContainer`, ring 8 busur: menyala=isi hari ini (`primary`), protein hewani menyala=`accent`, belum=`surfaceVariant`), center "n/8 kelompok", kalimat ringkas (kosong / protein hewani belum ada / target tercapai ✓ / progres), badge "Tercapai", CTA "Catat manual" → tab Makan; **Tips hari ini** (satu tips dari JSON sesuai kelompok belum tercapai; tampil penanda "Aturan keragaman pangan belum ditinjau ahli gizi" karena `reviewed_by: null`, PRD §9.1); di bawah 6 bulan hero ASI eksklusif.
+5. **Beranda "Status pertumbuhan" & Tumbuh**: `_ChildHeader` diekstrak jadi `ChildIdentityRow` (dipakai Tumbuh & Makan — struktur visual tidak berubah).
+6. `AppStrings`: copy Piring Hari Ini, kelompok pangan (nama UI + contoh PRD §3.7), sheet tipe makan, diary, tips, dan label nav `Makan`.
+
+### Keputusan desain
+- **Tanpa FAB "Foto makanan"** — muncul di Batch 5 bersama scanner.
+- **Pencarian daftar pangan (`foods_id.json`) ditunda** — file belum disediakan; PRD §6.4 menjamin jalur "ketuk kelompok pangan langsung" berfungsi penuh tanpa AI/file itu.
+- ASI toggle = catatan `breast_milk` murni (groups persis `['breast_milk']`); mematikan hanya menghapus catatan ASI murni hari itu; catatan campur tidak terhapus.
+- `food_logs.items` denormal: nama = nama kelompok pangan yang diketuk; union `groups` disortir sesuai acuan PRD (`canonicalOrder`).
+- Ring selalu 8 busur (lit = union hari ini, termasuk ASI); target/protein hewani dinilai profil usia (6–23: 5/8; 24–59: 5/7 tanpa ASI) — keduanya terpisah, konsisten aturan JSON.
+- Di masa seed belum ditinjau, kartu tips menampilkan penanda "belum ditinjau ahli gizi" (PRD §9.1).
+
+### Berkas
+- Domain/data: `features/meals/{domain,data}/...` (`food_log.dart`, `food_log_repository.dart`, `food_log_model.dart`, `food_log_repository_impl.dart`, `piring_day.dart`), `lib/domain_ref/nutrition_rules_asset.dart`.
+- Presentasi: `meals/presentation/{providers,screens,widgets}` (MakanScreen, meal_type_sheet, piring_ring, piring_hero_card, piring_tips_card), `home_screen.dart`, `app_shell.dart`, `router.dart`, `shared/widgets/child_identity_row.dart`, `growth_screen.dart` (refaktor kecil), `app_strings.dart`.
+- Test: `test/features/piring_day_test.dart` (unit evaluator), `makan_flow_test.dart` (alur catat manual → ring naik → target tercapai → hapus → toggle ASI → <6 bln → tips), `layout_scale_test.dart` (+Makan & tips, 360dp @1,3 light/dark), `growth_flow_test.dart` (CTA di-AC scroll), `app_test.dart`, `fakes.dart` (+`FakeFoodLogRepository`, `fakeNutritionRules`).
+
+### Verifikasi (2026-11-11)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **178/178 passed** (baseline Batch 4.1: 165).
+- Layout 360×640 @1,3 light/dark: Beranda (hero + tips), Makan, Tumbuh, Onboarding, Consent, kelola/formulir anak — tanpa overflow.
+- DoD §10.1: gradien 0; `Colors.` di `lib/features`+`lib/shared` → 0 (kecuali `Colors.transparent`); `GEMINI_API_KEY=<literal>` → 0.
+
+### Belum terverifikasi / menunggu kamu
+- Alur di perangkat nyata: Beranda (ring & tips) → Makan (catat kelompok, toggle ASI, hapus dengan swipe/tombol) → kembali Beranda.
+- `foods_id.json` dari pemilik (≥120 pangan, ditinjau ahli gizi) → pencarian "Catat manual" menyusul.
+- Peninjauan `nutrition_rules.json` oleh ahli gizi/bidan (penanda di UI akan otomatis hilang saat `reviewed_by` terisi).
+
 ## Batch 4.1 — Penyegaran Visual Beranda, Tumbuh, Onboarding, Consent, Anak (2026-11-11)
 
 ### Ruang lingkup
