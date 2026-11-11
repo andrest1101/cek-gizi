@@ -18,7 +18,7 @@ import 'package:cekgizi/features/growth/presentation/widgets/add_measurement_she
 import 'package:cekgizi/features/growth/presentation/widgets/growth_chart.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/growth_status_card.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/status_copy.dart';
-import 'package:cekgizi/shared/widgets/child_avatar.dart';
+import 'package:cekgizi/shared/widgets/child_identity_row.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/section_header.dart';
@@ -101,7 +101,7 @@ class _GrowthBody extends ConsumerWidget {
         AppSpacing.xxxl + AppSpacing.lg,
       ),
       children: [
-        _ChildHeader(child: child),
+        ChildIdentityRow(child: child),
         const SizedBox(height: AppSpacing.lg),
         const GrowthStatusCard(showMetrics: false),
         const SizedBox(height: AppSpacing.lg),
@@ -144,50 +144,6 @@ class _GrowthBody extends ConsumerWidget {
               ],
             );
           },
-        ),
-      ],
-    );
-  }
-}
-
-class _ChildHeader extends StatelessWidget {
-  const _ChildHeader({required this.child});
-
-  final ChildProfile child;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
-    return Row(
-      children: [
-        ChildAvatar(
-          avatarKey: child.avatarKey,
-          size: 40,
-          semanticLabel: child.nickname,
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                child.nickname,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: textTheme.titleMedium?.copyWith(
-                  color: colors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                child.ageLabel(DateTime.now()),
-                style: textTheme.bodySmall?.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-            ],
-          ),
         ),
       ],
     );

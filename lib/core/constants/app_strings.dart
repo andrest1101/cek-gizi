@@ -210,8 +210,83 @@ abstract final class AppStrings {
   static const statusTrendTracked = 'Tren sesuai. Lanjutkan pemantauan rutin.';
   static const statusAddFirst = 'Tambah ukuran';
 
+  // ── Piring Hari Ini (PRD §3.7, §6.3) ─────────────────────────────
+  static const piringTitle = 'Piring Hari Ini';
+  static const piringEmpty = 'Belum ada catatan makan hari ini.';
+  static const piringAnimalProteinMissing = 'Belum ada protein hewani hari ini.';
+  static const piringTargetReached = 'Keragaman pangan hari ini tercapai';
+  static const piringGroupsLabel = 'kelompok';
+  static const piringCta = 'Catat manual';
+  static const piringHeroSemantics = 'Piring Hari Ini';
+  static const piringUnreviewedCaption =
+      'Aturan keragaman pangan belum ditinjau ahli gizi.';
+  static const piringAllMet = 'Semua kelompok sudah terisi hari ini.';
+  static const piringNoProfile =
+      'Target keragaman belum tersedia untuk usia ini. Tetap catat kelompok yang dimakan.';
+  static const tipTitle = 'Tips hari ini';
+  static const piringReachedBadge = 'Tercapai';
+  static String piringPartial(int met, int total) =>
+      '$met/$total $piringGroupsLabel sudah terisi hari ini.';
+  static String piringCountLine(int met, int total) =>
+      '$met/$total $piringGroupsLabel';
+  static const asiExclusiveTitle = 'Bayi di bawah 6 bulan';
+  static const asiExclusiveBody =
+      'ASI eksklusif adalah yang terbaik untuk usia ini. Setelah usia 6 bulan, '
+      'diversifikasi pangan bisa dimulai dengan pendampingan bidan atau ahli gizi.';
+  static String piringGroupsMetSemantics(int met, int total) =>
+      'Keragaman pangan hari ini: $met dari $total kelompok terisi.';
+
+  // ── Kelompok pangan (PRD §3.7) ─────────────────────────────────
+  static const groupBreastMilk = 'ASI';
+  static const groupBreastMilkExamples = 'ASI';
+  static const groupGrainsTubers = 'Makanan pokok';
+  static const groupGrainsTubersExamples = 'Nasi, bubur, kentang, ubi';
+  static const groupLegumesNuts = 'Kacang dan biji-bijian';
+  static const groupLegumesNutsExamples = 'Tahu, tempe, kacang hijau';
+  static const groupDairy = 'Susu dan olahannya';
+  static const groupDairyExamples = 'Susu, yogurt, keju';
+  static const groupFlesh = 'Daging, ikan, unggas, hati';
+  static const groupFleshExamples = 'Ikan kembung, hati ayam, daging';
+  static const groupEggs = 'Telur';
+  static const groupEggsExamples = 'Telur rebus, orak-arik';
+  static const groupVitAFruitVeg = 'Buah & sayur vitamin A';
+  static const groupVitAFruitVegExamples = 'Wortel, labu, bayam, pepaya, mangga';
+  static const groupOtherFruitVeg = 'Buah & sayur lainnya';
+  static const groupOtherFruitVegExamples = 'Pisang, apel, kol, buncis';
+
+  // ── Makan (PRD §6.4) ───────────────────────────────────────────
+  static const makanTitle = 'Makan';
+  static const makanAsiToday = 'ASI hari ini';
+  static const makanAsiSubtitle =
+      'Ketuk untuk mencatat ASI yang sudah diberikan hari ini.';
+  static const makanGridTitle = 'Catat kelompok pangan';
+  static const makanGridHint = 'Ketuk kelompok yang dimakan anak hari ini.';
+  static const mealBreakfast = 'Sarapan';
+  static const mealLunch = 'Siang';
+  static const mealDinner = 'Malam';
+  static const mealSnack = 'Camilan';
+  static const makanMealTypeTitle = 'Untuk kapan?';
+  static const makanMealTypeBody = 'Pilih jenis makan untuk catatan ini.';
+  static const makanDiaryTitle = 'Catatan terakhir';
+  static const makanDiaryEmpty =
+      'Belum ada catatan. Mulai dengan ketuk kelompok pangan di atas.';
+  static const makanDeleteLog = 'Hapus catatan';
+  static const makanLogDeleted = 'Catatan dihapus.';
+  static const makanDeleteLogTitle = 'Hapus catatan?';
+  static const makanDeleteLogBody =
+      'Catatan makan ini akan dihapus permanen.';
+  static const makanSaveLog = 'Simpan catatan';
+  static const makanToday = 'Hari ini';
+  static const makanYesterday = 'Kemarin';
+  static const makanLoadError =
+      'Gagal memuat catatan makan. Periksa koneksi internet kamu, lalu coba lagi.';
+  static const makanSaveError =
+      'Gagal menyimpan catatan. Periksa koneksi internet kamu, lalu coba lagi.';
+  static String makanLogGroupSemantics(String group) => 'Catat $group';
+
   // ── Navigasi ───────────────────────────────────────────────────
   static const navHome = 'Beranda';
+  static const navMakan = 'Makan';
   static const navGrowth = 'Tumbuh';
 
   // ── Beranda ────────────────────────────────────────────────────

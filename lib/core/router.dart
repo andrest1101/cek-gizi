@@ -13,6 +13,7 @@ import 'package:cekgizi/features/consent/presentation/screens/consent_screen.dar
 import 'package:cekgizi/features/growth/presentation/screens/growth_screen.dart';
 import 'package:cekgizi/features/home/presentation/app_shell.dart';
 import 'package:cekgizi/features/home/presentation/home_screen.dart';
+import 'package:cekgizi/features/meals/presentation/screens/makan_screen.dart';
 import 'package:cekgizi/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
@@ -68,6 +69,15 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: '/',
                 name: '/',
                 builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/makan',
+                name: '/makan',
+                builder: (context, state) => const MakanScreen(),
               ),
             ],
           ),

@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 
-/// Shell navigasi utama (PRD §6.2): 2 destinasi aktif Batch 4
-/// (Beranda, Tumbuh); destinasi lain menyusul Batch 6–8.
+/// Shell navigasi utama (PRD §6.2): 3 destinasi aktif Batch 6
+/// (Beranda, Makan, Tumbuh); destinasi lain menyusul Batch 7–8.
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.navigationShell});
 
@@ -31,6 +31,11 @@ class AppShell extends StatelessWidget {
               icon: Icon(Icons.home_outlined),
               selectedIcon: Icon(Icons.home_rounded),
               label: AppStrings.navHome,
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.restaurant_outlined),
+              selectedIcon: Icon(Icons.restaurant_rounded),
+              label: AppStrings.navMakan,
             ),
             NavigationDestination(
               icon: Icon(Icons.show_chart_rounded),
