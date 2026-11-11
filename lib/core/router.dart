@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
@@ -14,6 +15,7 @@ import 'package:cekgizi/features/home/presentation/app_shell.dart';
 import 'package:cekgizi/features/home/presentation/home_screen.dart';
 import 'package:cekgizi/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
+import 'package:cekgizi/shared/widgets/skeleton.dart';
 
 /// Dikonfigurasi di `main()`; tes melakukan override dengan prefs dari
 /// SharedPreferences mock.
@@ -44,12 +46,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     errorBuilder: (context, state) => Scaffold(
-      appBar: AppBar(title: const Text('Halaman tidak ditemukan')),
+      appBar: AppBar(title: const Text(AppStrings.routeNotFoundTitle)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.screenPadding),
           child: ErrorCard(
-            message: 'Alamat "${state.uri}" tidak ada. Kembali ke Beranda.',
+            message: AppStrings.routeNotFoundBody,
             onRetry: () => context.go('/'),
           ),
         ),
@@ -122,15 +124,15 @@ class _EditChildRoute extends ConsumerWidget {
     final childrenAsync = ref.watch(childrenListProvider);
     return childrenAsync.when(
       loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(child: Skeleton(width: 96, height: 96, radius: 48)),
       ),
       error: (error, stackTrace) => Scaffold(
-        appBar: AppBar(title: const Text('Anak saya')),
+        appBar: AppBar(title: const Text(AppStrings.childListTitle)),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.screenPadding),
             child: ErrorCard(
-              message: 'Gagal memuat data anak. Periksa koneksi kamu.',
+              message: AppStrings.childListLoadError,
               onRetry: () => ref.invalidate(childrenListProvider),
             ),
           ),
@@ -140,10 +142,10 @@ class _EditChildRoute extends ConsumerWidget {
         final child = children.where((c) => c.id == childId).firstOrNull;
         if (child == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Anak saya')),
+            appBar: AppBar(title: const Text(AppStrings.childListTitle)),
             body: Center(
               child: Text(
-                'Anak tidak ditemukan.',
+                AppStrings.childNotFound,
                 style: TextStyle(color: colors.textSecondary),
               ),
             ),

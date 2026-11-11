@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
+import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/utils/date_format.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
@@ -12,6 +13,7 @@ import 'package:cekgizi/features/children/domain/repositories/child_exceptions.d
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/growth/domain/entities/sex.dart';
 import 'package:cekgizi/shared/widgets/child_avatar.dart';
+import 'package:cekgizi/shared/widgets/segment_control.dart';
 
 /// Formulir tambah/ubah anak. Tanggal lahir dibatasi 0–60 bulan
 /// (target pemantauan aplikasi) dan tidak boleh di masa depan.
@@ -76,7 +78,7 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
   String? _validateNickname(String? value) {
     final trimmed = value?.trim() ?? '';
     if (trimmed.isEmpty) return AppStrings.validationRequired;
-    if (trimmed.length > 30) return 'Maksimal 30 karakter.';
+    if (trimmed.length > 30) return AppStrings.childNicknameMaxLength;
     return null;
   }
 
@@ -110,9 +112,7 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
     } on ChildLimitException {
       setState(() => _error = AppStrings.childMaxReached);
     } catch (error) {
-      setState(() {
-        _error = 'Gagal menyimpan. Periksa koneksi internet kamu, lalu coba lagi.';
-      });
+      setState(() => _error = AppStrings.childSaveError);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -126,71 +126,84 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? AppStrings.childEditTitle : AppStrings.childAddTitle),
+        title: Text(
+          isEdit ? AppStrings.childEditTitle : AppStrings.childAddTitle,
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(
+          AppSpacing.screenPadding,
+          AppSpacing.sm,
+          AppSpacing.screenPadding,
+          AppSpacing.lg,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_error != null) ...[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.error_outline_rounded,
+                    size: 18,
+                    color: colors.statusAlert,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      _error!,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colors.statusAlert,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+            FilledButton.icon(
+              onPressed: _busy ? null : _save,
+              icon: _busy
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save_rounded),
+              label: const Text(AppStrings.childSave),
+            ),
+          ],
+        ),
       ),
       body: SafeArea(
         child: Form(
           key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.screenPadding),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenPadding,
+              AppSpacing.sm,
+              AppSpacing.screenPadding,
+              AppSpacing.xxl,
+            ),
             children: [
               Center(
-                child: ChildAvatar(avatarKey: _avatarKey, size: 96),
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-              TextFormField(
-                controller: _nicknameController,
-                validator: _validateNickname,
-                textCapitalization: TextCapitalization.words,
-                maxLength: 30,
-                decoration: const InputDecoration(
-                  labelText: AppStrings.childNicknameLabel,
-                  hintText: AppStrings.childNicknameHint,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              InkWell(
-                onTap: _busy ? null : _pickBirthDate,
-                borderRadius: BorderRadius.circular(AppRadius.control),
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: AppStrings.childBirthDateLabel,
-                    prefixIcon: const Icon(Icons.calendar_month_rounded),
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  decoration: AppSurfaces.sunken(
+                    context,
+                    radius: AppRadius.pill,
                   ),
-                  child: Text(
-                    IdDateFormat.full(_birthDate),
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: colors.textPrimary,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
+                  child: ChildAvatar(
+                    avatarKey: _avatarKey,
+                    size: 88,
+                    semanticLabel: _nicknameController.text.trim().isEmpty
+                        ? AppStrings.childAvatarLabel
+                        : _nicknameController.text.trim(),
                   ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                AppStrings.childSexLabel,
-                style: textTheme.labelLarge?.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              SegmentedButton<Sex>(
-                segments: const [
-                  ButtonSegment(
-                    value: Sex.male,
-                    label: Text(AppStrings.childSexMale),
-                    icon: Icon(Icons.male_rounded),
-                  ),
-                  ButtonSegment(
-                    value: Sex.female,
-                    label: Text(AppStrings.childSexFemale),
-                    icon: Icon(Icons.female_rounded),
-                  ),
-                ],
-                selected: {_sex},
-                onSelectionChanged: _busy
-                    ? null
-                    : (value) => setState(() => _sex = value.first),
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
@@ -199,7 +212,7 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
                   color: colors.textSecondary,
                 ),
               ),
-              const SizedBox(height: AppSpacing.xs),
+              const SizedBox(height: AppSpacing.sm),
               Wrap(
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
@@ -214,29 +227,66 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
                     ),
                 ],
               ),
-              if (_error != null) ...[
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  _error!,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colors.statusAlert,
+              const SizedBox(height: AppSpacing.xl),
+              TextFormField(
+                controller: _nicknameController,
+                validator: _validateNickname,
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                maxLength: 30,
+                decoration: const InputDecoration(
+                  labelText: AppStrings.childNicknameLabel,
+                  hintText: AppStrings.childNicknameHint,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              InkWell(
+                onTap: _busy ? null : _pickBirthDate,
+                borderRadius: BorderRadius.circular(AppRadius.control),
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: AppStrings.childBirthDateLabel,
+                    prefixIcon: Icon(Icons.calendar_month_rounded),
+                  ),
+                  child: Text(
+                    IdDateFormat.full(_birthDate),
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: colors.textPrimary,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
-              ],
-              const SizedBox(height: AppSpacing.xxl),
-              SizedBox(
-                height: 48,
-                child: FilledButton.icon(
-                  onPressed: _busy ? null : _save,
-                  icon: _busy
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.save_rounded),
-                  label: const Text(AppStrings.childSave),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                AppStrings.childBirthDateHint,
+                style: textTheme.labelMedium?.copyWith(
+                  color: colors.textSecondary,
                 ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                AppStrings.childSexLabel,
+                style: textTheme.labelLarge?.copyWith(
+                  color: colors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              SegmentControl<Sex>(
+                selected: _sex,
+                onChanged: (value) => setState(() => _sex = value),
+                options: const <SegmentOption<Sex>>[
+                  SegmentOption(
+                    value: Sex.male,
+                    label: AppStrings.childSexMale,
+                    semanticLabel: AppStrings.childSexMale,
+                  ),
+                  SegmentOption(
+                    value: Sex.female,
+                    label: AppStrings.childSexFemale,
+                    semanticLabel: AppStrings.childSexFemale,
+                  ),
+                ],
               ),
             ],
           ),
@@ -263,25 +313,33 @@ class _AvatarOption extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: 'Avatar $avatarKey',
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: selected ? colors.primaryContainer : colors.surfaceVariant,
-            border: Border.all(
-              color: selected ? colors.primary : Colors.transparent,
-              width: 2,
+      label: AppStrings.childAvatarSemantics(avatarKey),
+      excludeSemantics: true,
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: selected
+                  ? colors.primaryContainer
+                  : AppSurfaces.cardColor(context),
+              border: Border.all(
+                color: selected ? colors.primary : colors.outline,
+                width: selected ? 2 : 1,
+              ),
             ),
-          ),
-          child: Icon(
-            AvatarCatalog.of(avatarKey),
-            size: 28,
-            color: selected ? colors.primary : colors.textSecondary,
+            child: Icon(
+              AvatarCatalog.of(avatarKey),
+              size: 24,
+              color: selected ? colors.primary : colors.textSecondary,
+            ),
           ),
         ),
       ),
