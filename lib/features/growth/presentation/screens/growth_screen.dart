@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:go_router/go_router.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
+import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/utils/date_format.dart';
+import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/growth/domain/entities/anthropometry_index.dart';
 import 'package:cekgizi/features/growth/domain/entities/growth_measurement.dart';
+import 'package:cekgizi/features/growth/presentation/growth_summary.dart';
 import 'package:cekgizi/features/growth/presentation/providers/growth_providers.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/add_measurement_sheet.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/growth_chart.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/growth_status_card.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/status_copy.dart';
 import 'package:cekgizi/shared/widgets/child_avatar.dart';
+import 'package:cekgizi/shared/widgets/empty_state.dart';
+import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/section_header.dart';
+import 'package:cekgizi/shared/widgets/segment_control.dart';
+import 'package:cekgizi/shared/widgets/skeleton.dart';
 import 'package:cekgizi/shared/widgets/status_pill.dart';
 
-/// Layar Tumbuh (PRD §6.5): status terbaru, 3 tab grafik pita SD, riwayat.
+/// Layar Tumbuh (PRD §6.5): status terbaru, grafik pita SD, riwayat ukur.
 class GrowthScreen extends ConsumerStatefulWidget {
   const GrowthScreen({super.key});
 
@@ -27,201 +34,462 @@ class GrowthScreen extends ConsumerStatefulWidget {
   ConsumerState<GrowthScreen> createState() => _GrowthScreenState();
 }
 
-class _GrowthScreenState extends ConsumerState<GrowthScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
+class _GrowthScreenState extends ConsumerState<GrowthScreen> {
+  AnthropometryIndex _index = AnthropometryIndex.haz;
 
   @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+  Widget build(BuildContext context) {
+    final child = ref.watch(selectedChildProvider).value;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text(AppStrings.growthTitle)),
+      body: SafeArea(
+        child: child == null
+            ? const _NoChild()
+            : _GrowthBody(
+                child: child,
+                index: _index,
+                onIndexChanged: (value) => setState(() => _index = value),
+              ),
+      ),
+    );
   }
+}
+
+class _NoChild extends StatelessWidget {
+  const _NoChild();
 
   @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.screenPadding),
+        child: EmptyState(
+          icon: Icons.child_care_rounded,
+          title: AppStrings.growthNoChildTitle,
+          body: AppStrings.growthNoChildBody,
+          action: FilledButton(
+            onPressed: () => context.push('/children/add'),
+            child: const Text(AppStrings.growthNoChildCta),
+          ),
+        ),
+      ),
+    );
   }
+}
+
+class _GrowthBody extends ConsumerWidget {
+  const _GrowthBody({
+    required this.child,
+    required this.index,
+    required this.onIndexChanged,
+  });
+
+  final ChildProfile child;
+  final AnthropometryIndex index;
+  final ValueChanged<AnthropometryIndex> onIndexChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final measurementsAsync = ref.watch(measurementsProvider(child.id));
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenPadding,
+        AppSpacing.xs,
+        AppSpacing.screenPadding,
+        AppSpacing.xxxl + AppSpacing.lg,
+      ),
+      children: [
+        _ChildHeader(child: child),
+        const SizedBox(height: AppSpacing.lg),
+        const GrowthStatusCard(showMetrics: false),
+        const SizedBox(height: AppSpacing.lg),
+        GrowthChartCard(
+          child: child,
+          index: index,
+          onIndexChanged: onIndexChanged,
+          measurementsAsync: measurementsAsync,
+        ),
+        const SizedBox(height: AppSpacing.sectionGap),
+        const SectionHeader(title: AppStrings.growthHistoryTitle),
+        const SizedBox(height: AppSpacing.md),
+        measurementsAsync.when(
+          loading: () => const _HistorySkeleton(),
+          error: (error, stackTrace) => ErrorCard(
+            message: AppStrings.growthLoadError,
+            onRetry: () => ref.invalidate(measurementsProvider(child.id)),
+          ),
+          data: (measurements) {
+            final sorted = GrowthSummary.sorted(measurements);
+            if (sorted.isEmpty) {
+              return Container(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                decoration: AppSurfaces.sunken(context),
+                child: Text(
+                  AppStrings.growthHistoryEmpty,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.colorsOf(context).textSecondary,
+                      ),
+                ),
+              );
+            }
+            return Column(
+              children: [
+                for (final measurement in sorted.reversed)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: _MeasurementTile(measurement: measurement),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _ChildHeader extends StatelessWidget {
+  const _ChildHeader({required this.child});
+
+  final ChildProfile child;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
     final textTheme = Theme.of(context).textTheme;
-    final childAsync = ref.watch(selectedChildProvider);
-    final child = childAsync.value;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            if (child != null)
-              ChildAvatar(avatarKey: child.avatarKey, size: 36),
-            const SizedBox(width: AppSpacing.sm),
-            Text(child?.nickname ?? AppStrings.growthTitle),
-          ],
+    return Row(
+      children: [
+        ChildAvatar(
+          avatarKey: child.avatarKey,
+          size: 40,
+          semanticLabel: child.nickname,
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showMeasurementSheet(context),
-        icon: const Icon(Icons.straighten_rounded),
-        label: const Text(AppStrings.growthAddMeasurement),
-      ),
-      body: SafeArea(
-        child: child == null
-            ? Center(
-                child: Text(
-                  'Tambah anak dulu di Beranda.',
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: colors.textSecondary,
-                  ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                child.nickname,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: textTheme.titleMedium?.copyWith(
+                  color: colors.textPrimary,
                 ),
-              )
-            : _Body(
-                childId: child.id,
-                tabController: _tabController,
               ),
-      ),
+              const SizedBox(height: 2),
+              Text(
+                child.ageLabel(DateTime.now()),
+                style: textTheme.bodySmall?.copyWith(
+                  color: colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _Body extends ConsumerWidget {
-  const _Body({
-    required this.childId,
-    required this.tabController,
+/// Kartu grafik: pemilih indeks, grafik pita SD, legenda, dan sumber tabel.
+class GrowthChartCard extends ConsumerWidget {
+  const GrowthChartCard({
+    super.key,
+    required this.child,
+    required this.index,
+    required this.onIndexChanged,
+    required this.measurementsAsync,
   });
 
-  final String childId;
-  final TabController tabController;
+  final ChildProfile child;
+  final AnthropometryIndex index;
+  final ValueChanged<AnthropometryIndex> onIndexChanged;
+  final AsyncValue<List<GrowthMeasurement>> measurementsAsync;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colorsOf(context);
-    final measurementsAsync = ref.watch(measurementsProvider(childId));
+    final textTheme = Theme.of(context).textTheme;
 
-    return measurementsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.screenPadding),
-          child: Text('Gagal memuat pengukuran. Periksa koneksi kamu.'),
-        ),
-      ),
-      data: (measurements) {
-        final sorted = [...measurements]
-          ..sort((a, b) => a.measuredOn.compareTo(b.measuredOn));
-
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.screenPadding,
-            AppSpacing.sm,
-            AppSpacing.screenPadding,
-            AppSpacing.xxxl + AppSpacing.xl,
+    return Container(
+      decoration: AppSurfaces.card(context),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              AppStrings.growthChartTitle,
+              style: textTheme.titleMedium?.copyWith(
+                color: colors.textPrimary,
+              ),
+            ),
           ),
-          children: [
-            const GrowthStatusCard(),
-            const SizedBox(height: AppSpacing.lg),
-            TabBar(
-              controller: tabController,
-              labelStyle: Theme.of(context).textTheme.labelLarge,
-              unselectedLabelStyle: Theme.of(context).textTheme.labelLarge,
-              labelColor: colors.primary,
-              unselectedLabelColor: colors.textSecondary,
-              indicatorSize: TabBarIndicatorSize.label,
-              indicator: UnderlineTabIndicator(
-                borderSide: BorderSide(color: colors.primary, width: 2.5),
-                insets: const EdgeInsets.symmetric(horizontal: 8),
+          const SizedBox(height: AppSpacing.md),
+          SegmentControl<AnthropometryIndex>(
+            selected: index,
+            onChanged: onIndexChanged,
+            options: const <SegmentOption<AnthropometryIndex>>[
+              SegmentOption(
+                value: AnthropometryIndex.haz,
+                label: AppStrings.growthTabLengthHeightShort,
+                semanticLabel: AppStrings.growthTabLengthHeightSemantics,
               ),
-              tabs: const [
-                Tab(text: AppStrings.growthTabLengthHeight),
-                Tab(text: AppStrings.growthTabWeight),
-                Tab(text: AppStrings.growthTabWeightHeight),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            SizedBox(
-              height: 320,
-              child: _ChartArea(
-                tabController: tabController,
-                measurements: sorted,
+              SegmentOption(
+                value: AnthropometryIndex.waz,
+                label: AppStrings.growthTabWeightShort,
+                semanticLabel: AppStrings.growthTabWeightSemantics,
               ),
+              SegmentOption(
+                value: AnthropometryIndex.whz,
+                label: AppStrings.growthTabWeightHeightShort,
+                semanticLabel: AppStrings.growthTabWeightHeightSemantics,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          measurementsAsync.when(
+            loading: () => const Skeleton(height: 240),
+            error: (error, stackTrace) => _ChartError(
+              onRetry: () => ref.invalidate(measurementsProvider(child.id)),
             ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Garis hijau = rentang wajar; kuning = perlu perhatian. '
-              'Tabel: Permenkes 2/2020.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colors.textSecondary,
+            data: (measurements) {
+              final sorted = GrowthSummary.sorted(measurements);
+              if (sorted.isEmpty) return const _ChartEmpty();
+              final latest = sorted.last;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final height = (constraints.maxWidth * 0.78)
+                          .clamp(230.0, 320.0);
+                      return SizedBox(
+                        height: height,
+                        child: GrowthChart(
+                          child: child,
+                          measurements: sorted,
+                          index: index,
+                          semanticsLabel: _semanticsLabel(latest, index),
+                        ),
+                      );
+                    },
                   ),
-            ),
-            const SizedBox(height: AppSpacing.sectionGap),
-            const SectionHeader(title: AppStrings.growthHistoryTitle),
-            const SizedBox(height: AppSpacing.sm),
-            for (final measurement in sorted.reversed)
-              _MeasurementTile(measurement: measurement),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _ChartArea extends ConsumerWidget {
-  const _ChartArea({
-    required this.tabController,
-    required this.measurements,
-  });
-
-  final TabController tabController;
-  final List<GrowthMeasurement> measurements;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final childAsync = ref.watch(selectedChildProvider);
-    final child = childAsync.value;
-    if (child == null) return const SizedBox.shrink();
-
-    if (measurements.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.lg),
-          child: Text(
-            AppStrings.growthNoMeasurementsBody,
-            textAlign: TextAlign.center,
+                  const SizedBox(height: AppSpacing.md),
+                  const _ChartLegend(),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    AppStrings.growthChartCaption,
+                    style: textTheme.labelMedium?.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
-        ),
-      );
-    }
-
-    return TabBarView(
-      controller: tabController,
-      children: [
-        for (final index in const [
-          AnthropometryIndex.haz,
-          AnthropometryIndex.waz,
-          AnthropometryIndex.whz,
-        ])
-          GrowthChart(
-            child: child,
-            measurements: measurements,
-            index: index,
-            semanticsLabel: _semantics(measurements.last, index),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
-  static String _semantics(GrowthMeasurement latest, AnthropometryIndex index) {
+  static String _semanticsLabel(
+    GrowthMeasurement latest,
+    AnthropometryIndex index,
+  ) {
     final value = switch (index) {
       AnthropometryIndex.haz =>
         'Tinggi ${GrowthStatusCopy.formatKgCm(latest.lengthHeightCm)} cm',
       AnthropometryIndex.waz =>
         'Berat ${GrowthStatusCopy.formatKgCm(latest.weightKg)} kg',
       AnthropometryIndex.whz =>
-        'Berat ${GrowthStatusCopy.formatKgCm(latest.weightKg)} kg menurut panjang/tinggi',
+        'Berat ${GrowthStatusCopy.formatKgCm(latest.weightKg)} kg menurut '
+            'panjang/tinggi',
     };
     return 'Grafik pertumbuhan. Pengukuran terakhir $value, '
         'usia ${latest.ageMonths} bulan.';
+  }
+}
+
+class _ChartEmpty extends StatelessWidget {
+  const _ChartEmpty();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xxl,
+      ),
+      decoration: AppSurfaces.sunken(context, radius: AppRadius.card),
+      child: Column(
+        children: [
+          Icon(
+            Icons.show_chart_rounded,
+            size: 32,
+            color: colors.textSecondary,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            AppStrings.growthNoMeasurementsBody,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colors.textSecondary,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartError extends StatelessWidget {
+  const _ChartError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: AppSurfaces.sunken(context, radius: AppRadius.card),
+      child: Column(
+        children: [
+          Icon(Icons.cloud_off_rounded, color: colors.textSecondary),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            AppStrings.growthReferenceError,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colors.textSecondary,
+                ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          TextButton(
+            onPressed: onRetry,
+            child: const Text(AppStrings.retry),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartLegend extends StatelessWidget {
+  const _ChartLegend();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return Wrap(
+      spacing: AppSpacing.lg,
+      runSpacing: AppSpacing.sm,
+      children: [
+        _LegendItem(
+          label: AppStrings.growthLegendBand,
+          swatch: Container(
+            width: 14,
+            height: 12,
+            decoration: BoxDecoration(
+              color: colors.statusGood.withValues(alpha: 0.28),
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+        ),
+        _LegendItem(
+          label: AppStrings.growthLegendLimit,
+          swatch: SizedBox(
+            width: 14,
+            height: 12,
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  for (var i = 0; i < 3; i++)
+                    Container(
+                      width: 3,
+                      height: 2,
+                      color: colors.textSecondary,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        _LegendItem(
+          label: AppStrings.growthLegendMedian,
+          swatch: SizedBox(
+            width: 14,
+            height: 12,
+            child: Center(
+              child: Container(width: 14, height: 2, color: colors.textSecondary),
+            ),
+          ),
+        ),
+        _LegendItem(
+          label: AppStrings.growthLegendChild,
+          swatch: SizedBox(
+            width: 14,
+            height: 12,
+            child: Center(
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: colors.primary,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  const _LegendItem({required this.label, required this.swatch});
+
+  final String label;
+  final Widget swatch;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        swatch,
+        const SizedBox(width: AppSpacing.xs),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: AppTheme.colorsOf(context).textSecondary,
+              ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HistorySkeleton extends StatelessWidget {
+  const _HistorySkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: const [
+        Skeleton(height: 84),
+        SizedBox(height: AppSpacing.md),
+        Skeleton(height: 84),
+      ],
+    );
   }
 }
 
@@ -234,80 +502,88 @@ class _MeasurementTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colorsOf(context);
     final textTheme = Theme.of(context).textTheme;
-    final statusHaz = measurement.statusHaz;
-    final tone = statusHaz == null
-        ? StatusTone.watch
-        : GrowthStatusCopy.forIndex(
-            AnthropometryIndex.haz,
-            statusHaz,
-          ).tone;
-    final category = statusHaz == null
-        ? AppStrings.statusOutOfRangeShort
-        : AppStrings.officialCategoryHaz[statusHaz] ?? statusHaz;
+    final category = GrowthStatusCopy.categoryLabel(
+      AnthropometryIndex.haz,
+      measurement.statusHaz,
+    );
+    final tone = GrowthStatusCopy.toneOf(
+      AnthropometryIndex.haz,
+      measurement.statusHaz,
+    );
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(color: colors.outline, width: 1),
-        ),
-        child: ListTile(
-          minVerticalPadding: AppSpacing.md,
-          leading: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: colors.surfaceVariant,
-              borderRadius: BorderRadius.circular(AppRadius.control),
-            ),
-            alignment: Alignment.center,
-            child: const Icon(Icons.straighten_rounded),
-          ),
-          title: Text(
-            '${GrowthStatusCopy.formatKgCm(measurement.weightKg)} kg · '
-            '${GrowthStatusCopy.formatKgCm(measurement.lengthHeightCm)} cm',
-            style: textTheme.titleMedium?.copyWith(
-              color: colors.textPrimary,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.xs),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  IdDateFormat.full(measurement.measuredOn),
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colors.textSecondary,
-                  ),
+    return Container(
+      decoration: AppSurfaces.card(context),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.sm,
+        AppSpacing.md,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${GrowthStatusCopy.formatKgCm(measurement.weightKg)} kg · '
+                      '${GrowthStatusCopy.formatKgCm(measurement.lengthHeightCm)} cm',
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colors.textPrimary,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${IdDateFormat.full(measurement.measuredOn)} · '
+                      '${measurement.ageMonths} ${AppStrings.childAgeMonths}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                StatusPill(label: category, tone: tone),
-              ],
-            ),
-          ),
-          trailing: PopupMenuButton<String>(
-            tooltip: 'Opsi pengukuran',
-            onSelected: (value) async {
-              switch (value) {
-                case 'edit':
-                  await showMeasurementSheet(
-                    context,
-                    existing: measurement,
-                  );
-                case 'delete':
-                  await _confirmDelete(context, ref);
-              }
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: 'edit', child: Text('Ubah')),
-              PopupMenuItem(value: 'delete', child: Text('Hapus')),
+              ),
+              PopupMenuButton<String>(
+                tooltip: AppStrings.growthOptionsTooltip,
+                icon: Icon(
+                  Icons.more_vert_rounded,
+                  color: colors.textSecondary,
+                ),
+                onSelected: (value) async {
+                  switch (value) {
+                    case 'edit':
+                      await showMeasurementSheet(
+                        context,
+                        existing: measurement,
+                      );
+                    case 'delete':
+                      await _confirmDelete(context, ref);
+                  }
+                },
+                itemBuilder: (context) => const [
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Text(AppStrings.actionEdit),
+                  ),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Text(AppStrings.actionDelete),
+                  ),
+                ],
+              ),
             ],
           ),
-        ),
+          const SizedBox(height: AppSpacing.sm),
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            child: StatusPill(label: category, tone: tone),
+          ),
+        ],
       ),
     );
   }
@@ -316,18 +592,16 @@ class _MeasurementTile extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus pengukuran?'),
-        content: const Text(
-          'Pengukuran ini akan dihapus permanen.',
-        ),
+        title: const Text(AppStrings.growthDeleteTitle),
+        content: const Text(AppStrings.growthDeleteBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Batal'),
+            child: const Text(AppStrings.actionCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Hapus'),
+            child: const Text(AppStrings.actionDelete),
           ),
         ],
       ),
@@ -335,9 +609,9 @@ class _MeasurementTile extends ConsumerWidget {
     if (confirmed == true) {
       final childId = ref.read(selectedChildProvider).value?.id;
       if (childId == null) return;
-      await ref.read(measurementsProvider(childId).notifier).deleteMeasurement(
-            measurement.id,
-          );
+      await ref
+          .read(measurementsProvider(childId).notifier)
+          .deleteMeasurement(measurement.id);
     }
   }
 }

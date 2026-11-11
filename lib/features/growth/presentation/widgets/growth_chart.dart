@@ -2,17 +2,22 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:cekgizi/core/constants/app_strings.dart';
+import 'package:cekgizi/core/theme/app_spacing.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/growth/domain/entities/anthropometry_index.dart';
 import 'package:cekgizi/features/growth/domain/entities/growth_measurement.dart';
-import 'package:cekgizi/features/growth/domain/entities/sd_columns.dart';
-import 'package:cekgizi/features/growth/domain/repositories/anthropometry_reference_tables.dart';
-import 'package:cekgizi/features/growth/domain/services/measure_correction.dart';
+import 'package:cekgizi/features/growth/presentation/chart/sd_series.dart';
 import 'package:cekgizi/features/growth/presentation/providers/growth_providers.dart';
+import 'package:cekgizi/shared/widgets/skeleton.dart';
 
-/// Grafik pita SD (PRD §6.5): area −2 s.d. +1 (PB/U: +3) hijau lembut,
-/// di luarnya kuning/merah lembut, garis median tegas, titik anak di atas.
+/// Grafik pita SD (PRD §6.5).
+///
+/// Pita: −3…−2 SD & +2…+3 SD kuning lembut, −2…+1 SD (PB/U: +3) hijau
+/// lembut. Garis ±2 SD putus-putus, median solid, baris anak hijau tua.
+/// Warna tidak pernah jadi sinyal tunggal — legenda teks ada di kartu.
 class GrowthChart extends ConsumerWidget {
   const GrowthChart({
     super.key,
@@ -31,38 +36,88 @@ class GrowthChart extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tablesAsync = ref.watch(permenkesTablesProvider);
     return tablesAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => Center(
-        child: Text('Gagal memuat tabel referensi. Muat ulang aplikasi.'),
+      loading: () => const Skeleton(height: 220),
+      error: (error, stackTrace) => _ChartError(
+        onRetry: () => ref.invalidate(permenkesTablesProvider),
       ),
-      data: (tables) => _buildChart(context, tables),
+      data: (tables) => _ChartBody(
+        measurements: measurements,
+        index: index,
+        semanticsLabel: semanticsLabel,
+        series: SdSeriesBuilder.build(
+          index: index,
+          sex: child.sex,
+          useTbTable: child.ageInCompletedMonths(DateTime.now()) >= 24,
+          tables: tables,
+        ),
+      ),
     );
   }
+}
 
-  Widget _buildChart(BuildContext context, AnthropometryReferenceTables tables) {
+class _ChartBody extends StatelessWidget {
+  const _ChartBody({
+    required this.measurements,
+    required this.index,
+    required this.semanticsLabel,
+    required this.series,
+  });
+
+  final List<GrowthMeasurement> measurements;
+  final AnthropometryIndex index;
+  final String semanticsLabel;
+  final SdSeries series;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final sd = _sdCurves(tables);
+    final secondary = colors.textSecondary;
+
+    final hasOuterUpper = series.outerUpper.isNotEmpty;
+    final bandData = <BetweenBarsData>[
+      BetweenBarsData(
+        fromIndex: 0,
+        toIndex: 1,
+        color: colors.statusWatch.withValues(alpha: 0.16),
+      ),
+      BetweenBarsData(
+        fromIndex: 1,
+        toIndex: 2,
+        color: colors.statusGood.withValues(alpha: 0.18),
+      ),
+      if (hasOuterUpper)
+        BetweenBarsData(
+          fromIndex: 2,
+          toIndex: 3,
+          color: colors.statusWatch.withValues(alpha: 0.16),
+        ),
+    ];
 
     final bars = <LineChartBarData>[
-      _curve(sd.sdNeg3, colors.textSecondary, width: 0, dot: false),
-      _curve(sd.sdNeg2, colors.textSecondary, width: 1.5, dot: false),
-      _curve(sd.upper, colors.textSecondary, width: 1.5, dot: false),
-      if (sd.outerUpper != null)
-        _curve(sd.outerUpper!, colors.textSecondary, width: 0, dot: false),
-      _curve(sd.median, colors.textPrimary, width: 2, dot: false),
+      _reference(series.neg3, secondary.withValues(alpha: 0.35),
+          width: 1, dashArray: const [4, 4]),
+      _reference(series.neg2, secondary,
+          width: 1.5, dashArray: const [6, 4]),
+      _reference(series.upper, secondary,
+          width: 1.5, dashArray: const [6, 4]),
+      if (hasOuterUpper)
+        _reference(series.outerUpper, secondary.withValues(alpha: 0.35),
+            width: 1, dashArray: const [4, 4]),
+      _reference(series.median, secondary, width: 2),
       LineChartBarData(
         spots: [
-          for (final m in measurements) FlSpot(m.x(index), m.y(index)),
+          for (final measurement in measurements)
+            FlSpot(measurement.chartX(index), measurement.chartY(index)),
         ],
         isCurved: false,
-        color: colors.accent,
+        color: colors.primary,
         barWidth: 3,
+        isStrokeCapRound: true,
         dotData: FlDotData(
           show: true,
-          getDotPainter: (spot, percent, barData, index) =>
-              FlDotCirclePainter(
+          getDotPainter: (spot, percent, barData, i) => FlDotCirclePainter(
             radius: 4.5,
-            color: colors.accent,
+            color: colors.primary,
             strokeWidth: 2,
             strokeColor: colors.surface,
           ),
@@ -70,238 +125,118 @@ class GrowthChart extends ConsumerWidget {
       ),
     ];
 
-    // Between-bar bands: index curve list differs per mode.
-    const lowerNeg3 = 0;
-    const lowerNeg2 = 1;
-    const upperBand = 2; // haz: sdPos3, others: sdPos1
-    final bandData = <BetweenBarsData>[
-      BetweenBarsData(
-        fromIndex: lowerNeg3,
-        toIndex: lowerNeg2,
-        color: colors.statusWatch.withValues(alpha: 0.18),
-      ),
-      BetweenBarsData(
-        fromIndex: lowerNeg2,
-        toIndex: upperBand,
-        color: colors.statusGood.withValues(alpha: 0.18),
-      ),
-    ];
-    if (sd.outerUpper != null) {
-      bandData.add(
-        BetweenBarsData(
-          fromIndex: upperBand,
-          toIndex: 3,
-          color: colors.statusWatch.withValues(alpha: 0.18),
-        ),
-      );
-    }
-
-    final minY = sd.minY.floorToDouble();
-    final maxY = sd.maxY.ceilToDouble();
+    final minY = series.minY.floorToDouble();
+    final maxY = series.maxY.ceilToDouble();
+    final axisStyle = AppTextStyles.label.copyWith(
+      fontSize: 11,
+      color: secondary,
+    );
 
     return Semantics(
       label: semanticsLabel,
-      child: LineChart(
-        LineChartData(
-          minX: sd.minX,
-          maxX: sd.maxX,
-          minY: minY,
-          maxY: maxY,
-          gridData: FlGridData(
-            show: true,
-            drawVerticalLine: false,
-            getDrawingHorizontalLine: (value) => FlLine(
-              color: colors.outline.withValues(alpha: 0.6),
-              strokeWidth: 1,
+      child: ExcludeSemantics(
+        child: LineChart(
+          LineChartData(
+            minX: series.minX,
+            maxX: series.maxX,
+            minY: minY,
+            maxY: maxY,
+            gridData: FlGridData(
+              show: true,
+              drawVerticalLine: false,
+              getDrawingHorizontalLine: (value) => FlLine(
+                color: colors.outline.withValues(alpha: 0.7),
+                strokeWidth: 1,
+              ),
             ),
-          ),
-          borderData: FlBorderData(show: false),
-          titlesData: FlTitlesData(
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                interval: sd.titleInterval,
-                reservedSize: 28,
-                getTitlesWidget: (value, meta) => Text(
-                  meta.formattedValue,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: colors.textSecondary,
+            borderData: FlBorderData(show: false),
+            titlesData: FlTitlesData(
+              topTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              rightTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  interval: series.xInterval,
+                  reservedSize: 26,
+                  getTitlesWidget: (value, meta) => Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xs),
+                    child: Text(meta.formattedValue, style: axisStyle),
+                  ),
+                ),
+              ),
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 34,
+                  interval: (maxY - minY) / 4,
+                  getTitlesWidget: (value, meta) => Text(
+                    value.toStringAsFixed(0),
+                    style: axisStyle,
                   ),
                 ),
               ),
             ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 34,
-                interval: (maxY - minY) / 4,
-                getTitlesWidget: (value, meta) => Text(
-                  value.toStringAsFixed(0),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: colors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
+            lineBarsData: bars,
+            betweenBarsData: bandData,
+            lineTouchData: const LineTouchData(enabled: false),
           ),
-          lineBarsData: bars,
-          betweenBarsData: bandData,
-          lineTouchData: LineTouchData(enabled: false),
+          duration: Duration.zero,
         ),
-        duration: Duration.zero,
       ),
     );
   }
 
-  LineChartBarData _curve(List<FlSpot> spots, Color color,
-      {required double width, required bool dot}) {
+  LineChartBarData _reference(
+    List<SdPoint> points,
+    Color color, {
+    required double width,
+    List<int>? dashArray,
+  }) {
     return LineChartBarData(
-      spots: spots,
+      spots: [for (final point in points) FlSpot(point.x, point.y)],
       isCurved: true,
       curveSmoothness: 0.15,
-      color: width == 0 ? Colors.transparent : color,
+      color: color,
       barWidth: width,
+      dashArray: dashArray,
       dotData: const FlDotData(show: false),
     );
   }
+}
 
-  _SdCurves _sdCurves(AnthropometryReferenceTables tables) {
-    final isHaz = index == AnthropometryIndex.haz;
-    final isWaz = index == AnthropometryIndex.waz;
-    final sexKey = child.sex;
+class _ChartError extends StatelessWidget {
+  const _ChartError({required this.onRetry});
 
-    final sdNeg3 = <FlSpot>[];
-    final sdNeg2 = <FlSpot>[];
-    final upper = <FlSpot>[];
-    final outerUpper = <FlSpot>[];
-    final median = <FlSpot>[];
+  final VoidCallback onRetry;
 
-    double minYraw = double.infinity;
-    double maxYraw = double.negativeInfinity;
-    double minX = double.infinity;
-    double maxX = double.negativeInfinity;
-
-    void addSpot(double x, SdColumns sd) {
-      minX = x < minX ? x : minX;
-      maxX = x > maxX ? x : maxX;
-      sdNeg3.add(FlSpot(x, sd.sdNeg3 ?? sd.sdNeg1));
-      sdNeg2.add(FlSpot(x, sd.sdNeg2 ?? sd.sdNeg1));
-      final bandTop = isHaz ? (sd.sdPos3 ?? sd.sdPos1) : sd.sdPos1;
-      upper.add(FlSpot(x, bandTop));
-      if (!isHaz) {
-        outerUpper.add(FlSpot(x, sd.sdPos3 ?? sd.sdPos1));
-      }
-      median.add(FlSpot(x, sd.median));
-      minYraw = [
-        minYraw,
-        sd.sdNeg3 ?? sd.sdNeg1,
-      ].reduce((a, b) => a < b ? a : b);
-      maxYraw = [
-        maxYraw,
-        sd.sdPos3 ?? sd.sdPos1,
-        sd.sdPos1,
-      ].reduce((a, b) => a > b ? a : b);
-    }
-
-    if (isHaz || isWaz) {
-      for (var month = 0; month <= 60; month++) {
-        final sd = isHaz
-            ? tables.haz(sex: sexKey, ageMonths: month)
-            : tables.waz(sex: sexKey, ageMonths: month);
-        addSpot(month.toDouble(), sd);
-      }
-      maxX = 60;
-      minX = 0;
-    } else {
-      final useTb =
-          child.ageInCompletedMonths(DateTime.now()) >= 24;
-      final info = tables.whzTableInfo(
-        sex: sexKey,
-        ageMonths: useTb ? 30 : 12,
-      );
-      for (var cm = info.start; cm <= info.start + (info.length - 1) * info.step + 1e-9;
-          cm += info.step) {
-        final step = double.parse(cm.toStringAsFixed(1));
-        final sd = tables.whz(
-          sex: sexKey,
-          lengthHeightCmStep: step,
-          ageMonths: useTb ? 30 : 12,
-        );
-        addSpot(step, sd);
-      }
-      minX = info.start;
-      maxX = info.start + (info.length - 1) * info.step;
-    }
-
-    final titleInterval = switch (index) {
-      AnthropometryIndex.haz => 12.0,
-      AnthropometryIndex.waz => 12.0,
-      AnthropometryIndex.whz => 10.0,
-    };
-
-    return _SdCurves(
-      sdNeg3: sdNeg3,
-      sdNeg2: sdNeg2,
-      upper: upper,
-      outerUpper: outerUpper.isEmpty ? null : outerUpper,
-      median: median,
-      minX: minX,
-      maxX: maxX,
-      minY: minYraw - 1,
-      maxY: maxYraw + 1,
-      titleInterval: titleInterval,
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.show_chart_rounded, color: colors.textSecondary),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            AppStrings.growthReferenceError,
+            textAlign: TextAlign.center,
+            style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          TextButton(
+            onPressed: onRetry,
+            child: const Text(AppStrings.retry),
+          ),
+        ],
+      ),
     );
   }
-}
-
-class _SdCurves {
-  const _SdCurves({
-    required this.sdNeg3,
-    required this.sdNeg2,
-    required this.upper,
-    required this.outerUpper,
-    required this.median,
-    required this.minX,
-    required this.maxX,
-    required this.minY,
-    required this.maxY,
-    required this.titleInterval,
-  });
-
-  final List<FlSpot> sdNeg3;
-  final List<FlSpot> sdNeg2;
-  final List<FlSpot> upper;
-  final List<FlSpot>? outerUpper;
-  final List<FlSpot> median;
-  final double minX;
-  final double maxX;
-  final double minY;
-  final double maxY;
-  final double titleInterval;
-}
-
-extension on GrowthMeasurement {
-  double x(AnthropometryIndex index) => switch (index) {
-        AnthropometryIndex.haz => ageMonths.toDouble(),
-        AnthropometryIndex.waz => ageMonths.toDouble(),
-        AnthropometryIndex.whz => MeasureCorrection.corrected(
-            lengthHeightCm: lengthHeightCm,
-            mode: measureMode,
-            ageMonths: ageMonths,
-          ),
-      };
-
-  double y(AnthropometryIndex index) => switch (index) {
-        AnthropometryIndex.haz => MeasureCorrection.corrected(
-            lengthHeightCm: lengthHeightCm,
-            mode: measureMode,
-            ageMonths: ageMonths,
-          ),
-        AnthropometryIndex.waz => weightKg,
-        AnthropometryIndex.whz => weightKg,
-      };
 }

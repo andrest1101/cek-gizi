@@ -174,4 +174,21 @@ abstract final class GrowthStatusCopy {
 
   static String formatKgCm(double value) =>
       value.toStringAsFixed(1).replaceFirst('.', ',');
+
+  /// Nada status untuk tanpa memanggil copy (mis. pill riwayat).
+  static StatusTone toneOf(AnthropometryIndex index, String? code) =>
+      forIndex(index, code).tone;
+
+  /// Kategori resmi siap tampil; out-of-range → "Di luar rentang wajar".
+  static String categoryLabel(AnthropometryIndex index, String? code) {
+    if (code == null) return AppStrings.statusOutOfRangeShort;
+    return officialCategories(index)[code] ?? code;
+  }
+
+  /// "+0,3 kg sejak ukur terakhir" / "Sama dengan ukur lalu".
+  static String weightDeltaLabel(double delta) {
+    if (delta.abs() < 0.05) return AppStrings.growthDeltaSame;
+    final sign = delta > 0 ? '+' : '−';
+    return '$sign${formatKgCm(delta.abs())} kg ${AppStrings.growthDeltaSince}';
+  }
 }
