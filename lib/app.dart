@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/config/app_config.dart';
+import 'core/router.dart';
 import 'core/theme/app_theme.dart';
-import 'shared/dev/token_gallery_screen.dart';
 
-/// Root widget aplikasi.
-///
-/// Batch 1: tema light/dark aktif (mengikuti mode sistem); layar uji token
-/// ditampilkan. Navigasi go_router dan Beranda asli masuk di Batch 4.
-class CekGiziApp extends StatelessWidget {
+/// Root widget aplikasi. Navigasi go_router; tema light/dark (PRD §7).
+/// Gate: onboarding & consent wajib lebih dulu (PRD §6.1).
+class CekGiziApp extends ConsumerWidget {
   const CekGiziApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    return MaterialApp.router(
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
-      home: const TokenGalleryScreen(),
+      routerConfig: router,
     );
   }
 }
