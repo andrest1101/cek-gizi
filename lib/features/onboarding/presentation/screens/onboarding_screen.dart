@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:cekgizi/core/config/app_config.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
+import 'package:cekgizi/core/theme/app_motion.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
@@ -23,7 +25,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  static const _slides = [
+  static const _slides = <({IconData icon, String title, String body})>[
     (
       icon: Icons.photo_camera_rounded,
       title: AppStrings.onboardingTitle1,
@@ -41,6 +43,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
   ];
 
+  bool get _isLast => _page == _slides.length - 1;
+
   @override
   void dispose() {
     _controller.dispose();
@@ -53,24 +57,50 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     context.go('/consent');
   }
 
+  void _next() {
+    if (_isLast) {
+      _finish();
+      return;
+    }
+    _controller.nextPage(
+      duration: AppMotion.normal,
+      curve: AppMotion.easeOutCubic,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
     final textTheme = Theme.of(context).textTheme;
-    final isLast = _page == _slides.length - 1;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: TextButton(
-                  onPressed: _finish,
-                  child: const Text(AppStrings.onboardingSkip),
-                ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screenPadding,
+                AppSpacing.sm,
+                AppSpacing.md,
+                AppSpacing.xs,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      AppConfig.appName,
+                      style: textTheme.labelLarge?.copyWith(
+                        color: colors.primary,
+                      ),
+                    ),
+                  ),
+                  if (!_isLast)
+                    TextButton(
+                      onPressed: _finish,
+                      child: const Text(AppStrings.onboardingSkip),
+                    ),
+                ],
               ),
             ),
             Expanded(
@@ -78,88 +108,133 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 controller: _controller,
                 itemCount: _slides.length,
                 onPageChanged: (index) => setState(() => _page = index),
-                itemBuilder: (context, index) {
-                  final slide = _slides[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.screenPadding,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TonalIconCircle(
-                          icon: slide.icon,
-                          iconSemantics: slide.title,
-                          size: 96,
-                          iconSize: 48,
-                        ),
-                        const SizedBox(height: AppSpacing.xxl),
-                        Text(
-                          slide.title,
-                          style: textTheme.titleLarge?.copyWith(
-                            color: colors.textPrimary,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          slide.body,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: colors.textSecondary,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                itemBuilder: (context, index) => _Slide(slide: _slides[index]),
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (var i = 0; i < _slides.length; i++)
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: _page == i ? 24 : 8,
-                    height: 8,
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xs,
+            Semantics(
+              label: AppStrings.onboardingPageSemantics(
+                _page + 1,
+                _slides.length,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (var i = 0; i < _slides.length; i++)
+                    AnimatedContainer(
+                      duration: reduceMotion ? Duration.zero : AppMotion.fast,
+                      curve: AppMotion.easeOutCubic,
+                      width: _page == i ? 24 : 8,
+                      height: 8,
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _page == i
+                            ? colors.primary
+                            : colors.surfaceVariant,
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                      ),
                     ),
-                    decoration: BoxDecoration(
-                      color:
-                          _page == i ? colors.primary : colors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(AppRadius.pill),
-                    ),
-                  ),
-              ],
+                ],
+              ),
             ),
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.screenPadding),
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () {
-                    if (isLast) {
-                      _finish();
-                    } else {
-                      _controller.nextPage(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeOutCubic,
-                      );
-                    }
-                  },
-                  child: Text(
-                    isLast
-                        ? AppStrings.onboardingStart
-                        : AppStrings.onboardingNext,
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screenPadding,
+                AppSpacing.xl,
+                AppSpacing.screenPadding,
+                AppSpacing.lg,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  FilledButton(
+                    onPressed: _next,
+                    child: Text(
+                      _isLast
+                          ? AppStrings.onboardingStart
+                          : AppStrings.onboardingNext,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    AppStrings.disclaimer,
+                    textAlign: TextAlign.center,
+                    style: textTheme.labelMedium?.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _Slide extends StatelessWidget {
+  const _Slide({required this.slide});
+
+  final ({IconData icon, String title, String body}) slide;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    final textTheme = Theme.of(context).textTheme;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenPadding,
+            vertical: AppSpacing.lg,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: (constraints.maxHeight - AppSpacing.xxl)
+                  .clamp(0.0, double.infinity),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 124,
+                  height: 124,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colors.surfaceVariant,
+                  ),
+                  child: TonalIconCircle(
+                    icon: slide.icon,
+                    iconSemantics: slide.title,
+                    size: 92,
+                    iconSize: 44,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xxl),
+                Text(
+                  slide.title,
+                  textAlign: TextAlign.center,
+                  style: textTheme.titleLarge?.copyWith(
+                    color: colors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  slide.body,
+                  textAlign: TextAlign.center,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

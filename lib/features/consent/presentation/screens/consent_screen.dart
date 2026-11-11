@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:cekgizi/core/config/app_config.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
+import 'package:cekgizi/core/supabase/supabase_client_provider.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
+import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/consent/data/repositories/consent_repository_impl.dart';
 import 'package:cekgizi/features/consent/domain/use_cases/accept_consent.dart';
-import 'package:cekgizi/core/supabase/supabase_client_provider.dart';
-import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/tonal_icon_circle.dart';
 
 /// Layar consent WAJIB (PRD §6.1, §8.3): tanpa setuju, app tidak bisa
@@ -43,10 +44,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       context.go('/');
     } catch (_) {
       if (!mounted) return;
-      setState(() {
-        _error =
-            'Persetujuan belum tersimpan. Periksa koneksi internet kamu, lalu coba lagi.';
-      });
+      setState(() => _error = AppStrings.consentError);
     } finally {
       if (mounted) {
         setState(() => _busy = false);
@@ -60,101 +58,200 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.consentTitle)),
+      appBar: AppBar(title: const Text(AppConfig.appName)),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.screenPadding),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.screenPadding,
+            AppSpacing.sm,
+            AppSpacing.screenPadding,
+            AppSpacing.xxxl,
+          ),
           children: [
-            const TonalIconCircle(
-              icon: Icons.privacy_tip_rounded,
-              iconSemantics: 'Privasi data anak',
-              size: 72,
-              iconSize: 36,
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: TonalIconCircle(
+                icon: Icons.privacy_tip_rounded,
+                iconSemantics: AppStrings.consentPrivacySemantics,
+                size: 64,
+                iconSize: 30,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            Text(
-              AppStrings.consentIntro,
-              style: textTheme.bodyMedium?.copyWith(color: colors.textPrimary),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            for (final bullet in AppStrings.consentBullets)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.check_rounded,
-                      size: 20,
-                      color: colors.primary,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        bullet,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colors.textPrimary,
-                        ),
-                      ),
-                    ),
-                  ],
+            Semantics(
+              header: true,
+              child: Text(
+                AppStrings.consentTitle,
+                style: textTheme.titleLarge?.copyWith(
+                  color: colors.textPrimary,
                 ),
               ),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: colors.surfaceVariant,
-                borderRadius: BorderRadius.circular(AppRadius.card),
-              ),
-              child: Text(
-                AppStrings.disclaimer,
-                style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              AppStrings.consentIntro,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colors.textSecondary,
               ),
             ),
             const SizedBox(height: AppSpacing.xxl),
-            if (_error != null)
-              ErrorCard(message: _error!, onRetry: _submit, title: AppStrings.errorTitle),
-            if (_error != null) const SizedBox(height: AppSpacing.md),
-            Semantics(
-              container: true,
-              checked: _agreed,
-              child: Material(
-                color: Colors.transparent,
-                child: CheckboxListTile(
-                  value: _agreed,
-                  onChanged: (value) => setState(() => _agreed = value ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  title: const Text(AppStrings.consentAgreeLabel),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.card),
+            Text(
+              AppStrings.consentDataTitle,
+              style: textTheme.titleMedium?.copyWith(
+                color: colors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            for (final bullet in AppStrings.consentBullets)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                child: _Bullet(text: bullet),
+              ),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: AppSurfaces.sunken(
+                context,
+                radius: AppRadius.card,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        size: 18,
+                        color: colors.textSecondary,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          AppStrings.consentDisclaimerTitle,
+                          style: textTheme.labelLarge?.copyWith(
+                            color: colors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    AppStrings.disclaimer,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            if (_error != null) ...[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.error_outline_rounded,
+                    size: 18,
+                    color: colors.statusAlert,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      _error!,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colors.statusAlert,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
+            Container(
+              decoration: BoxDecoration(
+                color: AppSurfaces.cardColor(context),
+                borderRadius: BorderRadius.circular(AppRadius.card),
+                border: Border.all(
+                  color: _agreed ? colors.primary : colors.outline,
+                  width: _agreed ? 1.5 : 1,
+                ),
+              ),
+              child: CheckboxListTile(
+                value: _agreed,
+                onChanged: (value) =>
+                    setState(() => _agreed = value ?? false),
+                controlAffinity: ListTileControlAffinity.leading,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.card),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
+                ),
+                title: Text(
+                  AppStrings.consentAgreeLabel,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colors.textPrimary,
                   ),
                 ),
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _agreed && !_busy ? _submit : null,
-                child: _busy
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text(AppStrings.consentSubmit),
-              ),
+            FilledButton(
+              onPressed: _agreed && !_busy ? _submit : null,
+              child: _busy
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text(AppStrings.consentSubmit),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               AppStrings.consentDeclineHint,
-              style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
               textAlign: TextAlign.center,
+              style: textTheme.labelMedium?.copyWith(
+                color: colors.textSecondary,
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _Bullet extends StatelessWidget {
+  const _Bullet({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: colors.primaryContainer,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.check_rounded, size: 16, color: colors.primary),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colors.textPrimary,
+                ),
+          ),
+        ),
+      ],
     );
   }
 }
