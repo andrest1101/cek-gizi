@@ -15,7 +15,7 @@ import '../fakes.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('FAB sheet: inline validation then valid save updates UI', (
+  testWidgets('alur ukur: CTA kartu → validasi → simpan → grafik & riwayat', (
     tester,
   ) async {
     final child = fakeChild();
@@ -28,50 +28,78 @@ void main() {
       ProviderScope(
         overrides: [
           localPrefsProvider.overrideWithValue(prefs),
-          childRepositoryProvider.overrideWithValue(FakeChildRepository([child])),
-          growthRepositoryProvider.overrideWithValue(FakeGrowthRepository()),
-          permenkesTablesProvider.overrideWith((ref) => Future.value(const FakeAnthropometryTables())),
+          childRepositoryProvider
+              .overrideWithValue(FakeChildRepository([child])),
+          growthRepositoryProvider
+              .overrideWithValue(FakeGrowthRepository()),
+          permenkesTablesProvider.overrideWith(
+            (ref) => Future.value(const FakeAnthropometryTables()),
+          ),
         ],
         child: const CekGiziApp(),
       ),
     );
     await tester.pumpAndSettle();
 
-    // Status kartu kosong di Beranda.
-
-    // Buka sheet lewat FAB.
-    await tester.tap(find.byType(FloatingActionButton).first);
+    // Kartu status kosong di Beranda → buka sheet lewat CTA-nya.
+    expect(find.text(AppStrings.growthNoMeasurementsTitle), findsOneWidget);
+    await tester.tap(find.text(AppStrings.growthNoMeasurementsCta));
     await tester.pumpAndSettle();
 
     // Simpan tanpa mengisi apa pun → pesan wajib muncul.
-    await tester.tap(find.text(AppStrings.growthMeasureSave));
+    final saveButton = find.text(AppStrings.growthMeasureSave);
+    await tester.ensureVisible(saveButton);
     await tester.pumpAndSettle();
+    await tester.tap(saveButton);
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.validationRequired), findsWidgets);
 
     // Berat di luar rentang.
-    await tester.enterText(find.widgetWithText(TextFormField, 'Berat (kg)'), '99');
-    await tester.ensureVisible(find.text(AppStrings.growthMeasureSave));
-    await tester.tap(find.text(AppStrings.growthMeasureSave));
+    await tester.enterText(
+      find.widgetWithText(TextFormField, AppStrings.growthMeasureWeight),
+      '99',
+    );
+    await tester.ensureVisible(saveButton);
     await tester.pumpAndSettle();
+    await tester.tap(saveButton);
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.validationWeightRange), findsOneWidget);
 
     // Isi nilai valid lalu simpan.
-    await tester.enterText(find.widgetWithText(TextFormField, 'Berat (kg)'), '8,2');
-    await tester.enterText(find.widgetWithText(TextFormField, 'Panjang/tinggi (cm)'), '72,0');
-    await tester.ensureVisible(find.text(AppStrings.growthMeasureSave));
-    await tester.tap(find.text(AppStrings.growthMeasureSave));
+    await tester.enterText(
+      find.widgetWithText(TextFormField, AppStrings.growthMeasureWeight),
+      '8,2',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, AppStrings.growthMeasureHeightLength),
+      '72,0',
+    );
+    await tester.ensureVisible(saveButton);
+    await tester.pumpAndSettle();
+    await tester.tap(saveButton);
     await tester.pumpAndSettle();
 
-    // Hasil tersimpan tampil.
-    expect(find.text('Sesuai umur'), findsWidgets);
+    // Dialog hasil: z-score + kategori resmi.
+    expect(find.textContaining(AppStrings.growthMeasureSaved), findsOneWidget);
+    expect(find.text(AppStrings.hazLabel), findsOneWidget);
+    expect(find.text(AppStrings.wazLabel), findsOneWidget);
+    expect(find.text(AppStrings.whzLabel), findsOneWidget);
 
-    // Tutup dialog, pindah ke tab Tumbuh, tile muncul.
-    await tester.tap(find.text('Tutup'));
+    // Tutup dialog, pindah ke tab Tumbuh.
+    await tester.tap(find.text(AppStrings.actionClose));
     await tester.pumpAndSettle();
     await tester.tap(find.text(AppStrings.navGrowth));
     await tester.pumpAndSettle();
-    expect(find.text(AppStrings.growthTabLengthHeight), findsOneWidget);
+
+    expect(find.text(AppStrings.growthChartTitle), findsOneWidget);
+
+    // Ganti indeks grafik ke Berat/Umur.
+    await tester.tap(find.text(AppStrings.growthTabWeightShort));
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.growthTabWeightShort), findsOneWidget);
 
     // Scroll daftar ke riwayat (tile berada di bawah lipatan 600dp).
-    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.drag(find.byType(ListView), const Offset(0, -600));
     await tester.pumpAndSettle();
     expect(find.text('8,2 kg · 72,0 cm'), findsOneWidget);
   });
