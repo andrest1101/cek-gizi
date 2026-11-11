@@ -1,3 +1,4 @@
+import 'package:cekgizi/domain_ref/nutrition_rules.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/domain/repositories/child_repository.dart';
 import 'package:cekgizi/features/growth/domain/entities/growth_measurement.dart';
@@ -6,6 +7,9 @@ import 'package:cekgizi/features/growth/domain/entities/sd_columns.dart';
 import 'package:cekgizi/features/growth/domain/entities/sex.dart';
 import 'package:cekgizi/features/growth/domain/repositories/anthropometry_reference_tables.dart';
 import 'package:cekgizi/features/growth/domain/repositories/growth_repository.dart';
+import 'package:cekgizi/features/meals/domain/entities/food_log.dart';
+import 'package:cekgizi/features/meals/domain/repositories/food_log_repository.dart';
+import 'package:cekgizi/features/meals/domain/services/dietary_diversity.dart';
 
 /// Fake repositories IN-MEMORY untuk widget test (tanpa jaringan).
 final class FakeChildRepository implements ChildRepository {
@@ -195,12 +199,101 @@ ChildProfile fakeChild({
   String nickname = 'Arka',
   Sex sex = Sex.male,
   String avatarKey = 'sprout',
+  DateTime? birthDate,
 }) {
   return ChildProfile(
     id: id,
     nickname: nickname,
-    birthDate: DateTime(2025, 11, 20),
+    birthDate: birthDate ?? DateTime(2025, 11, 20),
     sex: sex,
     avatarKey: avatarKey,
+  );
+}
+
+FoodLog fakeFoodLog({
+  String id = 'log-1',
+  String childId = 'fake-child-1',
+  DateTime? eatenAt,
+  MealType mealType = MealType.snack,
+  FoodLogSource source = FoodLogSource.manual,
+  List<String> groups = const ['grains_tubers'],
+  List<FoodLogItem>? items,
+}) {
+  return FoodLog(
+    id: id,
+    childId: childId,
+    eatenAt: eatenAt ?? DateTime.now(),
+    mealType: mealType,
+    source: source,
+    items: items ??
+        [
+          for (final group in groups)
+            FoodLogItem(name: group, groups: [group]),
+        ],
+    groups: groups,
+  );
+}
+
+/// Fake repository catatan makan in-memory (tanpa jaringan).
+final class FakeFoodLogRepository implements FoodLogRepository {
+  FakeFoodLogRepository([List<FoodLog>? seed]) : _logs = [...?seed];
+
+  final List<FoodLog> _logs;
+  int _counter = 1000;
+
+  @override
+  Future<List<FoodLog>> listLogs(String childId) async {
+    return [
+      for (final log in _logs)
+        if (log.childId == childId) log,
+    ]..sort((a, b) => a.eatenAt.compareTo(b.eatenAt));
+  }
+
+  @override
+  Future<FoodLog> addLog(FoodLog log) async {
+    final saved = log.copyWith(id: 'log-${_counter++}');
+    _logs.add(saved);
+    return saved;
+  }
+
+  @override
+  Future<void> deleteLog(String id) async {
+    _logs.removeWhere((log) => log.id == id);
+  }
+}
+
+/// Aturan keragaman PALSU untuk tes (bukan `nutrition_rules.json`).
+/// Tips memakai contoh jelas "CONTOH" agar mudah dikenali.
+NutritionRules fakeNutritionRules({bool reviewed = true}) {
+  return NutritionRules(
+    version: 'test',
+    groups: FoodGroup.allCodes.toSet(),
+    animalSource: FoodGroup.animalProteinCodes.toSet(),
+    profiles: const [
+      DiversityProfile(
+        minAgeMonths: 6,
+        maxAgeMonths: 23,
+        targetGroups: 5,
+        countWithoutBreastMilk: false,
+      ),
+      DiversityProfile(
+        minAgeMonths: 24,
+        maxAgeMonths: 59,
+        targetGroups: 5,
+        countWithoutBreastMilk: true,
+      ),
+    ],
+    tips: const {
+      'breast_milk': 'Ayo beri ASI lebih sering hari ini.',
+      'grains_tubers': 'Tambahkan makanan pokok seperti nasi atau bubur.',
+      'legumes_nuts': 'Tambahkan tahu atau tempe hari ini.',
+      'dairy': 'Tambahkan susu atau yogurt hari ini.',
+      'flesh': 'Tambahkan lauk hewani hari ini.',
+      'eggs': 'Tambahkan telur hari ini.',
+      'vit_a_fruit_veg': 'Tambahkan sayuran atau buah kaya vitamin A.',
+      'other_fruit_veg': 'Tambahkan buah atau sayur lainnya.',
+    },
+    reviewedBy: reviewed ? 'Test Ahli Gizi' : null,
+    reviewedOn: reviewed ? '2026-11-11' : null,
   );
 }

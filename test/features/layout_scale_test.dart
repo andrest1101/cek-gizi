@@ -9,6 +9,7 @@ import 'package:cekgizi/core/router.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/growth/presentation/providers/growth_providers.dart';
+import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 
 import '../fakes.dart';
 
@@ -50,6 +51,8 @@ void main() {
           permenkesTablesProvider.overrideWith(
             (ref) => Future.value(const FakeAnthropometryTables()),
           ),
+          foodLogRepositoryProvider.overrideWithValue(FakeFoodLogRepository()),
+          nutritionRulesProvider.overrideWith((ref) => Future.value(fakeNutritionRules())),
         ],
         child: const CekGiziApp(),
       ),
@@ -128,6 +131,48 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         expect(find.text(AppStrings.consentSubmit), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Makan & tips Beranda muat di 360dp @1.3 (${brightness.name})',
+      (tester) async {
+        useSmallScreen(tester, brightness);
+        await pumpApp(
+          tester,
+          await prefsFor({
+            'onboarding_completed': true,
+            'consent_version_accepted': '1',
+          }),
+        );
+
+        await tester.tap(find.text(AppStrings.navMakan));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        // Gulir ke diary kosong (grid kelompok ada di atas).
+        await tester.scrollUntilVisible(
+          find.text(AppStrings.makanDiaryEmpty),
+          240,
+          scrollable: find.byType(Scrollable).first,
+          maxScrolls: 40,
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.text(AppStrings.makanDiaryEmpty), findsOneWidget);
+
+        // Beranda: kartu tips tampil (belum ada catatan) & tidak overflow.
+        await tester.tap(find.text(AppStrings.navHome));
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          find.text(AppStrings.tipTitle),
+          240,
+          scrollable: find.byType(Scrollable).first,
+          maxScrolls: 40,
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.text(AppStrings.tipTitle), findsOneWidget);
       },
     );
 
