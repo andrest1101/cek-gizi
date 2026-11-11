@@ -175,6 +175,46 @@ Kode Batch 2 selesai & terverifikasi analyze/test; **uji RLS = Success (lulus, 2
 - Peninjauan konten gizi oleh ahli gizi/bidan (`reviewed_by`/`reviewed_on` di isi `nutrition_rules.json`) — PRD §9.1/§13.
 - Verifikasi OWNER terhadap tabel Permenkes + sel cacat — PRD §13.
 
+## Batch 4.1 — Penyegaran Visual Beranda, Tumbuh, Onboarding, Consent, Anak (2026-11-11)
+
+### Ruang lingkup
+Presentasi saja (UI/UX, tata letak, widget). Domain & Data TIDAK disentuh: tidak ada perubahan entity, use case, repository, tabel, atau rumus z-score. Semua angka tetap dihitung Domain (PRD §3) — widget hanya menampilkan.
+
+### Dependency baru
+**Tidak ada.** Skeleton & segment control dibuat sendiri (tanpa paket tambahan) dan sengaja tanpa animasi berulang agar `pumpAndSettle` di widget test tidak menggantung. `fl_chart` tetap **0.71.0**.
+
+### Perubahan
+1. **Fondasi visual**: `lib/core/theme/app_surfaces.dart` (`card`/`sunken`/`hero`/`cardColor`/`hairline` — kedalaman dari lapisan tone + hairline, tanpa bayangan/gradien); `AppTextStyles.metricNumber`; tema `appBar`/`navigationBar`/`bottomSheet`/`dialog`/`checkbox` di `app_theme.dart`.
+2. **Widget bersama baru** (`lib/shared/widgets/`): `segment_control.dart` (pill; label pendek + `semanticLabel` lengkap → aman 360dp @1,3), `skeleton.dart` (statis), `metric_tile.dart`, `z_score_table.dart`, `child_switcher.dart` (kartu anak + sheet pilih anak); `Greeting` di `lib/core/utils/greeting.dart`.
+3. **Logika presentasi diekstrak jadi fungsi murni + unit test**: `features/growth/presentation/growth_summary.dart` (`worstOf`, `sorted`, `latestOf`, `trendOf`, `weightDeltaOf`) dan `presentation/chart/sd_series.dart` (`SdSeriesBuilder.build` + ekstensi titik grafik). Geometri pita SD tidak berubah.
+4. **Beranda**: sapaan menurut jam + ikon kelola anak; kartu anak (avatar, usia, "Ganti") → sheet pilih anak + tautan "Kelola anak"; kartu status dengan metrik besar (berat & tinggi + selisih berat) dan CTA "Tambah ukuran" + "Lihat detail"; `RefreshIndicator`; empty/error/skeleton.
+5. **Tumbuh**: header anak; kartu status tanpa metrik (grafik & riwayat ada di bawahnya); kartu grafik dengan `SegmentControl` Tinggi/Berat/BB/TB, legenda teks (rentang wajar, batas ±2 SD, median, anak), caption sumber tabel; riwayat berupa kartu (berat · tinggi, tanggal · usia, pill kategori, menu ubah/hapus). Garis ±2 SD putus-putus, median solid, seri anak `primary`.
+6. **Anak**: kartu terpilih = surface + garis `primary` + badge "Sedang dipilih" (bukan `primaryContainer`), menu ubah/hapus, FAB "Tambah anak"; formulir anak memakai `SegmentControl` jenis kelamin, grid avatar 48dp, tombol simpan menempel di bawah.
+7. **Onboarding & Consent**: slide bisa digulir (`LayoutBuilder` + `SingleChildScrollView`); disclaimer wajib selalu tampil di bawah CTA onboarding (PRD §8.5) dan di kartu "Perlu kamu tahu" pada consent; kartu checkbox consent (garis `primary` saat dicentang). Copy baru masuk `AppStrings` (`greeting*`, `home*`, `growth*`, `child*`, `action*`, `routeNotFound*`).
+8. **Navigasi**: hairline di atas `NavigationBar`; halaman tidak ditemukan memakai copy `AppStrings`, bukan pesan mentah/URI.
+
+### Keputusan desain (dipakai batch berikutnya)
+- **Tanpa FAB di Beranda/Tumbuh** — FAB dicadangkan untuk "Foto makanan" (Batch 6); CTA ukur ada di dalam kartu status.
+- `primaryContainer` hanya untuk sorotan hero (Piring Hari Ini); kartu terpilih memakai surface + garis `primary`.
+- Skeleton statis (tanpa shimmer) agar widget test tidak menggantung & tanpa dependency baru.
+- `TabBar` diganti `SegmentControl`; label pendek + nama lengkap di `Semantics`.
+- Edit pengukuran: tanggal dikunci + copy `growthDateLocked` karena `updateMeasurement` tidak mengirim tanggal.
+- Chip "protein hewani" **ditunda** sampai `food_logs` tersedia (Batch 6).
+
+### Berkas
+- Baru: `app_surfaces.dart`, `greeting.dart`, `segment_control.dart`, `skeleton.dart`, `metric_tile.dart`, `z_score_table.dart`, `child_switcher.dart`, `growth_summary.dart`, `chart/sd_series.dart`.
+- Ditulis ulang/dirapikan: `home_screen.dart`, `app_shell.dart`, `growth_screen.dart`, `growth_status_card.dart`, `growth_chart.dart`, `add_measurement_sheet.dart`, `children_screen.dart`, `child_form_screen.dart`, `onboarding_screen.dart`, `consent_screen.dart`, `router.dart`, `status_pill.dart`, `status_copy.dart`, `app_strings.dart`, `app_theme.dart`, `app_text_styles.dart`.
+- Test: baru `test/core/utils/greeting_test.dart`, `test/features/growth_summary_test.dart`, `test/features/sd_series_test.dart`, `test/features/layout_scale_test.dart`; `test/features/growth_flow_test.dart` ditulis ulang (CTA kartu → validasi → simpan → grafik → riwayat); `test/fakes.dart` menerima `measureMode`.
+
+### Verifikasi (2026-11-11)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **165/165 passed** (baseline Batch 4: 139). Tidak ada assertion yang dilemahkan; tes baru menambah cakupan.
+- `test/features/layout_scale_test.dart`: Beranda, Tumbuh, Onboarding, Consent, kelola anak & formulir anak pada **360×640 @1,3**, light & dark — tanpa overflow. Tes ini menemukan satu overflow nyata (badge "Sedang dipilih" di kartu anak) yang sudah diperbaiki (`Flexible` + ellipsis).
+- DoD §10.1: `LinearGradient|RadialGradient|SweepGradient` di `lib/` → 0; `Colors.` di `lib/features` + `lib/shared` → 0 (hanya `Colors.transparent` yang diizinkan); `GEMINI_API_KEY=<literal>` → 0.
+
+### Belum terverifikasi (butuh kamu)
+- Review visual di perangkat nyata (light & dark) untuk Beranda/Tumbuh/Onboarding/Consent/Anak, termasuk perilaku keyboard pada sheet ukur.
+
 ## Batch 4 — Anak & Pertumbuhan (2026-11-11)
 
 ### Dependency baru (alasan, PRD constraint #5)
