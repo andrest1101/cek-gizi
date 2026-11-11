@@ -163,8 +163,19 @@ Kode Batch 2 selesai & terverifikasi analyze/test; **uji RLS = Success (lulus, 2
 
 ### MENUNGGU PEMILIK (tutup Batch 3)
 1. **Verifikasi tabel** `assets/reference/permenkes_2_2020_sd.json` vs dokumen Permenkes asli + nasib 1 sel cacat (PRD §13 — wajib sebelum rilis).
-2. **`nutrition_rules.json`** — (a) file ditinjau ahli gizi/bidan, atau (b) seed Lampiran A PRD bertanda `reviewed_by=null`. Loader + ratifikasi tips menyusul.
-3. Uji 30 kasus manual (selisih ≤ 0,01) vs tabel resmi → tutup Batch 3 (PRD §9.2/9.3).
+2. ~~Sediakan `nutrition_rules.json`~~ — **SELESAI (2026-11-11)**: berkas `assets/rules/nutrition_rules.json` (seed Lampiran A PRD, `reviewed_by=null`) sudah diparse & divalidasi penuh oleh `NutritionRulesLoader` (`lib/domain_ref/nutrition_rules.dart`): 8 kode kelompok persis, animal_source persis [dairy, flesh, eggs], profil tanpa tumpang tindih (mpasi_6_23, balita_24_59), tips keys ⊆ groups, status peninjauan terekspos (`isReviewed == false` → konten BELUM ditinjau, wajib penanda UI sesuai PRD §9.1).
+3. ~~Uji 30 kasus manual~~ — **SELESAI (2026-11-11)**: `test/domain_ref/z_score_manual_cases_test.dart` — 30 kasus (HAZ/WAZ/WHZ × laki-laki/perempuan, usia/cm beragam), ekspektasi dihitung dari angka tabel resmi, selisih ≤ 0,01 (PRD §9.2). `flutter test` → **137/137 passed**, `flutter analyze` → bersih.
+
+### Verifikasi akhir (2026-11-11)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **137/137 passed**
+- DoD §10.1: gradien 0, `Colors.` features/shared 0.
+
+### Sisa Batch 3 (gate rilis, bukan item kode)
+- Peninjauan konten gizi oleh ahli gizi/bidan (`reviewed_by`/`reviewed_on` di isi `nutrition_rules.json`) — PRD §9.1/§13.
+- Verifikasi OWNER terhadap tabel Permenkes + sel cacat — PRD §13.
+
+## Batch 3 — Domain Gizi (dimulai 2026-11-10, tabel Permenkes SELESAI 2026-11-11)
 
 ## Batch 3 — Domain Gizi (dimulai 2026-11-10, sebagian SELESAI)
 

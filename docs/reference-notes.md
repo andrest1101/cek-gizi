@@ -58,6 +58,19 @@ Konvensi akses (lihat `lib/domain_ref/permenkes_reference_tables.dart`):
 4. Unit test Dart (`test/domain_ref/permenkes_reference_tables_test.dart`): anchor resmi dari PDF (waz lk umur 0 = [2.1, 2.5, 2.9, 3.3, 3.9, 4.4, 5.0]; haz pr umur 0 median 49.1; TB/U lk umur 24 median 87.1; sel cacat null), anchor matematis seluruh baris (z(−1)=−1, z(0)=0, z(+1)=+1), batas cakupan ditolak, pemilih PB/TB by usia.
 5. Anchor yang DIPERIKSA langsung terhadap PDF — lihat test file (bukan dari ingatan).
 
+## `nutrition_rules.json` (seed Lampiran A, 2026-11-11)
+
+Berkas `assets/rules/nutrition_rules.json` adalah seed dari Lampiran A PRD dengan `reviewed_by: null` — **konten BELUM ditinjau ahli gizi/bidan**; UI wajib memberi penanda sampai ditinjau (PRD §9.1).
+
+Loader `lib/domain_ref/nutrition_rules.dart` memvalidasi ketat saat parse (hal yang tidak boleh lolos):
+- `groups` persis 8 kode tetap PRD §3.7 (duplikat/kode tak dikenal → gagal).
+- `animal_source` persis `[dairy, flesh, eggs]`.
+- `profiles`: `min_age_months` ≤ `max_age_months`, `count` ∈ {`all`, `without_breast_milk`}, `target_groups` 1..(8 atau 7), **tanpa tumpang tindih** (urutan diurutkan oleh usia).
+- `tips`: kunci ⊆ kelompok yang dikenal, nilai tidak kosong.
+- `reviewed_by`/`reviewed_on`: string atau null — `isReviewed` false berarti BELUM ditinjau.
+
+Tips & target **tidak pernah di-hardcode di kode**; selalu dari berkas ini (PRD §3.7).
+
 ## Yang MASIH harus dilakukan pemilik (gate rilis, PRD §13)
 
 - [ ] Mencocokkan tabel di `assets/reference/permenkes_2_2020_sd.json` dengan dokumen Permenkes asli (total 689 baris).
