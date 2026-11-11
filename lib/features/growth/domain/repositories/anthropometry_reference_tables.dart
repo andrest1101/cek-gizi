@@ -13,8 +13,19 @@ abstract interface class AnthropometryReferenceTables {
 
   /// Berat menurut panjang/tinggi, langkah 0,5 cm (PB untuk 0–23 bln,
   /// TB untuk 24–60 bln). [lengthHeightCmStep] sudah dibulatkan half-up
-  /// oleh pemanggil — lihat [LengthHeightStep].
-  SdColumns whz({required Sex sex, required double lengthHeightCmStep});
+  /// oleh pemanggil — lihat [LengthHeightStep]. [ageMonths] dipakai untuk
+  /// memilih tabel PB vs TB (PRD §3.3).
+  SdColumns whz({
+    required Sex sex,
+    required double lengthHeightCmStep,
+    required int ageMonths,
+  });
+
+  /// Rentang tabel WHZ (start, step, jumlah baris) — dipakai grafik.
+  ({double start, double step, int length}) whzTableInfo({
+    required Sex sex,
+    required int ageMonths,
+  });
 }
 
 /// Pembulatan panjang/tinggi ke baris step 0,5 (PRD §3.3: PB/BB per 0,5 cm).

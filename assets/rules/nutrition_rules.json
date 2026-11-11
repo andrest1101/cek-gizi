@@ -1,0 +1,41 @@
+{
+  "version": "1",
+  "groups": [
+    "breast_milk",
+    "grains_tubers",
+    "legumes_nuts",
+    "dairy",
+    "flesh",
+    "eggs",
+    "vit_a_fruit_veg",
+    "other_fruit_veg"
+  ],
+  "animal_source": ["dairy", "flesh", "eggs"],
+  "profiles": {
+    "mpasi_6_23": {
+      "min_age_months": 6,
+      "max_age_months": 23,
+      "target_groups": 5,
+      "count": "all",
+      "basis": "WHO/UNICEF minimum dietary diversity"
+    },
+    "balita_24_59": {
+      "min_age_months": 24,
+      "max_age_months": 59,
+      "target_groups": 5,
+      "count": "without_breast_milk",
+      "basis": "panduan aplikasi, menunggu tinjauan ahli gizi"
+    }
+  },
+  "tips": {
+    "flesh": "Tambahkan hati ayam, ikan, atau daging cincang halus sebagai sumber protein dan zat besi.",
+    "eggs": "Telur yang dimasak matang bisa jadi lauk yang murah dan bergizi.",
+    "vit_a_fruit_veg": "Tambahkan wortel, labu, bayam, atau pepaya.",
+    "legumes_nuts": "Tahu atau tempe yang dihaluskan cocok sebagai pendamping.",
+    "dairy": "Tambahkan susu atau yogurt sesuai anjuran untuk usia anak.",
+    "grains_tubers": "Pastikan ada Sometimes it's hard to face reality. Oh, oh, though you might get mad Oh, oh, you might get mad at me.makanan pokok seperti nasi, bubur, atau ubi.",
+    "other_fruit_veg": "Tambahkan potongan buah atau sayur lain."
+  },
+  "reviewed_by": null,
+  "reviewed_on": null
+}

@@ -140,6 +140,113 @@ Batch 1 SELESAI. Menunggu perintah lanjut ke Batch 2 (Supabase).
 ### Status
 Kode Batch 2 selesai & terverifikasi analyze/test; **uji RLS = Success (lulus, 2026-11-10)**; anonymous sign-in terbukti bekerja. Batch 2 SELESAI (sisa opsional: deploy `health`).
 
+## Batch 3 — Domain Gizi (dimulai 2026-11-10, tabel Permenkes SELESAI 2026-11-11)
+
+### Tabel referensi Permenkes 2/2020 — diekstrak & tervalidasi (2026-11-11)
+- Berkas PDF resmi (`.reference/permenkes_2_2020.pdf`, TIDAK di-commit) dibaca dengan `scripts/extract_permenkes.py` (pypdf; PDF ternyata text-based, bukan scan).
+- **689 baris diekstrak dari 10 tabel** (BB/U, PB/U, TB/U, BB/PB, BB/TB × 2 jenis kelamin) → `assets/reference/permenkes_2_2020_sd.json`.
+- Validasi otomatis: jumlah baris & kontinuitas kunci ✓; monotonicity kolom SD 0 pelanggaran ✓; **seluruh 689 baris verbatim cocok dengan PDF** ✓; 1 sel cacat di PDF resmi (`whz_tb_female` 69,5 cm, kolom −3 SD tercetak "6.") → `null`, terdokumentasi; menunggu verifikasi pemilik (PRD §13).
+- Loader Dart murni: `lib/domain_ref/permenkes_reference_tables.dart` — validasi saat parse (baris, monotonicity), akses by usia/PB/TB, di luar cakupan → exception.
+- Unit test Dart terhadap berkas asli: anchor dari PDF (waz/haz/whz), anchor matematis seluruh baris (z(−1)=−1, median=0, +1=+1), monotonicity berkas, batas cakupan.
+- Tooling: Python 3.13 + pypdf (pdfplumber dicoba → gagal karena XRef stream PDF; di-uninstall lagi agar environment bersih).
+- `pubspec.yaml`: `assets/reference/` ditambahkan.
+
+### Verifikasi (2026-11-11)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **84/84 passed**
+- DoD §10.1: tetap bersih (gradien 0, `Colors.` di features/shared 0).
+
+### Ubah antarmuka Domain (Batch 3)
+- `SdColumns`: `sdNeg3`, `sdNeg2`, `sdPos2`, `sdPos3` → nullable (rujukan; SATU sel di PDF resmi cacat). `sdNeg1`/`median`/`sdPos1` tetap wajib.
+- `AnthropometryReferenceTables.whz(...)` kini menerima `ageMonths` (PRD §3.3: PB untuk 0–23 bln, TB untuk 24–60 bln).
+- `GrowthEvaluator.evaluateWhz` meneruskan usia ke tabel.
+
+### MENUNGGU PEMILIK (tutup Batch 3)
+1. **Verifikasi tabel** `assets/reference/permenkes_2_2020_sd.json` vs dokumen Permenkes asli + nasib 1 sel cacat (PRD §13 — wajib sebelum rilis).
+2. ~~Sediakan `nutrition_rules.json`~~ — **SELESAI (2026-11-11)**: berkas `assets/rules/nutrition_rules.json` (seed Lampiran A PRD, `reviewed_by=null`) sudah diparse & divalidasi penuh oleh `NutritionRulesLoader` (`lib/domain_ref/nutrition_rules.dart`): 8 kode kelompok persis, animal_source persis [dairy, flesh, eggs], profil tanpa tumpang tindih (mpasi_6_23, balita_24_59), tips keys ⊆ groups, status peninjauan terekspos (`isReviewed == false` → konten BELUM ditinjau, wajib penanda UI sesuai PRD §9.1).
+3. ~~Uji 30 kasus manual~~ — **SELESAI (2026-11-11)**: `test/domain_ref/z_score_manual_cases_test.dart` — 30 kasus (HAZ/WAZ/WHZ × laki-laki/perempuan, usia/cm beragam), ekspektasi dihitung dari angka tabel resmi, selisih ≤ 0,01 (PRD §9.2). `flutter test` → **137/137 passed**, `flutter analyze` → bersih.
+
+### Verifikasi akhir (2026-11-11)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **137/137 passed**
+- DoD §10.1: gradien 0, `Colors.` features/shared 0.
+
+### Sisa Batch 3 (gate rilis, bukan item kode)
+- Peninjauan konten gizi oleh ahli gizi/bidan (`reviewed_by`/`reviewed_on` di isi `nutrition_rules.json`) — PRD §9.1/§13.
+- Verifikasi OWNER terhadap tabel Permenkes + sel cacat — PRD §13.
+
+## Batch 4.1 — Penyegaran Visual Beranda, Tumbuh, Onboarding, Consent, Anak (2026-11-11)
+
+### Ruang lingkup
+Presentasi saja (UI/UX, tata letak, widget). Domain & Data TIDAK disentuh: tidak ada perubahan entity, use case, repository, tabel, atau rumus z-score. Semua angka tetap dihitung Domain (PRD §3) — widget hanya menampilkan.
+
+### Dependency baru
+**Tidak ada.** Skeleton & segment control dibuat sendiri (tanpa paket tambahan) dan sengaja tanpa animasi berulang agar `pumpAndSettle` di widget test tidak menggantung. `fl_chart` tetap **0.71.0**.
+
+### Perubahan
+1. **Fondasi visual**: `lib/core/theme/app_surfaces.dart` (`card`/`sunken`/`hero`/`cardColor`/`hairline` — kedalaman dari lapisan tone + hairline, tanpa bayangan/gradien); `AppTextStyles.metricNumber`; tema `appBar`/`navigationBar`/`bottomSheet`/`dialog`/`checkbox` di `app_theme.dart`.
+2. **Widget bersama baru** (`lib/shared/widgets/`): `segment_control.dart` (pill; label pendek + `semanticLabel` lengkap → aman 360dp @1,3), `skeleton.dart` (statis), `metric_tile.dart`, `z_score_table.dart`, `child_switcher.dart` (kartu anak + sheet pilih anak); `Greeting` di `lib/core/utils/greeting.dart`.
+3. **Logika presentasi diekstrak jadi fungsi murni + unit test**: `features/growth/presentation/growth_summary.dart` (`worstOf`, `sorted`, `latestOf`, `trendOf`, `weightDeltaOf`) dan `presentation/chart/sd_series.dart` (`SdSeriesBuilder.build` + ekstensi titik grafik). Geometri pita SD tidak berubah.
+4. **Beranda**: sapaan menurut jam + ikon kelola anak; kartu anak (avatar, usia, "Ganti") → sheet pilih anak + tautan "Kelola anak"; kartu status dengan metrik besar (berat & tinggi + selisih berat) dan CTA "Tambah ukuran" + "Lihat detail"; `RefreshIndicator`; empty/error/skeleton.
+5. **Tumbuh**: header anak; kartu status tanpa metrik (grafik & riwayat ada di bawahnya); kartu grafik dengan `SegmentControl` Tinggi/Berat/BB/TB, legenda teks (rentang wajar, batas ±2 SD, median, anak), caption sumber tabel; riwayat berupa kartu (berat · tinggi, tanggal · usia, pill kategori, menu ubah/hapus). Garis ±2 SD putus-putus, median solid, seri anak `primary`.
+6. **Anak**: kartu terpilih = surface + garis `primary` + badge "Sedang dipilih" (bukan `primaryContainer`), menu ubah/hapus, FAB "Tambah anak"; formulir anak memakai `SegmentControl` jenis kelamin, grid avatar 48dp, tombol simpan menempel di bawah.
+7. **Onboarding & Consent**: slide bisa digulir (`LayoutBuilder` + `SingleChildScrollView`); disclaimer wajib selalu tampil di bawah CTA onboarding (PRD §8.5) dan di kartu "Perlu kamu tahu" pada consent; kartu checkbox consent (garis `primary` saat dicentang). Copy baru masuk `AppStrings` (`greeting*`, `home*`, `growth*`, `child*`, `action*`, `routeNotFound*`).
+8. **Navigasi**: hairline di atas `NavigationBar`; halaman tidak ditemukan memakai copy `AppStrings`, bukan pesan mentah/URI.
+
+### Keputusan desain (dipakai batch berikutnya)
+- **Tanpa FAB di Beranda/Tumbuh** — FAB dicadangkan untuk "Foto makanan" (Batch 6); CTA ukur ada di dalam kartu status.
+- `primaryContainer` hanya untuk sorotan hero (Piring Hari Ini); kartu terpilih memakai surface + garis `primary`.
+- Skeleton statis (tanpa shimmer) agar widget test tidak menggantung & tanpa dependency baru.
+- `TabBar` diganti `SegmentControl`; label pendek + nama lengkap di `Semantics`.
+- Edit pengukuran: tanggal dikunci + copy `growthDateLocked` karena `updateMeasurement` tidak mengirim tanggal.
+- Chip "protein hewani" **ditunda** sampai `food_logs` tersedia (Batch 6).
+
+### Berkas
+- Baru: `app_surfaces.dart`, `greeting.dart`, `segment_control.dart`, `skeleton.dart`, `metric_tile.dart`, `z_score_table.dart`, `child_switcher.dart`, `growth_summary.dart`, `chart/sd_series.dart`.
+- Ditulis ulang/dirapikan: `home_screen.dart`, `app_shell.dart`, `growth_screen.dart`, `growth_status_card.dart`, `growth_chart.dart`, `add_measurement_sheet.dart`, `children_screen.dart`, `child_form_screen.dart`, `onboarding_screen.dart`, `consent_screen.dart`, `router.dart`, `status_pill.dart`, `status_copy.dart`, `app_strings.dart`, `app_theme.dart`, `app_text_styles.dart`.
+- Test: baru `test/core/utils/greeting_test.dart`, `test/features/growth_summary_test.dart`, `test/features/sd_series_test.dart`, `test/features/layout_scale_test.dart`; `test/features/growth_flow_test.dart` ditulis ulang (CTA kartu → validasi → simpan → grafik → riwayat); `test/fakes.dart` menerima `measureMode`.
+
+### Verifikasi (2026-11-11)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **165/165 passed** (baseline Batch 4: 139). Tidak ada assertion yang dilemahkan; tes baru menambah cakupan.
+- `test/features/layout_scale_test.dart`: Beranda, Tumbuh, Onboarding, Consent, kelola anak & formulir anak pada **360×640 @1,3**, light & dark — tanpa overflow. Tes ini menemukan satu overflow nyata (badge "Sedang dipilih" di kartu anak) yang sudah diperbaiki (`Flexible` + ellipsis).
+- DoD §10.1: `LinearGradient|RadialGradient|SweepGradient` di `lib/` → 0; `Colors.` di `lib/features` + `lib/shared` → 0 (hanya `Colors.transparent` yang diizinkan); `GEMINI_API_KEY=<literal>` → 0.
+
+### Belum terverifikasi (butuh kamu)
+- Review visual di perangkat nyata (light & dark) untuk Beranda/Tumbuh/Onboarding/Consent/Anak, termasuk perilaku keyboard pada sheet ukur.
+
+## Batch 4 — Anak & Pertumbuhan (2026-11-11)
+
+### Dependency baru (alasan, PRD constraint #5)
+- `flutter_riverpod ^3.3.2` — state management wajib (PRD/AGENTS).
+- `go_router ^17.0.0` — navigasi wajib (PRD §4).
+- `fl_chart` → **0.71.0** (bukan 1.x!) — Flutter SDK mem-pin `vector_math: 2.1.4` (flutter & flutter_test); fl_chart ≥1.1 memakai API `Matrix4.translateByDouble` yang tidak ada di 2.1.4 → gagal kompilasi. 0.71.0 kompatibel & tetap sesuai PRD.
+- `shared_preferences ^2.5.3` — flag lokal onboarding/consent (offline-safe). Transitif via supabase_flutter; dinyatakan eksplisit karena diimpor langsung.
+
+### Perubahan
+1. **App shell & routing** (`lib/core/router.dart`, `lib/app.dart`, `lib/main.dart`): `StatefulShellRoute.indexedStack` (Beranda, Tumbuh) + redirect gate onboarding → consent → app (PRD §6.1/§6.2). `LocalPrefs` (flag lokal), tema light/dark, `ProviderScope` di main.
+2. **Onboarding** (3 slide: nilai produk, tumbuh dalam konteks, pendamping bukan dokter; CTA Lewati/Mulai) + **Consent** (PRD §8.3: tujuan, data yang dikumpulkan, hak pengguna, disclaimer; checkbox wajib; tersimpan ke `user_consents` via `ConsentRepositoryImpl` + flag lokal).
+3. **Profil anak** (`features/children/`): entity + repository Supabase (tabel `children`, RLS) — CRUD; batas maksimal 5 (use case `ChildUseCases`); layar kelola (tambah/ubah/hapus + konfirmasi hapus); avatar katalog 8 ilustrasi (`AvatarCatalog`, tanpa foto asli); switch anak di Beranda.
+4. **Tambah/Edit ukuran** (`add_measurement_sheet.dart`): tanggal (batas 0–60 bln & tidak sebelum lahir), berat 1–30 kg, tinggi 35–130 cm, cara ukur default menurut usia, catatan ≤200, validasi ganda (form + domain `MeasurementEvaluator`), gagal simpan → pesan ramah; setelah simpan → dialog hasil (z-score + kategori resmi).
+5. **Kartu status** (`growth_status_card.dart`): status terburuk dari HAZ/WAZ/WHZ (nada PRD §3.9), tanggal, tren (GrowthTrendEvaluator), out-of-range → peringatan tanpa klasifikasi (PRD §3.5); tombol "Lihat detail" → sheet nilai z + kategori + tanggal; "Tambah ukuran".
+6. **Grafik pita SD** (`growth_chart.dart`, fl_chart): 3 tab Tinggi/Umur, Berat/Umur, Berat/Tinggi; pita −2…+1 (PB/U s.d. +3) hijau lembut, di luarnya kuning/merah lembut (PRD §6.5); median tegas; garis anak + titik; Semantics label; mode PB/TB dipilih by usia.
+7. **Z-score pada simpan**: dihitung di Domain (`SaveMeasurement`) dengan koreksi 0,7 cm, rumus §3.3, bounds §3.5 → kolom `haz/waz/whz/status_*` + `ref_version` (`permenkes-2-2020`) disimpan.
+8. **Beranda** (`features/home/`): switch anak (bottom sheet), Kartu Status Tumbuh, empty state "Belum ada anak" + CTA. Token galeri Batch 1 digantikan shell ini (galeri tetap di `lib/shared/dev/` sebagai dev tool).
+
+### Verifikasi (2026-11-11)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **139/139 passed** (termasuk alur penuh: FAB → sheet → validasi inline → valid → dialog hasil → tab Tumbuh → tile riwayat; boot routing onboarding/Beranda; fakes in-memory — tanpa jaringan).
+- DoD §10.1: gradien 0; `Colors.` di features/shared hanya `Colors.transparent`; `GEMINI_API_KEY=<literal>` 0.
+
+### Belum terverifikasi (butuh kamu)
+- **Alur penuh di perangkat nyata dengan Supabase produksi** (PRD Batch 4: "Alur ukur sampai status benar di perangkat nyata"): onboarding → consent (consent tersimpan di `user_consents`) → tambah anak → tambah ukuran → kartu status & grafik; hapus anak (cascading ke `growth_measurements`); RLS dua user (sudah teruji di Batch 2).
+- Keputusan akhir visual chart (bisa disesuaikan saat review di device).
+
+### Status
+Batch 4 SELESAI (kode & test hijau). Menunggu verifikasi device & perintah lanjut ke Batch 5 (edge function analyze-meal + scanner — butuh keputusan Cloud Billing, PRD §13.3).
+
+## Batch 3 — Domain Gizi (dimulai 2026-11-10, tabel Permenkes SELESAI 2026-11-11)
+
 ## Batch 3 — Domain Gizi (dimulai 2026-11-10, sebagian SELESAI)
 
 ### Perubahan (bagian yang tidak bergantung pada isi tabel)

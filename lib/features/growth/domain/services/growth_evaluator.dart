@@ -56,7 +56,11 @@ abstract final class GrowthEvaluator {
       ageMonths: ageMonths,
     );
     final step = LengthHeightStep.of(corrected);
-    final sd = tables.whz(sex: sex, lengthHeightCmStep: step);
+    final sd = tables.whz(
+      sex: sex,
+      lengthHeightCmStep: step,
+      ageMonths: ageMonths,
+    );
     return GrowthClassification.whz(ZScore.calculate(value: weightKg, sd: sd));
   }
 }

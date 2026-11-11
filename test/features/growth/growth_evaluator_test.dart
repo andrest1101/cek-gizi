@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// setelah berkas resmi disediakan pemilik (docs/reference-notes.md).
 final class _FakeTables implements AnthropometryReferenceTables {
   double? lastLengthHeightStep;
+  int? lastAgeMonths;
 
   static const _fixture = SdColumns(
     sdNeg3: 61,
@@ -28,10 +29,22 @@ final class _FakeTables implements AnthropometryReferenceTables {
   SdColumns waz({required Sex sex, required int ageMonths}) => _fixture;
 
   @override
-  SdColumns whz({required Sex sex, required double lengthHeightCmStep}) {
+  SdColumns whz({
+    required Sex sex,
+    required double lengthHeightCmStep,
+    required int ageMonths,
+  }) {
     lastLengthHeightStep = lengthHeightCmStep;
+    lastAgeMonths = ageMonths;
     return _fixture;
   }
+
+  @override
+  ({double start, double step, int length}) whzTableInfo({
+    required Sex sex,
+    required int ageMonths,
+  }) =>
+      (start: 45.0, step: 0.5, length: 131);
 }
 
 const _male = Sex.male;

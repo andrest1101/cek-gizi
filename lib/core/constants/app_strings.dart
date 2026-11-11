@@ -17,4 +17,248 @@ abstract final class AppStrings {
 
   /// Judul umum kartu galat (PRD §6.9).
   static const String errorTitle = 'Ups, terjadi kesalahan';
+
+  // ── Umum ───────────────────────────────────────────────────────
+  static const String actionEdit = 'Ubah';
+  static const String actionDelete = 'Hapus';
+  static const String actionCancel = 'Batal';
+  static const String actionClose = 'Tutup';
+  static const String skeletonLoading = 'Sedang memuat';
+
+  // ── Onboarding ─────────────────────────────────────────────────
+  static const onboardingSkip = 'Lewati';
+  static const onboardingNext = 'Selanjutnya';
+  static const onboardingStart = 'Mulai';
+  static const onboardingTitle1 = 'Foto piring, lihat isinya';
+  static const onboardingBody1 =
+      'Ambil foto makanan anak, lalu lihat kelompok pangan mana yang sudah dan '
+      'belum tercapai hari ini.';
+  static const onboardingTitle2 = 'Tumbuh dalam konteks';
+  static const onboardingBody2 =
+      'Pantau tinggi, berat, dan status pertumbuhan menurut Permenkes 2/2020 — '
+      'dengan bahasa yang tenang dan jelas.';
+  static const onboardingTitle3 = 'Pendamping, bukan dokter';
+  static const onboardingBody3 =
+      '${AppConfig.appName} memberi edukasi, bukan diagnosis. Untuk kekhawatiran '
+      'kesehatan, hubungi Posyandu, puskesmas, atau dokter.';
+  static String onboardingPageSemantics(int page, int total) =>
+      'Halaman $page dari $total';
+
+  // ── Consent (PRD §8.3) ─────────────────────────────────────────
+  static const consentTitle = 'Sebelum mulai, baca ini dulu';
+  static const consentIntro =
+      '${AppConfig.appName} membantu memantau tumbuh kembang dan gizi balita '
+      'kamu. Kami hanya menyimpan yang kamu izinkan — tidak lebih.';
+  static const consentBullets = <String>[
+    'Data yang tersimpan: nama panggilan, tanggal lahir, jenis kelamin, berat, tinggi, dan catatan perkembangannya.',
+    'Foto makanan dikirim hanya untuk dikenali oleh AI dan dihapus setelah dianalisis — foto tidak disimpan.',
+    'Data kamu sendiri yang bisa mengaksesnya (pengamanan tingkat baris di server).',
+    'Kamu bisa mengekspor data, menghapus riwayat chat, atau menghapus akun beserta seluruh datanya kapan pun di Pengaturan.',
+  ];
+  static const consentAgreeLabel =
+      'Saya setuju data anak saya disimpan untuk tujuan pemantauan dan edukasi.';
+  static const consentSubmit = 'Setuju dan lanjutkan';
+  static const consentDeclineHint =
+      'Tanpa persetujuan, ${AppConfig.appName} tidak bisa dipakai.';
+  static const consentPrivacySemantics = 'Privasi data anak';
+  static const consentDataTitle = 'Yang kami simpan dan jaga';
+  static const consentDisclaimerTitle = 'Perlu kamu tahu';
+  static const consentError =
+      'Persetujuan belum tersimpan. Periksa koneksi internet kamu, lalu coba lagi.';
+
+  // ── Anak (profil) ──────────────────────────────────────────────
+  static const childAddTitle = 'Tambah anak';
+  static const childEditTitle = 'Ubah data anak';
+  static const childNicknameLabel = 'Nama panggilan';
+  static const childNicknameHint = 'Mis. Siti, Arka, Bila';
+  static const childBirthDateLabel = 'Tanggal lahir';
+  static const childSexLabel = 'Jenis kelamin';
+  static const childSexMale = 'Laki-laki';
+  static const childSexFemale = 'Perempuan';
+  static const childAvatarLabel = 'Avatar';
+  static const childSave = 'Simpan';
+  static const childDelete = 'Hapus';
+  static const childDeleteTitle = 'Hapus data anak?';
+  static const childDeleteBody =
+      'Data anak beserta seluruh pengukurannya akan dihapus permanen. '
+      'Tindakan ini tidak bisa dibatalkan.';
+  static const childDeleteConfirm = 'Hapus';
+  static const childDeleteCancel = 'Batal';
+  static const childListTitle = 'Anak saya';
+  static const childMaxReached = 'Maksimal 5 anak per akun.';
+  static const childEmptyTitle = 'Belum ada anak terdaftar';
+  static const childEmptyBody =
+      'Tambahkan anak pertama — cukup nama panggilan, tgl lahir, dan jenis kelamin.';
+  static const childEmptyCta = 'Tambah anak';
+  static const childAgeYears = 'tahun';
+  static const childAgeMonths = 'bulan';
+  static const childSelectedBadge = 'Sedang dipilih';
+  static const childOptionsTooltip = 'Opsi anak';
+  static const childManageHint =
+      'Ketuk kartu untuk memilih anak yang tampil di Beranda.';
+  static const childListLoadError =
+      'Gagal memuat data anak. Periksa koneksi internet kamu, lalu coba lagi.';
+  static const childBirthDateHint = 'Usia 0–60 bulan.';
+  static const childNicknameMaxLength = 'Maksimal 30 karakter.';
+  static const childSaveError =
+      'Gagal menyimpan. Periksa koneksi internet kamu, lalu coba lagi.';
+  static const childNotFound = 'Anak tidak ditemukan.';
+  static String childAvatarSemantics(String key) => 'Avatar $key';
+
+  // ── Tumbuh ─────────────────────────────────────────────────────
+  static const growthTitle = 'Tumbuh';
+  static const growthAddMeasurement = 'Tambah ukuran';
+  static const growthTabLengthHeight = 'Tinggi/Umur';
+  static const growthTabWeight = 'Berat/Umur';
+  static const growthTabWeightHeight = 'Berat/Tinggi';
+  static const growthTabLengthHeightShort = 'Tinggi';
+  static const growthTabWeightShort = 'Berat';
+  static const growthTabWeightHeightShort = 'BB/TB';
+  static const growthTabLengthHeightSemantics =
+      'Grafik tinggi badan menurut umur';
+  static const growthTabWeightSemantics = 'Grafik berat badan menurut umur';
+  static const growthTabWeightHeightSemantics =
+      'Grafik berat badan menurut panjang atau tinggi badan';
+  static const growthHistoryTitle = 'Riwayat pengukuran';
+  static const growthChartTitle = 'Grafik pertumbuhan';
+  static const growthChartCaption = 'Tabel rujukan: Permenkes 2/2020';
+  static const growthLegendBand = 'Rentang wajar';
+  static const growthLegendLimit = 'Batas ±2 SD';
+  static const growthLegendMedian = 'Median';
+  static const growthLegendChild = 'Anak';
+  static const growthLatestWeight = 'Berat terakhir';
+  static const growthLatestHeight = 'Tinggi terakhir';
+  static const growthDeltaSame = 'Sama dengan ukur lalu';
+  static const growthDeltaSince = 'sejak ukur terakhir';
+  static const growthHistoryEmpty = 'Belum ada riwayat pengukuran.';
+  static const growthLoadError =
+      'Gagal memuat pengukuran. Periksa koneksi internet kamu, lalu coba lagi.';
+  static const growthReferenceError =
+      'Tabel rujukan belum bisa dimuat. Periksa koneksi, lalu coba lagi.';
+  static const growthNoChildTitle = 'Belum ada anak';
+  static const growthNoChildBody =
+      'Tambahkan profil anak dulu untuk mulai memantau pertumbuhan.';
+  static const growthNoChildCta = 'Tambah anak';
+  static const growthEditTitle = 'Ubah pengukuran';
+  static const growthSheetHint =
+      'Catat hasil ukur di Posyandu atau timbangan rumah.';
+  static const growthDateLocked = 'Tanggal ukur tidak bisa diubah.';
+  static const growthOptionsTooltip = 'Opsi pengukuran';
+  static const growthDeleteTitle = 'Hapus pengukuran?';
+  static const growthDeleteBody = 'Pengukuran ini akan dihapus permanen.';
+  static const growthViewChart = 'Lihat di grafik';
+  static const growthMeasureWeight = 'Berat (kg)';
+  static const growthMeasureHeightLength = 'Panjang/tinggi (cm)';
+  static const growthMeasureDate = 'Tanggal ukur';
+  static const growthMeasureMode = 'Cara ukur';
+  static const growthMeasureModeLying = 'Terlentang';
+  static const growthMeasureModeStanding = 'Berdiri';
+  static const growthMeasureModeLyingSemantics =
+      'Diukur terlentang (baring)';
+  static const growthMeasureModeStandingSemantics = 'Diukur berdiri';
+  static const growthMeasureNote = 'Catatan (opsional)';
+  static const growthMeasureSave = 'Simpan pengukuran';
+  static const growthMeasureSaved = 'Pengukuran tersimpan';
+  static const growthNoteMaxLength = 200;
+  static const growthNoMeasurementsTitle = 'Belum ada pengukuran';
+  static const growthNoMeasurementsBody =
+      'Ukur berat dan panjang/tinggi anak untuk melihat grafik dan statusnya.';
+  static const growthNoMeasurementsCta = 'Tambah ukuran pertama';
+
+  // ── Validasi ukur (PRD §5.1 skema: 1–30 kg, 35–130 cm, 0–60 bln) ──
+  static const validationWeightRange = 'Berat harus antara 1 dan 30 kg.';
+  static const validationHeightRange = 'Panjang/tinggi harus antara 35 dan 130 cm.';
+  static const validationDateFuture = 'Tanggal ukur tidak boleh di masa depan.';
+  static const validationDateBeforeBirth =
+      'Tanggal ukur tidak boleh sebelum anak lahir.';
+  static const validationAgeRange =
+      'Usia saat ukur di luar 0–60 bulan — remaja tidak bisa dipantau aplikasi ini.';
+  static const validationDuplicateDate =
+      'Sudah ada pengukuran pada tanggal ini. Ubah atau hapus dulu yang lama.';
+  static const validationRequired = 'Wajib diisi.';
+
+  // ── Status ramah (PRD §3.9 + §3.5) ──────────────────────────────
+  static const statusNormalTitle = 'Sesuai umur';
+  static const statusNormalBody =
+      'Pertumbuhan anak sejalan dengan standar untuk umurnya.';
+  static const statusNormalAction = 'Lanjut ukur bulan depan';
+  static const statusBelowTitle = 'Di bawah rata-rata';
+  static const statusBelowBody =
+      'Angkanya di bawah rata-rata untuk umurnya. Ini bukan diagnosis.';
+  static const statusBelowAction = 'Periksakan ke Posyandu atau puskesmas';
+  static const statusAlertTitle = 'Perlu diperiksa segera';
+  static const statusAlertBody =
+      'Sebaiknya anak diperiksa tenaga kesehatan dalam waktu dekat.';
+  static const statusAlertAction = 'Hubungi Posyandu/puskesmas';
+  static const statusAboveTitle = 'Di atas rata-rata';
+  static const statusAboveBody = 'Angkanya di atas rata-rata untuk umurnya.';
+  static const statusAboveAction = 'Konsultasikan pola makan';
+  static const statusOutOfRangeTitle = 'Periksa kembali';
+  static const statusOutOfRangeBody =
+      'Angka ini tampak tidak biasa. Periksa kembali berat dan panjang/tinggi '
+      'yang kamu masukkan.';
+  static const statusDetailTitle = 'Detail angka';
+  static const statusDetailZScore = 'Skor z';
+  static const statusDetailCategory = 'Kategori resmi';
+  static const statusDetailDate = 'Tanggal ukur';
+  static const statusDetailFootnote =
+      'Skor z dihitung dari tabel Permenkes 2/2020.';
+  static const statusViewDetail = 'Lihat detail';
+  static const statusCardTitle = 'Status pertumbuhan';
+  static const statusTrendNeedsAttention =
+      'Berat turun dibanding pengukuran sebelumnya — sebaiknya periksakan.';
+  static const statusTrendTracked = 'Tren sesuai. Lanjutkan pemantauan rutin.';
+  static const statusAddFirst = 'Tambah ukuran';
+
+  // ── Navigasi ───────────────────────────────────────────────────
+  static const navHome = 'Beranda';
+  static const navGrowth = 'Tumbuh';
+
+  // ── Beranda ────────────────────────────────────────────────────
+  static const greetingMorning = 'Selamat pagi';
+  static const greetingNoon = 'Selamat siang';
+  static const greetingEvening = 'Selamat sore';
+  static const greetingNight = 'Selamat malam';
+  static const homeSummaryLabel = 'Ringkasan hari ini';
+  static const homeManageChild = 'Kelola anak';
+  static const homeChangeChild = 'Ganti';
+  static const homeSwitchChildHint =
+      'Pilih anak untuk melihat ringkasannya di Beranda.';
+  static const homeLoadError =
+      'Tidak bisa memuat data. Periksa koneksi internet kamu, lalu coba lagi.';
+  static String homeChildCardSemantics(String nickname, String age) =>
+      '$nickname, $age. Ketuk untuk ganti atau kelola anak.';
+
+  // ── Navigasi lain ──────────────────────────────────────────────
+  static const routeNotFoundTitle = 'Halaman tidak ditemukan';
+  static const routeNotFoundBody =
+      'Alamat ini tidak ada. Kembali ke Beranda, ya.';
+
+  // ── Kategori resmi (PRD §3.4) ───────────────────────────────────
+  static const Map<String, String> officialCategoryHaz = {
+    'very_short': 'Sangat pendek',
+    'short': 'Pendek',
+    'normal': 'Normal',
+    'tall': 'Tinggi',
+  };
+  static const Map<String, String> officialCategoryWaz = {
+    'very_low': 'Berat badan sangat kurang',
+    'low': 'Berat badan kurang',
+    'normal': 'Berat badan normal',
+    'risk_overweight': 'Risiko berat badan lebih',
+  };
+  static const Map<String, String> officialCategoryWhz = {
+    'severe_wasting': 'Gizi buruk',
+    'wasting': 'Gizi kurang',
+    'normal': 'Gizi baik',
+    'risk_over': 'Berisiko gizi lebih',
+    'overweight': 'Gizi lebih',
+    'obese': 'Obesitas',
+  };
+
+  /// Indeks antropometri (tampilan detail).
+  static const hazLabel = 'PB/U – TB/U';
+  static const wazLabel = 'BB/U';
+  static const whzLabel = 'BB/PB – BB/TB';
+  static const statusOutOfRangeShort = 'Di luar rentang wajar';
 }

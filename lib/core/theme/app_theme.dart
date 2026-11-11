@@ -64,6 +64,74 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: colors.background,
       textTheme: textTheme,
       extensions: [colors],
+      appBarTheme: AppBarTheme(
+        backgroundColor: colors.background,
+        surfaceTintColor: Colors.transparent,
+        foregroundColor: colors.textPrimary,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleTextStyle: AppTextStyles.titleLarge.copyWith(
+          color: colors.textPrimary,
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: colors.surface,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: colors.primaryContainer,
+        elevation: 0,
+        height: 68,
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => AppTextStyles.label.copyWith(
+            color: states.contains(WidgetState.selected)
+                ? colors.primary
+                : colors.textSecondary,
+          ),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            size: 24,
+            color: states.contains(WidgetState.selected)
+                ? colors.primary
+                : colors.textSecondary,
+          ),
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: colors.surface,
+        surfaceTintColor: Colors.transparent,
+        modalBackgroundColor: colors.surface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.card),
+          ),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: colors.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        titleTextStyle: AppTextStyles.titleMedium.copyWith(
+          color: colors.textPrimary,
+        ),
+        contentTextStyle: AppTextStyles.bodySmall.copyWith(
+          color: colors.textSecondary,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        side: BorderSide(color: colors.outline, width: 1.5),
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? colors.primary
+              : Colors.transparent,
+        ),
+        checkColor: WidgetStatePropertyAll(colors.onPrimary),
+      ),
       cardTheme: CardThemeData(
         color: colors.surface,
         elevation: 0,
