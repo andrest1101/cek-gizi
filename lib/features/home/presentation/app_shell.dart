@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
+import 'package:cekgizi/core/theme/app_theme.dart';
 
 /// Shell navigasi utama (PRD §6.2): 2 destinasi aktif Batch 4
 /// (Beranda, Tumbuh); destinasi lain menyusul Batch 6–8.
@@ -12,26 +13,32 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: colors.outline, width: 1)),
         ),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: AppStrings.navHome,
+        child: NavigationBar(
+          selectedIndex: navigationShell.currentIndex,
+          onDestinationSelected: (index) => navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
           ),
-          NavigationDestination(
-            icon: Icon(Icons.show_chart_rounded),
-            selectedIcon: Icon(Icons.show_chart_rounded),
-            label: AppStrings.navGrowth,
-          ),
-        ],
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded),
+              label: AppStrings.navHome,
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.show_chart_rounded),
+              selectedIcon: Icon(Icons.show_chart_rounded),
+              label: AppStrings.navGrowth,
+            ),
+          ],
+        ),
       ),
     );
   }
