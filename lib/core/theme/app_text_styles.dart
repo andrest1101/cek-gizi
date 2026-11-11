@@ -18,6 +18,15 @@ abstract final class AppTextStyles {
     fontFeatures: [FontFeature.tabularFigures()],
   );
 
+  /// Angka metrik kartu: "8,2 kg" (26/32, w700, tabular figures).
+  static const TextStyle metricNumber = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 26,
+    height: 32 / 26,
+    fontWeight: FontWeight.w700,
+    fontFeatures: [FontFeature.tabularFigures()],
+  );
+
   /// Judul layar (22/28, w700).
   static const TextStyle titleLarge = TextStyle(
     fontFamily: fontFamily,
