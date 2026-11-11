@@ -170,6 +170,16 @@ final class PermenkesReferenceTables implements AnthropometryReferenceTables {
 
   String _sexKey(Sex sex) => sex == Sex.male ? 'male' : 'female';
 
+  /// Informasi rentang tabel WHZ (start, step, jumlah baris) — untuk grafik.
+  @override
+  ({double start, double step, int length}) whzTableInfo({
+    required Sex sex,
+    required int ageMonths,
+  }) {
+    final table = _whz[_sexKey(sex)]![ageMonths < 24 ? 'pb' : 'tb']!;
+    return (start: table.start, step: table.step, length: table.rows.length);
+  }
+
   @override
   SdColumns haz({required Sex sex, required int ageMonths}) {
     if (ageMonths < 0 || ageMonths > 60) {

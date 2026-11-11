@@ -20,6 +20,12 @@ abstract interface class AnthropometryReferenceTables {
     required double lengthHeightCmStep,
     required int ageMonths,
   });
+
+  /// Rentang tabel WHZ (start, step, jumlah baris) — dipakai grafik.
+  ({double start, double step, int length}) whzTableInfo({
+    required Sex sex,
+    required int ageMonths,
+  });
 }
 
 /// Pembulatan panjang/tinggi ke baris step 0,5 (PRD §3.3: PB/BB per 0,5 cm).
