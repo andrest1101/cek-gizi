@@ -175,6 +175,36 @@ Kode Batch 2 selesai & terverifikasi analyze/test; **uji RLS = Success (lulus, 2
 - Peninjauan konten gizi oleh ahli gizi/bidan (`reviewed_by`/`reviewed_on` di isi `nutrition_rules.json`) — PRD §9.1/§13.
 - Verifikasi OWNER terhadap tabel Permenkes + sel cacat — PRD §13.
 
+## Batch 4 — Anak & Pertumbuhan (2026-11-11)
+
+### Dependency baru (alasan, PRD constraint #5)
+- `flutter_riverpod ^3.3.2` — state management wajib (PRD/AGENTS).
+- `go_router ^17.0.0` — navigasi wajib (PRD §4).
+- `fl_chart` → **0.71.0** (bukan 1.x!) — Flutter SDK mem-pin `vector_math: 2.1.4` (flutter & flutter_test); fl_chart ≥1.1 memakai API `Matrix4.translateByDouble` yang tidak ada di 2.1.4 → gagal kompilasi. 0.71.0 kompatibel & tetap sesuai PRD.
+- `shared_preferences ^2.5.3` — flag lokal onboarding/consent (offline-safe). Transitif via supabase_flutter; dinyatakan eksplisit karena diimpor langsung.
+
+### Perubahan
+1. **App shell & routing** (`lib/core/router.dart`, `lib/app.dart`, `lib/main.dart`): `StatefulShellRoute.indexedStack` (Beranda, Tumbuh) + redirect gate onboarding → consent → app (PRD §6.1/§6.2). `LocalPrefs` (flag lokal), tema light/dark, `ProviderScope` di main.
+2. **Onboarding** (3 slide: nilai produk, tumbuh dalam konteks, pendamping bukan dokter; CTA Lewati/Mulai) + **Consent** (PRD §8.3: tujuan, data yang dikumpulkan, hak pengguna, disclaimer; checkbox wajib; tersimpan ke `user_consents` via `ConsentRepositoryImpl` + flag lokal).
+3. **Profil anak** (`features/children/`): entity + repository Supabase (tabel `children`, RLS) — CRUD; batas maksimal 5 (use case `ChildUseCases`); layar kelola (tambah/ubah/hapus + konfirmasi hapus); avatar katalog 8 ilustrasi (`AvatarCatalog`, tanpa foto asli); switch anak di Beranda.
+4. **Tambah/Edit ukuran** (`add_measurement_sheet.dart`): tanggal (batas 0–60 bln & tidak sebelum lahir), berat 1–30 kg, tinggi 35–130 cm, cara ukur default menurut usia, catatan ≤200, validasi ganda (form + domain `MeasurementEvaluator`), gagal simpan → pesan ramah; setelah simpan → dialog hasil (z-score + kategori resmi).
+5. **Kartu status** (`growth_status_card.dart`): status terburuk dari HAZ/WAZ/WHZ (nada PRD §3.9), tanggal, tren (GrowthTrendEvaluator), out-of-range → peringatan tanpa klasifikasi (PRD §3.5); tombol "Lihat detail" → sheet nilai z + kategori + tanggal; "Tambah ukuran".
+6. **Grafik pita SD** (`growth_chart.dart`, fl_chart): 3 tab Tinggi/Umur, Berat/Umur, Berat/Tinggi; pita −2…+1 (PB/U s.d. +3) hijau lembut, di luarnya kuning/merah lembut (PRD §6.5); median tegas; garis anak + titik; Semantics label; mode PB/TB dipilih by usia.
+7. **Z-score pada simpan**: dihitung di Domain (`SaveMeasurement`) dengan koreksi 0,7 cm, rumus §3.3, bounds §3.5 → kolom `haz/waz/whz/status_*` + `ref_version` (`permenkes-2-2020`) disimpan.
+8. **Beranda** (`features/home/`): switch anak (bottom sheet), Kartu Status Tumbuh, empty state "Belum ada anak" + CTA. Token galeri Batch 1 digantikan shell ini (galeri tetap di `lib/shared/dev/` sebagai dev tool).
+
+### Verifikasi (2026-11-11)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **139/139 passed** (termasuk alur penuh: FAB → sheet → validasi inline → valid → dialog hasil → tab Tumbuh → tile riwayat; boot routing onboarding/Beranda; fakes in-memory — tanpa jaringan).
+- DoD §10.1: gradien 0; `Colors.` di features/shared hanya `Colors.transparent`; `GEMINI_API_KEY=<literal>` 0.
+
+### Belum terverifikasi (butuh kamu)
+- **Alur penuh di perangkat nyata dengan Supabase produksi** (PRD Batch 4: "Alur ukur sampai status benar di perangkat nyata"): onboarding → consent (consent tersimpan di `user_consents`) → tambah anak → tambah ukuran → kartu status & grafik; hapus anak (cascading ke `growth_measurements`); RLS dua user (sudah teruji di Batch 2).
+- Keputusan akhir visual chart (bisa disesuaikan saat review di device).
+
+### Status
+Batch 4 SELESAI (kode & test hijau). Menunggu verifikasi device & perintah lanjut ke Batch 5 (edge function analyze-meal + scanner — butuh keputusan Cloud Billing, PRD §13.3).
+
 ## Batch 3 — Domain Gizi (dimulai 2026-11-10, tabel Permenkes SELESAI 2026-11-11)
 
 ## Batch 3 — Domain Gizi (dimulai 2026-11-10, sebagian SELESAI)

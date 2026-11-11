@@ -38,6 +38,13 @@ final class _FakeTables implements AnthropometryReferenceTables {
     lastAgeMonths = ageMonths;
     return _fixture;
   }
+
+  @override
+  ({double start, double step, int length}) whzTableInfo({
+    required Sex sex,
+    required int ageMonths,
+  }) =>
+      (start: 45.0, step: 0.5, length: 131);
 }
 
 const _male = Sex.male;

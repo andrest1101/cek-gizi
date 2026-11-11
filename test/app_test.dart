@@ -1,29 +1,95 @@
-import 'package:cekgizi/app.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:cekgizi/app.dart';
+import 'package:cekgizi/core/constants/app_strings.dart';
+import 'package:cekgizi/core/router.dart';
+import 'package:cekgizi/core/storage/local_prefs.dart';
+import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
+import 'package:cekgizi/features/growth/presentation/providers/growth_providers.dart';
+
+import 'fakes.dart';
+
+Future<LocalPrefs> _prefs(Map<String, Object> values) async {
+  SharedPreferences.setMockInitialValues(values);
+  return LocalPrefs.load();
+}
 
 void main() {
-  testWidgets('App boots and renders token gallery', (
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('first launch shows onboarding, Lewati goes to consent', (
     tester,
   ) async {
-    await tester.pumpWidget(const CekGiziApp());
+    final prefs = await _prefs({});
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localPrefsProvider.overrideWithValue(prefs),
+          childRepositoryProvider.overrideWithValue(FakeChildRepository()),
+          growthRepositoryProvider.overrideWithValue(FakeGrowthRepository()),
+          permenkesTablesProvider.overrideWith((ref) => Future.value(const FakeAnthropometryTables())),
+        ],
+        child: const CekGiziApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-    expect(find.text('Token Galeri (Batch 1)'), findsOneWidget);
-    expect(find.text('Tema Light'), findsOneWidget);
-    expect(find.text('Tema Dark'), findsOneWidget);
+    expect(find.text(AppStrings.onboardingTitle1), findsOneWidget);
+
+    await tester.tap(find.text(AppStrings.onboardingSkip));
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.consentTitle), findsOneWidget);
   });
 
-  testWidgets('Gallery renders all token sections in both themes', (
+  testWidgets('Beranda shows empty state when no children yet', (
     tester,
   ) async {
-    await tester.pumpWidget(const CekGiziApp());
+    final prefs =
+        await _prefs({'onboarding_completed': true, 'consent_version_accepted': '1'});
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localPrefsProvider.overrideWithValue(prefs),
+          childRepositoryProvider.overrideWithValue(FakeChildRepository([])),
+          growthRepositoryProvider.overrideWithValue(FakeGrowthRepository()),
+          permenkesTablesProvider.overrideWith((ref) => Future.value(const FakeAnthropometryTables())),
+        ],
+        child: const CekGiziApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-    // Section headers render once per theme preview (Light + Dark).
-    expect(find.text('Warna'), findsNWidgets(2));
-    expect(find.text('Tipografi'), findsNWidgets(2));
-    expect(find.text('Spacing (4pt)'), findsNWidgets(2));
-    expect(find.text('Radius'), findsNWidgets(2));
-    expect(find.text('Motion'), findsNWidgets(2));
-    expect(find.text('Tombol'), findsNWidgets(2));
-    expect(find.text('Komponen'), findsNWidgets(2));
+    expect(find.text(AppStrings.childEmptyTitle), findsOneWidget);
+    expect(find.text(AppStrings.childEmptyCta), findsOneWidget);
+  });
+
+  testWidgets('Beranda shows normal status card with a measurement', (
+    tester,
+  ) async {
+    final child = fakeChild();
+    final prefs =
+        await _prefs({'onboarding_completed': true, 'consent_version_accepted': '1'});
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localPrefsProvider.overrideWithValue(prefs),
+          childRepositoryProvider.overrideWithValue(FakeChildRepository([child])),
+          growthRepositoryProvider.overrideWithValue(
+            FakeGrowthRepository([
+              fakeMeasurement(id: 'm1', childId: child.id),
+            ]),
+          ),
+          permenkesTablesProvider.overrideWith((ref) => Future.value(const FakeAnthropometryTables())),
+        ],
+        child: const CekGiziApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.statusNormalTitle), findsWidgets);
+    expect(find.text(AppStrings.statusViewDetail), findsOneWidget);
+    expect(find.text(AppStrings.statusAddFirst), findsWidgets);
   });
 }
