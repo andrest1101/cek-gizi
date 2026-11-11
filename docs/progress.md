@@ -63,3 +63,117 @@ Rencana batch berikutnya (setiap penambahan akan dicatat di sini):
 
 ### Status
 Batch 0 SELESAI. Menunggu perintah lanjut ke Batch 1 (Tema).
+
+## Batch 1 — Tema (2026-11-10)
+
+### Perubahan
+1. **Font ter-bundle (PRD §7.3):** Plus Jakarta Sans Regular/Medium/SemiBold/Bold (400/500/600/700) diunduh dari repo resmi Tokotype (`tokotype/PlusJakartaSans`) dan disertakan dengan lisensi OFL (`assets/fonts/OFL.txt`). Dideklarasikan di `pubspec.yaml` (family `PlusJakartaSans`).
+2. **Token §7.2 — `AppColors` `ThemeExtension`** (`lib/core/theme/app_colors.dart`): light & dark sesuai PRD, termasuk pemisahan `statusWatch` (isi) vs `statusWatchText` (teks, light `#8A5A12`). `copyWith`/`lerp` lengkap.
+3. **Token §7.3 — `AppTextStyles`** (`lib/core/theme/app_text_styles.dart`): heroNumber 28/34 w700, titleLarge 22/28 w700, titleMedium 17/24 w600, body/bodyTabular 16/24, bodySmall 14/20, label 13/16 w500. `FontFeature.tabularFigures()` untuk angka. Style tanpa warna (warna dari theme).
+4. **Token §7.4 —** `AppSpacing` (skala 4pt: 4/8/12/16/20/24/32 + `screenPadding` 20 + `sectionGap` 28), `AppRadius` (control 12 / card 20 / pill 999), `AppMotion` (fast 200ms, normal 250ms, ring 400ms, `easeOutCubic`).
+5. **`AppTheme.light()/dark()`** (`lib/core/theme/app_theme.dart`): `ColorScheme` M3 dari seed primer + override token PRD (`surfaceContainerHighest` = `surfaceVariant`, dsb.); `TextTheme` PlusJakartaSans dengan ukuran PRD; `CardThemeData` hairline border radius 20 tanpa elevation (PRD §7.4); `FilledButton`/`OutlinedButton` minimum 48dp radius 12; `InputDecorationTheme` hairline radius 12; `DividerTheme` hairline 1px. Helper `AppTheme.colorsOf(context)`.
+6. **Komponen dasar** (`lib/shared/widgets/`): `TonalIconCircle`, `SectionHeader`, `EmptyState`, `ErrorCard` — semua tanpa literal warna, dengan `Semantics` dan copy dari `AppStrings` (§6.9: satu kalimat + satu tombol; tombol ≥48dp).
+7. **Layar uji token** (`lib/shared/dev/token_gallery_screen.dart`): menampilkan SEMUA token warna (14), tipografi (7 style), spacing, radius, motion, tombol, dan komponen dasar di **kedua tema** (di-render dua preview side-by-side vertical via `Theme` override). Developer tool — akan diganti Beranda asli di Batch 4.
+8. **AppStrings**: tambah `retry` dan `errorTitle`.
+9. **Tidak ada dependency baru.**
+
+### Verifikasi (2026-11-10)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **10/10 passed** (boot galeri, section token kedua tema, unit test `AppTheme`/`AppColors`/spacing/radius).
+- DoD §10.1: `LinearGradient|RadialGradient|SweepGradient` di `lib/` → 0; `Colors.` di `lib/features` & `lib/shared` → 0 (galeri dev membaca token lewat `extension<AppColors>()` di dalam preview tema, bukan literal); `GEMINI_API_KEY=<literal>` → 0.
+
+### Catatan teknis
+- Grep DoD PRD `Colors\.` juga cocok pada substring `AppColors.` — dev galeri sengaja membaca token via `Theme` extension; sisa referensi `AppColors` hanya di `lib/core` dan `test/` (di luar scope grep PRD).
+- Ikon memakai varian **Rounded bawaan Flutter** (`Icons.*_rounded`) — bundling font Material Symbols Rounded belum dilakukan (akan diputuskan bila diperlukan Batch 4+, dicatat di sini).
+- `TokenGalleryScreen` masuk Batch 4: digantikan Beranda; galeri tetap sebagai dev tool.
+
+### Status
+Batch 1 SELESAI. Menunggu perintah lanjut ke Batch 2 (Supabase).
+
+## Batch 2 — Supabase (2026-11-10)
+
+### Konteks
+- Project Supabase: `hvjqjjqgwpmpqnchnxts` (URL: `https://hvjqjjqgwpmpqnchnxts.supabase.co` — **tanpa** `/rest/v1/`, path itu ditambahkan SDK otomatis).
+- Publishable key dipakai sebagai default di `AppConfig` (publik, dilindungi RLS; keputusan pemilik 2026-11-10). Kunci service_role/secret TIDAK PERNAH masuk repo/aplikasi.
+- Anonymous Sign-Ins **sudah aktif** di dashboard (konfirmasi pemilik).
+- CLI Supabase & Docker TIDAK tersedia di mesin dev → migrasi diterapkan manual oleh pemilik via **SQL Editor** (opsi B yang disetujui pemilik). Source of truth skema tetap file di `supabase/migrations/`.
+
+### Perubahan (kode — sudah dikerjakan & terverifikasi)
+1. Edge Function `health` ditulis (`supabase/functions/health/index.ts`; tanpa auth; roundtrip query ke tabel `ai_usage` sebagai "select 1"; 500/503 bila down) + `supabase/config.toml` (`project_id`, `verify_jwt = false` untuk health). **Deploy manual diperlukan** (lihat di bawah).
+2. `supabase_flutter ^2.15.4` ditambahkan — alasan: backend client resmi PRD §4 (Supabase Auth + Postgrest + Edge Functions); dependency baru pertama untuk data layer.
+3. Migrasi di `supabase/migrations/` (source of truth, dari PRD §5.2–5.4):
+   - `20261111000001_schema.sql` — 6 tabel (`children`, `growth_measurements`, `food_logs`, `chat_messages`, `user_consents`, `ai_usage`) + CHECK constraints, FK `on delete cascade`/`set null`, `unique(child_id, measured_on)`, index.
+   - `20261111000002_rls.sql` — RLS semua tabel; policy `own rows` (user = `authenticated` termasuk anonim); untuk tabel ber-`child_id`, WITH CHECK juga memverifikasi anak milik user; `chat_messages` mengizinkan `child_id NULL`; `ai_usage` read-only untuk user (tulis hanya `service_role`).
+   - `20261111000003_quota.sql` — `public.consume_ai_quota(p_user, p_kind, p_limit)` SECURITY DEFINER, hari = `Asia/Jakarta`, atomic increment dengan limit; REVOKE dari public/anon/authenticated; GRANT hanya `service_role`.
+   - `20261111000004_grants.sql` — GRANT tabel ke `authenticated` (CRUD, tapi `ai_usage` SELECT-only) & `service_role`; tanpa ini RLS tidak pernah dievaluasi (error 42501 saat uji pertama).
+4. Script uji RLS dua pengguna: `supabase/tests/test_rls.sql` — transaksi + `rollback` di akhir; "dua pengguna" disimulasikan lewat `request.jwt.claims`; memverifikasi: A bisa CRUD sendiri; B tidak bisa select/update/delete/insert lintas anak (anak, growth, food_logs, chat, consents); chat `child_id NULL` diizinkan; kuota berhenti di limit (2) dan menolak kind tidak valid; dipanggil sebagai `service_role`.
+5. Integrasi app: `Supabase.initialize()` di `main.dart` (URL + publishable key via `String.fromEnvironment`, default = nilai publik; override `--dart-define`); `AuthRepository` (abstrak, domain) + `AuthRepositoryImpl` (`supabase_flutter`) + use case `SignInAnonymously`; `auth_bootstrap.dart` — login anonim otomatis saat boot, kegagalan jaringan ditelan (offline tetap terbuka; retry di UI Batch 4+).
+
+### Verifikasi (2026-11-10, mesin dev)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **12/12 passed** (termasuk unit test `AuthRepositoryImpl` tanpa jaringan).
+- DoD §10.1: `Colors.` di `lib/features` & `lib/shared` → 0; gradien → 0; `GEMINI_API_KEY=<literal>` → 0.
+
+### Perbaikan pasca-uji (2026-11-10, error 42501)
+- Uji RLS pertama di SQL Editor gagal: `42501: permission denied for table children` — hak akses tabel untuk role `authenticated` tidak otomatis diberikan untuk tabel yang dibuat lewat SQL Editor. **Bukan bug RLS**: tanpa GRANT, RLS tidak pernah dievaluasi.
+- Ditambahkan `20261111000004_grants.sql`: GRANT CRUD ke `authenticated` (CRUD data miliknya — RLS yang menyaring), `GRANT SELECT` saja di `ai_usage`, `GRANT ALL` ke `service_role`.
+- **ATURAN BARU untuk semua migrasi berikutnya: setiap migrasi yang membuat tabel WAJIB menyertakan GRANT untuk `authenticated`/`service_role` di file yang sama.**
+- Popup "Potential issue detected" di SQL Editor adalah peringatan standar untuk statement seperti DELETE/UPDATE/rollback — skrip uji aman (transaksi + `rollback` di akhir); klik "Run query" untuk melanjutkan.
+
+### Verifikasi RLS oleh pemilik (progres)
+- Anonymous Sign-In **terbukti aktif**: uid `f6c5d8e8-793f-4857-911d-b8276fb8488c` muncul di Authentication → Users setelah `flutter run` di Windows.
+- Uji pertama gagal `42501 ... permission denied for table children` → diperbaiki dengan `20261111000004_grants.sql`.
+- Uji kedua gagal `23503 ... Key is not present in table "users"` → UUID palsu tidak boleh; skrip diubah memakai UID asli pemilik (prefilled, bukan rahasia).
+- Uji ketiga gagal `42501 ... permission denied for table rls_test` → temp table dibuat sebagai `authenticated` sehingga tidak bisa dibaca `service_role`; **skrip ditulis ulang tanpa temp table** (semua UUID literal; anak A pakai id eksplisit `cccccccc-...`). Section kuota (`service_role`) kini self-contained.
+- Menunggu pemilik menjalankan ulang `supabase/tests/test_rls.sql` → semua notice PASS.
+
+### Langkah tersisa untuk pemilik
+1. Jalankan ulang `supabase/tests/test_rls.sql` di SQL Editor (klik **Run query** bila popup muncul) — semua notice PASS tanpa ERROR; jika lulus, Batch 2 resmi selesai.
+2. **Deploy `health`** (bila diinginkan sekarang): dashboard Edge Functions (tempel `index.ts`, Verify JWT = OFF) atau CLI: `npx supabase login` → `npx supabase link --project-ref hvjqjjqgwpmpqnchnxts` → `npx supabase functions deploy health`. Tes: `curl.exe https://hvjqjjqgwpmpqnchnxts.supabase.co/functions/v1/health` → `{"status":"ok"}`.
+3. Anonymous sign-in sudah terbukti (user anonim `f6c5d8e8-...` muncul di Authentication → Users).
+
+### Catatan
+- Keep-alive & backup terjadwal = Batch 9 (PRD §5.6), belum sekarang.
+- `delete-account` & `ask-nutrition`/`analyze-meal` = Batch 9 / 5 & 7.
+- Batas kuota default (`SCAN_DAILY_LIMIT=15`, `CHAT_DAILY_LIMIT=30`) = env di Edge Function saat Batch 5/7, bukan di klien.
+
+### Status
+Kode Batch 2 selesai & terverifikasi analyze/test; **uji RLS = Success (lulus, 2026-11-10)**; anonymous sign-in terbukti bekerja. Batch 2 SELESAI (sisa opsional: deploy `health`).
+
+## Batch 3 — Domain Gizi (dimulai 2026-11-10, sebagian SELESAI)
+
+### Perubahan (bagian yang tidak bergantung pada isi tabel)
+Logic PRD §3.1–3.8, Dart murni, tanpa Flutter, 100% unit-tested:
+1. `lib/core/errors/domain_exceptions.dart` — sealed domain exceptions (`OutOfSupportedRangeException`, `InvalidMeasurementException`, `InvalidReferenceDataException`).
+2. Entities: `Sex`, `MeasureMode`, `AnthropometryIndex`, `SdColumns`, `ZScoreResult` (statusCode null bila out-of-range), `GrowthMeasurementPoint`.
+3. `services/age_calculator.dart` — usia bulan penuh; di luar 0–60 → exception; sebelum lahir → exception.
+4. `services/measure_correction.dart` — koreksi 0,7 cm (PRD §3.2).
+5. `services/z_score.dart` — rumus SD Permenkes (PRD §3.3); pembagi nol → `InvalidReferenceDataException`.
+6. `services/growth_classification.dart` — kategori HAZ/WAZ/WHZ (PRD §3.4, batas inklusif/eksklusif persis) + tolak klasifikasi di luar rentang (PRD §3.5: HAZ ±6, WAZ −6..+5, WHZ −5..+5 → `isOutOfRange`, statusCode null).
+7. `services/growth_evaluator.dart` — orkestrasi: koreksi → cari baris → z → klasifikasi (HAZ terkoreksi, WAZ tidak, WHZ terkoreksi).
+8. `repositories/anthropometry_reference_tables.dart` — kontrak `AnthropometryReferenceTables` + `LengthHeightStep` (half-up 0,5 cm).
+9. `services/growth_trend_evaluator.dart` — tren (PRD §3.6): berat turun → `needsAttention/weight_drop`; HAZ memburuk → `haz_worsened`; <2 data → `insufficientData`.
+10. `chat/.../red_flag_checker.dart` — red flag (PRD §3.8): emergency (kejang/sesak/tersedak/biru) & referDoctor; cek emergency dulu; lowercase-insensitive.
+11. `meals/.../dietary_diversity.dart` — 8 kelompok (kode PRD), union kelompok per hari, `DiversityProfile` (mpasi_6_23 ≥5/8, balita_24_59 ≥5/7 tanpa ASI), flag protein hewani, validasi kode; **target TIDAK dihardcode — diterima sebagai parameter dari `nutrition_rules.json`**; `isScanSupportedForAge` (≥6 bln).
+12. Unit test: 62 test baru (total **73 passed**), termasuk mekanisme koreksi/pembagi/step via fixture **PALSU yang ditandai eksplisit — bukan nilai Permenkes**.
+
+### Verifikasi (2026-11-10)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **73/73 passed**
+- DoD §10.1: jaw "Colors." di features → 0; gradien → 0.
+
+### MENUNGGU PEMILIK (blocker Batch 3 — nilai tabel)
+1. **Tabel SD Permenkes 2/2020** — format apa pun (PDF/CSV/Excel/foto tabel); konversi ke `assets/reference/permenkes_2_2020_sd.json` sesuai spesifikasi di `docs/reference-notes.md` (urutan kolom −3 −2 −1 median +1 +2 +3; haz/waz per bulan; whz step 0,5 half-up). **Aku DILARANG mengetik ulang nilai dari ingatan.**
+2. **`nutrition_rules.json`** — (a) file ditinjau ahli gizi/bidan, atau (b) seed Lampiran A PRD bertanda `reviewed_by=null`. Loader JSON belum ditulis (menunggu file).
+3. Setelah tabel ada: verifikasi z-score 30 kasus (selisih ≤ 0,01; kolom −2 SD ≈ −2,00; median = 0) + rekonsiliasi terhadap WHO Anthro (PRD §9.2/9.3).
+
+### Catatan
+- `DietaryDiversity` tidak menyimpan target di kode; angka 5/8, 5/7, dan tips hanya boleh dari `nutrition_rules.json`.
+- Scanner <6 bulan dinonaktifkan (`isScanSupportedForAge`); kartu "ASI eksklusif" menyusul di UI (Batch 5/6).
+
+### MENUNGGU PEMILIK (blocker Batch 3)
+1. **Tabel SD Permenkes 2/2020** — format apa pun (PDF/CSV/Excel/foto); aku konversi ke `assets/reference/` sesuai spec di `docs/reference-notes.md`. Aku DILARANG mengetik ulang nilai tabel dari ingatan.
+2. **`nutrition_rules.json`** — boleh (a) file yang sudah ditinjau ahli gizi/bidan, atau (b) contoh Lampiran A PRD sebagai seed bertanda `reviewed_by=null` sampai ditinjau.
+
+### Status
+Domain inti terbangun + unit test hijau; nilai tabel & loader `nutrition_rules.json` menunggu file dari pemilik.
