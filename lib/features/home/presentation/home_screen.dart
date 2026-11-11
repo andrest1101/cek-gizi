@@ -10,6 +10,8 @@ import 'package:cekgizi/core/utils/greeting.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/growth_status_card.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/piring_hero_card.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/piring_tips_card.dart';
 import 'package:cekgizi/shared/widgets/child_switcher.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
@@ -65,7 +67,11 @@ class HomeScreen extends ConsumerWidget {
                     children: [
                       ChildSwitcherCard(),
                       SizedBox(height: AppSpacing.lg),
+                      PiringHeroCard(),
+                      SizedBox(height: AppSpacing.lg),
                       GrowthStatusCard(),
+                      SizedBox(height: AppSpacing.lg),
+                      PiringTipsCard(),
                     ],
                   );
                 },
@@ -138,6 +144,8 @@ class _HomeSkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Skeleton(height: 84),
+        SizedBox(height: AppSpacing.lg),
+        Skeleton(height: 280),
         SizedBox(height: AppSpacing.lg),
         Skeleton(height: 236),
       ],
