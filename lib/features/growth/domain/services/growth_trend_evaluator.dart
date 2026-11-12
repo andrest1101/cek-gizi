@@ -13,14 +13,14 @@ final class GrowthTrendResult {
   final GrowthTrend trend;
 
   /// 'weight_drop' | 'haz_worsened' | null (bukan diagnosis; hanya ajakan
-  /// memeriksakan ke Posyandu/puskesmas — copy ramah di AppStrings §3.9).
+  /// memeriksakan ke Posyandu/puskesmas - copy ramah di AppStrings §3.9).
   final String? reasonCode;
 }
 
 /// Tren pertumbuhan: minimal 2 pengukuran (PRD §3.6).
 ///
 /// "perlu perhatian" bila berat turun / tidak naik dibanding pengukuran
-/// sebelumnya, atau kategori HAZ memburuk. Copy bersifat ajakan — bukan
+/// sebelumnya, atau kategori HAZ memburuk. Copy bersifat ajakan - bukan
 /// vonis diagnosis.
 abstract final class GrowthTrendEvaluator {
   const GrowthTrendEvaluator._();

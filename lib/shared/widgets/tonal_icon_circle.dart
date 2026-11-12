@@ -18,7 +18,7 @@ class TonalIconCircle extends StatelessWidget {
 
   final IconData icon;
 
-  /// Label untuk pembaca layar (PRD §7.7) — wajib, jangan kosong.
+  /// Label untuk pembaca layar (PRD §7.7) - wajib, jangan kosong.
   final String iconSemantics;
 
   final double size;

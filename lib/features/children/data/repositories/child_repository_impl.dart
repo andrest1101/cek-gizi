@@ -5,7 +5,7 @@ import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/domain/repositories/child_repository.dart';
 import 'package:cekgizi/features/growth/domain/entities/sex.dart';
 
-/// CRUD anak di Supabase (tabel `children`, RLS aktif — PRD §5.3).
+/// CRUD anak di Supabase (tabel `children`, RLS aktif - PRD §5.3).
 /// Penolakan oleh RLS dibiarkan muncul sebagai galat server (ditangani UI).
 final class ChildRepositoryImpl implements ChildRepository {
   const ChildRepositoryImpl(this._client);

@@ -17,7 +17,7 @@ import 'package:cekgizi/shared/widgets/skeleton.dart';
 ///
 /// Pita: −3…−2 SD & +2…+3 SD kuning lembut, −2…+1 SD (PB/U: +3) hijau
 /// lembut. Garis ±2 SD putus-putus, median solid, baris anak hijau tua.
-/// Warna tidak pernah jadi sinyal tunggal — legenda teks ada di kartu.
+/// Warna tidak pernah jadi sinyal tunggal - legenda teks ada di kartu.
 class GrowthChart extends ConsumerWidget {
   const GrowthChart({
     super.key,

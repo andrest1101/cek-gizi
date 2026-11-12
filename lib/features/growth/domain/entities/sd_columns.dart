@@ -1,7 +1,7 @@
 /// Kolom SD satu baris tabel referensi Permenkes 2/2020.
 ///
 /// `median`, `sdNeg1`, `sdPos1` wajib ada (dipakai rumus z PRD §3.3).
-/// Kolom −3, −2, +2, +3 bersifat rujukan — nullable karena SATU sel di PDF
+/// Kolom −3, −2, +2, +3 bersifat rujukan - nullable karena SATU sel di PDF
 /// resmi tercetak tidak lengkap (whz_tb_female, panjang 69,5 cm, kolom −3 SD
 /// tercetak "6."; didokumentasikan di docs/reference-notes.md). Kolom luar
 /// tidak pernah dipakai rumus z.
@@ -16,12 +16,12 @@ final class SdColumns {
     this.sdPos3,
   });
 
-  /// −1 SD — wajib (pembagi bawah).
+  /// −1 SD - wajib (pembagi bawah).
   final double sdNeg1;
 
   final double median;
 
-  /// +1 SD — wajib (pembagi atas).
+  /// +1 SD - wajib (pembagi atas).
   final double sdPos1;
 
   final double? sdNeg3;

@@ -107,7 +107,7 @@ class _HomeHeader extends ConsumerWidget {
     final childName = selectedChild?.nickname;
     // Berlangganan data catatan hari ini: saat resume/tengah malam
     // (lihat `TodayWatcher`), header ini ikut dibangun ulang dengan tanggal
-    // yang benar. Tidak memicu jaringan tambahan — provider yang sama.
+    // yang benar. Tidak memicu jaringan tambahan - provider yang sama.
     if (selectedChild != null) {
       ref.watch(foodLogsProvider(selectedChild.id));
     }
@@ -147,7 +147,7 @@ class _HomeHeader extends ConsumerWidget {
         IconButton.filledTonal(
           tooltip: AppStrings.homeManageChild,
           onPressed: () => context.push('/children'),
-          icon: const Icon(Icons.tune_rounded, size: 21),
+          icon: const Icon(Icons.manage_accounts_rounded, size: 21),
         ),
       ],
     );

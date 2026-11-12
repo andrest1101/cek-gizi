@@ -19,7 +19,7 @@ void main() {
       );
       final radius = (size - stroke) / 2;
       final gapDp = gap * math.pi / 180 * radius;
-      // (stroke + 4dp) — jarak yang terlihat tetap ±4dp setelah round cap.
+      // (stroke + 4dp) - jarak yang terlihat tetap ±4dp setelah round cap.
       expect(gapDp, closeTo(stroke + 4, 0.01));
       // Busur tetap terbaca (tidak hilang karena celah).
       expect(360 / 8 - gap, greaterThan(20));

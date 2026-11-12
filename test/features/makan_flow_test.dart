@@ -93,7 +93,7 @@ void main() {
       await _scrollTo(tester, find.text(AppStrings.makanDiaryEmpty));
       expect(find.text(AppStrings.makanDiaryEmpty), findsOneWidget);
 
-      // Catat "Makanan pokok" — sekali tap langsung tersimpan.
+      // Catat "Makanan pokok" - sekali tap langsung tersimpan.
       await _scrollTo(tester, find.text(AppStrings.groupGrainsTubersShort));
       await tester.tap(find.text(AppStrings.groupGrainsTubersShort));
       await tester.pumpAndSettle();
@@ -218,7 +218,7 @@ void main() {
       ],
     );
 
-    // Tips tampil (satu tips dari aturan palsu) — di bawah lipatan → scroll beranda.
+    // Tips tampil (satu tips dari aturan palsu) - di bawah lipatan → scroll beranda.
     await _scrollTo(
       tester,
       find.text(AppStrings.tipTitle),
@@ -252,7 +252,7 @@ void main() {
       await tester.tap(find.text(AppStrings.groupGrainsTubersShort));
       await tester.pumpAndSettle();
 
-      // Bukan catatan baru — tawaran menghapus.
+      // Bukan catatan baru - tawaran menghapus.
       expect(
         find.text(
           AppStrings.makanGroupAlreadyLogged(AppStrings.groupGrainsTubers),

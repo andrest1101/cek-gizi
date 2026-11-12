@@ -5,7 +5,7 @@ import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/status_copy.dart';
 
-/// Pill status (PRD §7.2: warna status tidak pernah sinyal tunggal —
+/// Pill status (PRD §7.2: warna status tidak pernah sinyal tunggal -
 /// selalu disertai ikon dan teks).
 class StatusPill extends StatelessWidget {
   const StatusPill({

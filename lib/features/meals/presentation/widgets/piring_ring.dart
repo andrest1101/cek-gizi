@@ -12,11 +12,11 @@ import 'package:cekgizi/features/meals/domain/services/dietary_diversity.dart';
 ///
 /// Busur menyala = kelompok terisi hari ini; busur protein hewani yang
 /// menyala memakai `accent`; busur yang belum terisi = `surfaceVariant`.
-/// Warna tidak pernah menjadi sinyal tunggal — label/teks di sebelahnya
+/// Warna tidak pernah menjadi sinyal tunggal - label/teks di sebelahnya
 /// selalu ada (PRD §7.2).
 ///
 /// Hanya dipakai pada ukuran besar (hero Beranda). Pada ukuran kecil
-/// (≤ 60dp) delapan segmen tidak terbaca — gunakan [PiringProgressRing].
+/// (≤ 60dp) delapan segmen tidak terbaca - gunakan [PiringProgressRing].
 class PiringRing extends StatelessWidget {
   const PiringRing({
     super.key,

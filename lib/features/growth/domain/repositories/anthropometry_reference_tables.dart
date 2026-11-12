@@ -13,7 +13,7 @@ abstract interface class AnthropometryReferenceTables {
 
   /// Berat menurut panjang/tinggi, langkah 0,5 cm (PB untuk 0–23 bln,
   /// TB untuk 24–60 bln). [lengthHeightCmStep] sudah dibulatkan half-up
-  /// oleh pemanggil — lihat [LengthHeightStep]. [ageMonths] dipakai untuk
+  /// oleh pemanggil - lihat [LengthHeightStep]. [ageMonths] dipakai untuk
   /// memilih tabel PB vs TB (PRD §3.3).
   SdColumns whz({
     required Sex sex,
@@ -21,7 +21,7 @@ abstract interface class AnthropometryReferenceTables {
     required int ageMonths,
   });
 
-  /// Rentang tabel WHZ (start, step, jumlah baris) — dipakai grafik.
+  /// Rentang tabel WHZ (start, step, jumlah baris) - dipakai grafik.
   ({double start, double step, int length}) whzTableInfo({
     required Sex sex,
     required int ageMonths,
@@ -30,7 +30,7 @@ abstract interface class AnthropometryReferenceTables {
 
 /// Pembulatan panjang/tinggi ke baris step 0,5 (PRD §3.3: PB/BB per 0,5 cm).
 ///
-/// CATATAN: aturan final mengikuti petunjuk lampiran Permenkes 2/2020 —
+/// CATATAN: aturan final mengikuti petunjuk lampiran Permenkes 2/2020 -
 /// dikonfirmasi saat berkas tabel resmi tersedia (docs/reference-notes.md).
 abstract final class LengthHeightStep {
   const LengthHeightStep._();

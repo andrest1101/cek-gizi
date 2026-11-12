@@ -154,7 +154,7 @@ class _TipsContent extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xs),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: TextButton(
+                  child: TextButton.icon(
                     onPressed: onLog,
                     style: TextButton.styleFrom(
                       minimumSize: const Size(0, 48),
@@ -163,7 +163,8 @@ class _TipsContent extends StatelessWidget {
                       ),
                       tapTargetSize: MaterialTapTargetSize.padded,
                     ),
-                    child: const Text(AppStrings.tipsAction),
+                    icon: const Icon(Icons.add_rounded, size: 20),
+                    label: const Text(AppStrings.tipsAction),
                   ),
                 ),
               ],

@@ -1,9 +1,9 @@
-/// Skala ruang 4pt (PRD §7.4). Jangan pakai angka spacing aneh di widget —
+/// Skala ruang 4pt (PRD §7.4). Jangan pakai angka spacing aneh di widget -
 /// ambil dari sini.
 abstract final class AppSpacing {
   const AppSpacing._();
 
-  /// 4dp — jarak antar busur, celah terkecil.
+  /// 4dp - jarak antar busur, celah terkecil.
   static const double xs = 4;
 
   /// 8dp
@@ -15,7 +15,7 @@ abstract final class AppSpacing {
   /// 16dp
   static const double lg = 16;
 
-  /// 20dp — padding layar.
+  /// 20dp - padding layar.
   static const double xl = 20;
 
   /// 24dp

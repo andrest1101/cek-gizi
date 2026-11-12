@@ -11,7 +11,7 @@ Map<String, dynamic> _decoded() =>
         as Map<String, dynamic>;
 
 void main() {
-  group('Loader — berkas seed proyek (assets/rules/nutrition_rules.json)', () {
+  group('Loader - berkas seed proyek (assets/rules/nutrition_rules.json)', () {
     late NutritionRules rules;
 
     setUpAll(() {
@@ -50,7 +50,7 @@ void main() {
       expect(balita.countWithoutBreastMilk, isTrue);
     });
 
-    test('isReviewed false — konten belum ditinjau ahli gizi (PRD 9.1)', () {
+    test('isReviewed false - konten belum ditinjau ahli gizi (PRD 9.1)', () {
       expect(rules.isReviewed, isFalse);
       expect(rules.reviewedBy, isNull);
       expect(rules.reviewedOn, isNull);
@@ -119,7 +119,7 @@ void main() {
     });
   });
 
-  group('Loader — penolakan berkas korup (tidak boleh lolos)', () {
+  group('Loader - penolakan berkas korup (tidak boleh lolos)', () {
     test('version hilang', () {
       final json = _decoded()..remove('version');
       expect(

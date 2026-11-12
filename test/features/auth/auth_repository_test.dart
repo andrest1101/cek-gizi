@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   group('AuthRepositoryImpl', () {
-    // Client standalone (belum initialize) — sesi kosong; test ini TIDAK
+    // Client standalone (belum initialize) - sesi kosong; test ini TIDAK
     // memanggil signInAnonymously (butuh jaringan).
     late SupabaseClient client;
     late AuthRepositoryImpl repository;

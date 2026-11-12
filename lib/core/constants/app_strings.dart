@@ -1,11 +1,11 @@
 import 'package:cekgizi/core/config/app_config.dart';
 
 /// Semua copy UI terpusat di sini (Bahasa Indonesia, nada hangat dan
-/// tidak menghakimi — PRD §7.6). Widget tidak boleh menulis string bebas.
+/// tidak menghakimi - PRD §7.6). Widget tidak boleh menulis string bebas.
 abstract final class AppStrings {
   const AppStrings._();
 
-  /// Disclaimer tetap (PRD §8.5) — wajib tampil di Tentang & onboarding.
+  /// Disclaimer tetap (PRD §8.5) - wajib tampil di Tentang & onboarding.
   static const String disclaimer =
       '${AppConfig.appName} adalah alat bantu edukasi dan pemantauan. '
       'Hasilnya bukan diagnosis dan tidak menggantikan pemeriksaan tenaga '
@@ -35,7 +35,7 @@ abstract final class AppStrings {
       'belum tercapai hari ini.';
   static const onboardingTitle2 = 'Tumbuh dalam konteks';
   static const onboardingBody2 =
-      'Pantau tinggi, berat, dan status pertumbuhan menurut Permenkes 2/2020 — '
+      'Pantau tinggi, berat, dan status pertumbuhan menurut Permenkes 2/2020, '
       'dengan bahasa yang tenang dan jelas.';
   static const onboardingTitle3 = 'Pendamping, bukan dokter';
   static const onboardingBody3 =
@@ -48,10 +48,10 @@ abstract final class AppStrings {
   static const consentTitle = 'Sebelum mulai, baca ini dulu';
   static const consentIntro =
       '${AppConfig.appName} membantu memantau tumbuh kembang dan gizi balita '
-      'kamu. Kami hanya menyimpan yang kamu izinkan — tidak lebih.';
+      'kamu. Kami hanya menyimpan yang kamu izinkan, tidak lebih.';
   static const consentBullets = <String>[
     'Data yang tersimpan: nama panggilan, tanggal lahir, jenis kelamin, berat, tinggi, dan catatan perkembangannya.',
-    'Foto makanan dikirim hanya untuk dikenali oleh AI dan dihapus setelah dianalisis — foto tidak disimpan.',
+    'Foto makanan dikirim hanya untuk dikenali oleh AI dan dihapus setelah dianalisis. Foto tidak disimpan.',
     'Data kamu sendiri yang bisa mengaksesnya (pengamanan tingkat baris di server).',
     'Kamu bisa mengekspor data, menghapus riwayat chat, atau menghapus akun beserta seluruh datanya kapan pun di Pengaturan.',
   ];
@@ -88,7 +88,7 @@ abstract final class AppStrings {
   static const childMaxReached = 'Maksimal 5 anak per akun.';
   static const childEmptyTitle = 'Belum ada anak terdaftar';
   static const childEmptyBody =
-      'Tambahkan anak pertama — cukup nama panggilan, tgl lahir, dan jenis kelamin.';
+      'Tambahkan anak pertama. Cukup nama panggilan, tanggal lahir, dan jenis kelamin.';
   static const childEmptyCta = 'Tambah anak';
   static const childAgeYears = 'tahun';
   static const childAgeMonths = 'bulan';
@@ -174,7 +174,7 @@ abstract final class AppStrings {
   static const validationDateBeforeBirth =
       'Tanggal ukur tidak boleh sebelum anak lahir.';
   static const validationAgeRange =
-      'Usia saat ukur di luar 0–60 bulan — remaja tidak bisa dipantau aplikasi ini.';
+      'Usia saat ukur di luar 0–60 bulan. Remaja tidak bisa dipantau aplikasi ini.';
   static const validationDuplicateDate =
       'Sudah ada pengukuran pada tanggal ini. Ubah atau hapus dulu yang lama.';
   static const validationRequired = 'Wajib diisi.';
@@ -208,7 +208,7 @@ abstract final class AppStrings {
   static const statusViewDetail = 'Lihat detail';
   static const statusCardTitle = 'Status pertumbuhan';
   static const statusTrendNeedsAttention =
-      'Berat turun dibanding pengukuran sebelumnya — sebaiknya periksakan.';
+      'Berat turun dibanding pengukuran sebelumnya. Sebaiknya periksakan.';
   static const statusTrendTracked = 'Tren sesuai. Lanjutkan pemantauan rutin.';
   static const statusAddFirst = 'Tambah ukuran';
 
@@ -294,7 +294,7 @@ abstract final class AppStrings {
       'Ketuk kelompok pangan yang sudah dimakan anak hari ini.';
   static const makanAsiToday = 'ASI hari ini';
   static const makanAsiSubtitle =
-      'Cukup satu tanda untuk hari ini — tidak perlu menghitung berapa disusukan.';
+      'Cukup satu tanda untuk hari ini. Tidak perlu menghitung berapa disusukan.';
   static const makanAsiSecondaryNote =
       'ASI tetap boleh dicatat, tetapi tidak dihitung pada target usia ini.';
   static const makanAsiActionLog = 'Catat ASI';
@@ -304,7 +304,7 @@ abstract final class AppStrings {
   static const makanAsiRemovedFeedback = 'Catatan ASI hari ini dihapus.';
   static const makanGridTitle = 'Catat kelompok pangan';
   static const makanGridHint =
-      'Ketuk sekali — catatan langsung tersimpan. Tanda centang berarti '
+      'Ketuk sekali, catatan langsung tersimpan. Tanda centang berarti '
       'kelompok itu sudah tercatat hari ini.';
   static const makanDiaryTodayTitle = 'Catatan hari ini';
   static const makanPreviousTitle = 'Hari sebelumnya';

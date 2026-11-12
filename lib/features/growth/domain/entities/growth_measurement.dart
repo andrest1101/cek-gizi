@@ -3,7 +3,7 @@ import 'measure_mode.dart';
 /// Satu pengukuran anak (PRD §5.2, §6.5).
 ///
 /// Nilai z disimpan untuk audit; `status_*` null berarti z di luar rentang
-/// masuk akal (PRD §3.5) — UI menampilkan peringatan, bukan klasifikasi.
+/// masuk akal (PRD §3.5) - UI menampilkan peringatan, bukan klasifikasi.
 final class GrowthMeasurement {
   const GrowthMeasurement({
     required this.id,

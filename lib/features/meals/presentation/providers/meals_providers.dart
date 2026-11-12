@@ -36,7 +36,7 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
 
   /// Catat satu kelompok pangan secara manual (PRD §6.4).
   ///
-  /// Jenis makan tidak ditanyakan — kelompok pangan bukan sesi makan.
+  /// Jenis makan tidak ditanyakan - kelompok pangan bukan sesi makan.
   /// `meal_type` disimpan sebagai klasifikasi kasar menurut jam perangkat
   /// (mis. sarapan <10.00) dan TIDAK ditampilkan di UI; waktu makan yang
   /// relevan untuk catatan bernama (scanner/resep) menyusul di Batch 5/8.
@@ -177,7 +177,7 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
       a.year == day.year && a.month == day.month && a.day == day.day;
 
   /// Klasifikasi kasar jenis makan menurut jam perangkat (bukan klaim
-  /// yang ditampilkan ke pengguna — lihat catatan di `addManualGroup`).
+  /// yang ditampilkan ke pengguna - lihat catatan di `addManualGroup`).
   static MealType _inferMealType(DateTime now) {
     final hour = now.hour;
     if (hour < 10) return MealType.breakfast;

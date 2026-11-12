@@ -24,12 +24,12 @@ import 'package:cekgizi/shared/widgets/section_header.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 
 /// Layar Makan (PRD §6.4): ringkasan hari ini, catat manual (ketuk kelompok
-/// pangan — langsung tersimpan, bisa diurungkan), kontrol ASI, dan diary.
+/// pangan - langsung tersimpan, bisa diurungkan), kontrol ASI, dan diary.
 ///
 /// Struktur sengaja dibuat dua tingkat:
-/// 1. **Hari ini** — panel progres + grid + catatan hari ini (selalu tampil,
+/// 1. **Hari ini** - panel progres + grid + catatan hari ini (selalu tampil,
 ///    punya empty state yang mengarahkan).
-/// 2. **Hari sebelumnya** — dilipat per hari agar tidak membanjiri layar.
+/// 2. **Hari sebelumnya** - dilipat per hari agar tidak membanjiri layar.
 ///
 /// Scanner menyusul di Batch 5 (butuh Cloud Billing + Gemini key).
 class MakanScreen extends ConsumerWidget {
@@ -273,7 +273,7 @@ class _SummarySkeleton extends StatelessWidget {
   }
 }
 
-/// Kontrol ASI hari ini — baris tanpa kartu. Tombol bermakna:
+/// Kontrol ASI hari ini - baris tanpa kartu. Tombol bermakna:
 /// "Catat ASI" saat belum tercatat, "Hapus catatan ASI" saat sudah.
 /// Untuk usia 24–59 bulan tombol jadi sekunder + catatan bahwa ASI tidak
 /// dihitung pada target (PRD §3.7).

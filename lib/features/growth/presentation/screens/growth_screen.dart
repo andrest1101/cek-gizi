@@ -94,7 +94,7 @@ class _GrowthBody extends ConsumerWidget {
     final measurementsAsync = ref.watch(measurementsProvider(child.id));
     final now = DateTime.now();
     final hasMeasurements = measurementsAsync.value?.isNotEmpty ?? false;
-    // Saat data belum ada, cukup satu empty state di kartu status — grafik
+    // Saat data belum ada, cukup satu empty state di kartu status - grafik
     // dan riwayat kosong disembunyikan agar tidak ada tiga blok kosong.
     final showChart = measurementsAsync.isLoading || hasMeasurements;
 

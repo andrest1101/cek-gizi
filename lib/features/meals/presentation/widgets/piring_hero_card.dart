@@ -13,7 +13,7 @@ import 'package:cekgizi/features/meals/presentation/providers/meals_providers.da
 import 'package:cekgizi/features/meals/presentation/widgets/piring_ring.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 
-/// Kartu hero "Piring Hari Ini" di Beranda (PRD §6.3) — satu-satunya
+/// Kartu hero "Piring Hari Ini" di Beranda (PRD §6.3) - satu-satunya
 /// permukaan solid berwarna (`primaryContainer`, §7.1).
 ///
 /// Susunan: eyebrow + badge → ring besar dengan jumlah di tengah →

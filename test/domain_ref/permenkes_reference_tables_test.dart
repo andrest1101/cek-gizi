@@ -9,7 +9,7 @@ import 'package:cekgizi/features/growth/domain/services/z_score.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Berkas referensi ASLI hasil ekstraksi dari PDF resmi (689 baris).
-/// Dijalankan terhadap file dari disk — bukan fixture palsu.
+/// Dijalankan terhadap file dari disk - bukan fixture palsu.
 late final PermenkesReferenceTables tables;
 
 void main() {
@@ -19,7 +19,7 @@ void main() {
     tables = PermenkesReferenceTables.fromJsonString(contents);
   });
 
-  group('Loader — validasi parse', () {
+  group('Loader - validasi parse', () {
     test('versi referensi sesuai konfigurasi', () {
       expect(tables.version, 'permenkes-2-2020');
     });
@@ -73,7 +73,7 @@ void main() {
   });
 
   group('Anchor matematis seluruh tabel (rumus PRD 3.3)', () {
-    test('z(−1 SD) = −1, z(median) = 0, z(+1 SD) = +1 — seluruh baris', () {
+    test('z(−1 SD) = −1, z(median) = 0, z(+1 SD) = +1 - seluruh baris', () {
       void check(SdColumns sd) {
         expect(ZScore.calculate(value: sd.sdNeg1, sd: sd), closeTo(-1.0, 1e-9));
         expect(ZScore.calculate(value: sd.median, sd: sd), closeTo(0.0, 1e-9));

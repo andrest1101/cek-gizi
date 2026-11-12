@@ -5,7 +5,7 @@ import 'package:cekgizi/features/meals/domain/services/dietary_diversity.dart';
 
 /// Aturan keragaman pangan & tips harian (`assets/rules/nutrition_rules.json`).
 ///
-/// Semua aturan berasal dari berkas itu — TIDAK di-hardcode (PRD §3.7,
+/// Semua aturan berasal dari berkas itu - TIDAK di-hardcode (PRD §3.7,
 /// aturan agen: jangan karangan data gizi). Berkas saat ini adalah seed
 /// dari Lampiran A PRD dengan `reviewed_by: null` → konten BELUM ditinjau
 /// ahli gizi; aplikasi WAJIB menampilkan penanda (PRD §9.1).
@@ -22,10 +22,10 @@ final class NutritionRules {
 
   final String version;
 
-  /// Delapan kode kelompok pangan (PRD §3.7) — persis divalidasi.
+  /// Delapan kode kelompok pangan (PRD §3.7) - persis divalidasi.
   final Set<String> groups;
 
-  /// Sumber protein hewani (PRD §3.7) — persis [dairy, flesh, eggs].
+  /// Sumber protein hewani (PRD §3.7) - persis [dairy, flesh, eggs].
   final Set<String> animalSource;
 
   /// Profil target keragaman (mpasi_6_23, balita_24_59, …). Tidak tumpang
@@ -224,7 +224,7 @@ abstract final class NutritionRulesLoader {
       if (tip.length > maxTipLength) {
         throw InvalidReferenceDataException(
           'nutrition_rules.json: tips "$key" terlalu panjang '
-          '(${tip.length} > $maxTipLength karakter) — kemungkinan teks korup.',
+          '(${tip.length} > $maxTipLength karakter), kemungkinan teks korup.',
         );
       }
       if (tip.contains('\n')) {

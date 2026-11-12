@@ -7,7 +7,7 @@ import 'package:cekgizi/features/growth/presentation/widgets/status_copy.dart';
 /// Ringkasan status tumbuh yang siap dipakai widget (PRD §6.3, §6.5).
 ///
 /// Logika murni: memilih status terburuk, mengurutkan pengukuran, dan
-/// menghitung selisih berat — tidak ada UI di sini, sehingga mudah diuji.
+/// menghitung selisih berat - tidak ada UI di sini, sehingga mudah diuji.
 final class GrowthStatusSummary {
   const GrowthStatusSummary({
     required this.title,

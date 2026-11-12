@@ -402,7 +402,7 @@ class _DetailSheet extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            '${AppStrings.statusDetailTitle} — $nickname',
+            '${AppStrings.statusDetailTitle}: $nickname',
             style: textTheme.titleMedium?.copyWith(color: colors.textPrimary),
           ),
           const SizedBox(height: AppSpacing.xs),

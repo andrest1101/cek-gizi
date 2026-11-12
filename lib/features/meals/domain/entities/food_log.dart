@@ -1,7 +1,7 @@
 /// Satu catatan makan (PRD §5.2, §6.4).
 ///
 /// `groups` adalah gabungan kelompok pangan (union) dari semua item pada
-/// catatan ini — disimpan denormal sesuai skema agar perhitungan keragaman
+/// catatan ini - disimpan denormal sesuai skema agar perhitungan keragaman
 /// harian tidak perlu membongkar `items`. Nilai selalu kode resmi PRD §3.7.
 enum MealType { breakfast, lunch, dinner, snack }
 
@@ -63,7 +63,7 @@ final class FoodLog {
   final FoodLogSource source;
   final List<FoodLogItem> items;
 
-  /// Union kelompok dari seluruh item — diurutkan [FoodGroup.allCodes].
+  /// Union kelompok dari seluruh item - diurutkan [FoodGroup.allCodes].
   final List<String> groups;
 
   FoodLog copyWith({

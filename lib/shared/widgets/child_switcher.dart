@@ -13,7 +13,7 @@ import 'package:cekgizi/shared/widgets/child_avatar.dart';
 
 /// Baris identitas anak di Beranda: avatar, usia, dan chevron ke sheet
 /// ganti anak. Nama anak TIDAK diulang di sini karena sudah tampil di
-/// judul sapaan Beranda — menghindari nama yang sama dua kali.
+/// judul sapaan Beranda - menghindari nama yang sama dua kali.
 class ChildSwitcherCard extends ConsumerWidget {
   const ChildSwitcherCard({super.key});
 
@@ -31,7 +31,7 @@ class ChildSwitcherCard extends ConsumerWidget {
     return Semantics(
       container: true,
       button: true,
-      label: '${child.nickname}, $age — ganti anak',
+      label: '${child.nickname}, $age. Ketuk untuk ganti anak',
       excludeSemantics: true,
       child: Material(
         color: Colors.transparent,
@@ -240,7 +240,7 @@ class ChildSwitcherSheet extends ConsumerWidget {
               Navigator.of(context).pop();
               context.push('/children');
             },
-            icon: const Icon(Icons.tune_rounded),
+            icon: const Icon(Icons.manage_accounts_rounded),
             label: const Text(AppStrings.homeManageChild),
           ),
         ],

@@ -5,7 +5,7 @@ import 'package:cekgizi/core/theme/app_theme.dart';
 
 /// Permukaan kartu & blok yang konsisten di light/dark (PRD §7.1–7.2).
 ///
-/// Kedalaman visual datang dari lapisan tone + hairline — bukan bayangan,
+/// Kedalaman visual datang dari lapisan tone + hairline - bukan bayangan,
 /// bukan gradien:
 /// - `card`: permukaan utama (light putih + garis rambut, dark tone naik).
 /// - `sunken`: blok di dalam kartu (lebih gelap dari kartu di kedua mode).
@@ -53,7 +53,7 @@ abstract final class AppSurfaces {
     );
   }
 
-  /// Warna permukaan kartu aktif — untuk `Material`/ripple di atas kartu.
+  /// Warna permukaan kartu aktif - untuk `Material`/ripple di atas kartu.
   static Color cardColor(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
     return Theme.of(context).brightness == Brightness.dark
