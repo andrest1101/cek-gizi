@@ -154,7 +154,12 @@ void main() {
         await tester.scrollUntilVisible(
           find.text(AppStrings.makanDiaryEmpty),
           240,
-          scrollable: find.byType(Scrollable).first,
+          scrollable: find
+              .descendant(
+                of: find.byKey(const Key('makan-list')),
+                matching: find.byType(Scrollable),
+              )
+              .first,
           maxScrolls: 40,
         );
         await tester.pumpAndSettle();
@@ -167,7 +172,10 @@ void main() {
         await tester.scrollUntilVisible(
           find.text(AppStrings.tipTitle),
           240,
-          scrollable: find.byType(Scrollable).first,
+          scrollable: find.descendant(
+            of: find.byKey(const Key('home-list')),
+            matching: find.byType(Scrollable),
+          ),
           maxScrolls: 40,
         );
         await tester.pumpAndSettle();
