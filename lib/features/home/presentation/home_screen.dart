@@ -11,6 +11,7 @@ import 'package:cekgizi/core/utils/greeting.dart';
 import 'package:cekgizi/core/utils/date_format.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
+import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/growth_status_card.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_hero_card.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_tips_card.dart';
@@ -43,7 +44,7 @@ class HomeScreen extends ConsumerWidget {
             ),
             children: [
               const _HomeHeader(),
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: AppSpacing.lg),
               childrenAsync.when(
                 loading: () => const _HomeSkeleton(),
                 error: (error, stackTrace) => ErrorCard(
@@ -72,9 +73,9 @@ class HomeScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.lg),
                       const PiringHeroCard(),
                       const SizedBox(height: AppSpacing.lg),
-                      const GrowthStatusCard(),
-                      const SizedBox(height: AppSpacing.lg),
                       const PiringTipsCard(),
+                      const SizedBox(height: AppSpacing.lg),
+                      const GrowthStatusCard(),
                     ],
                   );
                 },
@@ -102,7 +103,14 @@ class _HomeHeader extends ConsumerWidget {
     final colors = AppTheme.colorsOf(context);
     final textTheme = Theme.of(context).textTheme;
     final now = DateTime.now();
-    final childName = ref.watch(selectedChildProvider).value?.nickname;
+    final selectedChild = ref.watch(selectedChildProvider).value;
+    final childName = selectedChild?.nickname;
+    // Berlangganan data catatan hari ini: saat resume/tengah malam
+    // (lihat `TodayWatcher`), header ini ikut dibangun ulang dengan tanggal
+    // yang benar. Tidak memicu jaringan tambahan — provider yang sama.
+    if (selectedChild != null) {
+      ref.watch(foodLogsProvider(selectedChild.id));
+    }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -124,7 +132,7 @@ class _HomeHeader extends ConsumerWidget {
                 child: Text(
                   childName == null
                       ? AppConfig.appName
-                      : '${Greeting.of(now)}, $childName',
+                      : AppStrings.homeGreeting(Greeting.of(now), childName),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.titleLarge?.copyWith(

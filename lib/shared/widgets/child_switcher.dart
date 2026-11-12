@@ -11,12 +11,9 @@ import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/shared/widgets/child_avatar.dart';
 
-/// Baris identitas anak di Beranda: avatar, nama, usia, dan chevron ke
-/// sheet ganti anak.
-///
-/// Tanpa permukaan kartu — sengaja ringan agar hero Piring Hari Ini yang
-/// menjadi fokus (PRD §7.1). Ketuk baris → sheet pilih anak +
-/// tautan "Kelola anak".
+/// Baris identitas anak di Beranda: avatar, usia, dan chevron ke sheet
+/// ganti anak. Nama anak TIDAK diulang di sini karena sudah tampil di
+/// judul sapaan Beranda — menghindari nama yang sama dua kali.
 class ChildSwitcherCard extends ConsumerWidget {
   const ChildSwitcherCard({super.key});
 
@@ -60,16 +57,14 @@ class ChildSwitcherCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        child.nickname,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        age,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               color: AppTheme.colorsOf(context).textPrimary,
                             ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        age,
+                        AppStrings.childSwitcherTooltip,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppTheme.colorsOf(context).textSecondary,
                             ),
@@ -93,6 +88,74 @@ class ChildSwitcherCard extends ConsumerWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tombol avatar kecil untuk header Makan/Tumbuh: ketuk → sheet ganti anak.
+/// Target ketuk 48dp; avatar tetap 38dp agar tidak mendominasi judul.
+class ChildSwitcherButton extends ConsumerWidget {
+  const ChildSwitcherButton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final children = ref.watch(childrenListProvider).value ?? const [];
+    if (children.isEmpty) return const SizedBox.shrink();
+    final colors = AppTheme.colorsOf(context);
+    final selectedId = ref.watch(selectedChildIdProvider);
+    final child = children.where((c) => c.id == selectedId).firstOrNull ??
+        children.first;
+
+    return Semantics(
+      container: true,
+      button: true,
+      label: '${AppStrings.childSwitcherTooltip}: ${child.nickname}',
+      excludeSemantics: true,
+      child: Tooltip(
+        message: AppStrings.childSwitcherTooltip,
+        child: SizedBox(
+          width: 48,
+          height: 48,
+          child: Material(
+            color: Colors.transparent,
+            shape: const CircleBorder(),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: () => showChildSwitcherSheet(context),
+              child: Center(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    ChildAvatar(
+                      avatarKey: child.avatarKey,
+                      size: 38,
+                      semanticLabel: child.nickname,
+                    ),
+                    Positioned(
+                      right: -2,
+                      bottom: -2,
+                      child: Container(
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: colors.outline),
+                        ),
+                        child: Icon(
+                          Icons.unfold_more_rounded,
+                          size: 12,
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
