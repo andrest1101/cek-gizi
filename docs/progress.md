@@ -221,6 +221,48 @@ Presentasi + data catatan makan (`food_logs`) + integrasi Beranda. **Tidak ada A
 ### Catatan tentang keputusan snack-bar/undo
 `notifier.deleteLog()` menghapus permanen di DB; aksi "Urungkan" menambahkan kembali dengan timestamp & kelompok identik (id baru). Untuk catatan ASI murni, "Hapus ASI" tetap menghormati aturan "hanya catatan murni hari itu yang terhapus" (Batch 6 sebelumnya), hanya diganti jadi aksi + snackbar.
 
+## Batch 6.1 — Refactor UI/UX Beranda, Makan, Tumbuh (2026-11-12)
+
+### Ruang lingkup
+Presentasi + satu perbaikan data tips. **Tidak ada dependency baru, tidak ada perubahan skema Supabase**, dan z-score/tabel SD tidak disentuh (Domain tetap murni & teruji).
+
+### Keluhan yang diperbaiki
+1. **Ring mini riwayat hijau+oranye tanpa arti** → diganti busur progres monokrom + angka `n/total`; setiap hari juga menulis ringkasan "3 dari 8 kelompok". Delapan segmen pada 36–56dp memang tidak terbaca.
+2. **Header Makan polos/berantakan** → header bersama `ScreenHeader` (tanggal, judul, satu kalimat penjelas) + tombol avatar ganti anak (48dp). Ditambah panel "hari ini" (ring 56dp, status target, status protein hewani) sebagai pengganti ring kosong.
+3. **Ujung busur menumpuk/masuk** → celah antar busur dihitung dari ketebalan stroke: `(stroke + 4dp) / radius`. Hero 196dp/stroke 18dp ≈ 14,2°, sehingga round cap menyisakan jarak terlihat ±4dp dan busur tidak saling menimpa.
+4. **Riwayat kemarin membingungkan** → dipisah: **Catatan hari ini** selalu terbuka (empty state mengarahkan), **Hari sebelumnya** dilipat per hari dan hanya memuat catatan saat diketuk.
+5. **Teks tips aneh** → string `grains_tubers` di `nutrition_rules.json` yang tersisipi lirik diperbaiki; loader menolak tips >140 karakter atau berisi baris baru; kartu tips kini menampilkan **nama kelompok** + aksi "Catat sekarang" yang langsung mencatat.
+
+### Perubahan lain
+- **Anti-duplikat**: mengetuk kelompok yang sudah tercatat tidak menambah log; snackbar menawarkan hapus. `removeGroupToday` hanya menghapus log satu-kelompok pada hari itu (catatan gabungan tidak disentuh).
+- **Semesta target mengikuti usia**: ring hero, jumlah segmen, dan angka ringkasan memakai 8 kelompok (6–23 bln) atau 7 kelompok (24–59 bln, tanpa ASI) agar tidak kontradiktif dengan target 5/7.
+- **Hero**: badge "Tercapai" ganda dihapus; status protein hewani selalu tampil; legenda "Busur oranye menandai protein hewani" muncul saat protein hewani sudah ada.
+- **ASI 24–59 bulan**: aksi menjadi sekunder + copy "tidak dihitung pada target usia ini".
+- **`TodayWatcher`** di `AppShell`: `foodLogsProvider` diinvalidasi saat app resume dan saat melewati tengah malam, sehingga label "Hari ini"/"Kemarin" tidak beku.
+- **Tumbuh**: header konsisten + chip anak; saat belum ada pengukuran hanya satu empty state (grafik & riwayat kosong disembunyikan).
+- **Beranda**: urutan header → identitas anak → hero → tips → status tumbuh; nama anak tidak diulang di baris ganti anak.
+- Copy baru terpusat di `AppStrings` (tanpa emoji, suara "kamu", status selalu ikon + teks).
+
+### Berkas utama
+- `lib/shared/widgets/screen_header.dart` (baru), `lib/shared/widgets/child_switcher.dart` (+`ChildSwitcherButton`, kartu tanpa duplikasi nama).
+- `lib/features/meals/presentation/screens/makan_screen.dart` (header, panel hari ini, grid anti-duplikat, diary hari ini vs hari sebelumnya).
+- `lib/features/meals/presentation/widgets/piring_ring.dart` (celah dari stroke, semesta 7/8, `PiringProgressRing`).
+- `lib/features/meals/presentation/widgets/piring_hero_card.dart`, `piring_tips_card.dart`, `meals_actions.dart` (baru: quick-add + snackbar undo/duplikat).
+- `lib/features/meals/domain/services/piring_day.dart` (`targetCodes`, `countedGroups`), `lib/domain_ref/nutrition_rules.dart` (guard panjang/baris baru + `missingCodesWithTips`).
+- `lib/features/home/presentation/{home_screen,app_shell}.dart`, `lib/features/growth/presentation/screens/growth_screen.dart`, `lib/core/constants/app_strings.dart`, `assets/rules/nutrition_rules.json`.
+- Test baru: `test/features/piring_ring_test.dart`; tambahan di `test/domain_ref/nutrition_rules_test.dart` dan `test/features/makan_flow_test.dart`.
+
+### Verifikasi (2026-11-12)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **193/193 passed** (baseline 179; +14 test baru: geometri celah busur, ring progres, guard tips, anti-duplikat, hari sebelumnya dilipat, ASI 24–59, hero protein hewani).
+- Layout 360×640 @1,3 light/dark → tidak ada overflow (test lama tetap hijau).
+- DoD §10.1: gradien 0; `Colors.` di `lib/features`+`lib/shared` → 0 (kecuali `Colors.transparent`); `GEMINI_API_KEY=<literal>` → 0.
+
+### Belum terverifikasi / menunggu kamu
+- Verifikasi visual & alur di perangkat nyata (kontras hero di dark, kerapatan tipografi, animasi lipat hari sebelumnya).
+- Peninjauan `nutrition_rules.json` oleh ahli gizi/bidan (`reviewed_by` masih `null`). Perbaikan string korup = memperbaiki teks rusak, **bukan** mengubah aturan gizi.
+- Opsional lanjutan (belum dieksekusi): strip 7 hari terakhir; batas fetch riwayat (butuh keputusan retensi data).
+
 ## Batch 4.1 — Penyegaran Visual Beranda, Tumbuh, Onboarding, Consent, Anak (2026-11-11)
 
 ### Ruang lingkup
