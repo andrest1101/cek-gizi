@@ -14,8 +14,12 @@ import 'package:cekgizi/features/meals/presentation/providers/meals_providers.da
 import 'package:cekgizi/features/meals/presentation/widgets/piring_ring.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 
-/// Kartu "Piring Hari Ini" di Beranda (PRD §6.3) — satu-satunya permukaan
-/// hero (`primaryContainer`). Usia <6 bulan menampilkan kartu ASI eksklusif.
+/// Kartu hero "Piring Hari Ini" di Beranda (PRD §6.3) — satu-satunya
+/// permukaan solid berwarna (`primaryContainer`, §7.1).
+///
+/// Susunan: eyebrow + badge → ring besar dengan jumlah di tengah →
+/// satu kalimat status + catatan target usia → CTA utama ke Makan.
+/// Usia <6 bulan menampilkan versi ASI eksklusif (tanpa ring).
 class PiringHeroCard extends ConsumerWidget {
   const PiringHeroCard({super.key});
 
@@ -34,8 +38,9 @@ class PiringHeroCard extends ConsumerWidget {
       error: (error, stackTrace) => _PiringError(
         onRetry: () => ref.invalidate(piringTodayProvider(child.id)),
       ),
-      data: (piring) =>
-          piring == null ? const SizedBox.shrink() : _PiringContent(piring: piring),
+      data: (piring) => piring == null
+          ? const SizedBox.shrink()
+          : _PiringContent(piring: piring),
     );
   }
 }
@@ -49,16 +54,14 @@ class _PiringContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
     final textTheme = Theme.of(context).textTheme;
-    final animalMissing = !piring.animalProteinPresent;
     final reached = piring.isTargetReached;
+    final animalMissing = !piring.animalProteinPresent;
     final noProfile = piring.profile == null;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: AppTheme.colorsOf(context).primaryContainer,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
+      decoration:
+          AppSurfaces.hero(context, radius: AppRadius.card + AppSpacing.xs),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -68,10 +71,11 @@ class _PiringContent extends StatelessWidget {
                 child: Semantics(
                   header: true,
                   child: Text(
-                    AppStrings.piringTitle,
-                    style: textTheme.labelLarge?.copyWith(
+                    AppStrings.piringTitle.toUpperCase(),
+                    style: textTheme.labelMedium?.copyWith(
                       color: colors.primary,
-                      letterSpacing: 0.6,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -87,19 +91,21 @@ class _PiringContent extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: colors.primary,
-                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                      borderRadius:
+                          BorderRadius.circular(AppRadius.pill),
                     ),
                     child: Text(
                       AppStrings.piringReachedBadge,
                       style: textTheme.labelMedium?.copyWith(
                         color: colors.onPrimary,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.sm),
           Center(
             child: PiringRing(
               met: piring.groups,
@@ -111,71 +117,52 @@ class _PiringContent extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           if (piring.logs.isEmpty)
-            Text(
-              AppStrings.piringEmpty,
-              textAlign: TextAlign.center,
-              style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
+            _StatusLine(
+              icon: Icons.restaurant_rounded,
+              color: colors.textSecondary,
+              text: AppStrings.piringEmpty,
+              muted: true,
             )
           else if (reached)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.check_circle_rounded, size: 18, color: colors.primary),
-                const SizedBox(width: AppSpacing.xs),
-                Flexible(
-                  child: Text(
-                    AppStrings.piringTargetReached,
-                    textAlign: TextAlign.center,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+            _StatusLine(
+              icon: Icons.check_circle_rounded,
+              color: colors.primary,
+              text: AppStrings.piringTargetReached,
+              bold: true,
             )
           else if (animalMissing)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.info_outline_rounded,
-                  size: 18,
-                  color: colors.accent,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Flexible(
-                  child: Text(
-                    AppStrings.piringAnimalProteinMissing,
-                    textAlign: TextAlign.center,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colors.textPrimary,
-                    ),
-                  ),
-                ),
-              ],
+            _StatusLine(
+              icon: Icons.info_outline_rounded,
+              color: colors.accent,
+              text: AppStrings.piringAnimalProteinMissing,
             )
           else
-            Text(
-              AppStrings.piringPartial(
+            _StatusLine(
+              icon: Icons.donut_small_rounded,
+              color: colors.primary,
+              text: AppStrings.piringPartial(
                 piring.groups.length,
                 FoodGroup.allCodes.length,
               ),
-              textAlign: TextAlign.center,
-              style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
             ),
-          if (noProfile) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              AppStrings.piringNoProfile,
-              textAlign: TextAlign.center,
-              style: textTheme.labelMedium?.copyWith(
-                color: colors.textSecondary,
-              ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            noProfile
+                ? AppStrings.piringNoProfile
+                : AppStrings.piringTargetNote(
+                    piring.profile!.targetGroups,
+                    breastMilkNotCounted:
+                        piring.profile!.countWithoutBreastMilk,
+                  ),
+            textAlign: TextAlign.center,
+            style: textTheme.labelMedium?.copyWith(
+              color: colors.textSecondary,
+              fontSize: 11,
+              height: 1.3,
             ),
-          ],
+          ),
           const SizedBox(height: AppSpacing.lg),
           FilledButton.icon(
             onPressed: () => context.go('/makan'),
@@ -188,6 +175,45 @@ class _PiringContent extends StatelessWidget {
   }
 }
 
+class _StatusLine extends StatelessWidget {
+  const _StatusLine({
+    required this.icon,
+    required this.color,
+    required this.text,
+    this.bold = false,
+    this.muted = false,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String text;
+  final bool bold;
+  final bool muted;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colors = AppTheme.colorsOf(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: AppSpacing.xs),
+        Flexible(
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: textTheme.bodySmall?.copyWith(
+              color: muted ? colors.textSecondary : colors.textPrimary,
+              fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _PiringSkeleton extends StatelessWidget {
   const _PiringSkeleton();
 
@@ -195,18 +221,18 @@ class _PiringSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: AppSurfaces.hero(context),
-      child: Column(
-        children: const [
+      decoration: AppSurfaces.hero(context, radius: AppRadius.card + AppSpacing.xs),
+      child: const Column(
+        children: [
           Align(
             alignment: Alignment.centerLeft,
-            child: Skeleton(width: 132, height: 14),
+            child: Skeleton(width: 140, height: 12),
           ),
           SizedBox(height: AppSpacing.lg),
-          Skeleton(width: 180, height: 180, radius: 90),
-          SizedBox(height: AppSpacing.lg),
-          Skeleton(width: 200, height: 14),
-          SizedBox(height: AppSpacing.lg),
+          Skeleton(width: 190, height: 190, radius: 95),
+          SizedBox(height: AppSpacing.md),
+          Skeleton(width: 220, height: 16),
+          SizedBox(height: AppSpacing.md),
           Skeleton(height: 48),
         ],
       ),
@@ -224,16 +250,16 @@ class _PiringError extends StatelessWidget {
     final colors = AppTheme.colorsOf(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: AppSurfaces.hero(context),
+      decoration: AppSurfaces.hero(context, radius: AppRadius.card + AppSpacing.xs),
       child: Column(
         children: [
-          Icon(Icons.cloud_off_rounded, color: colors.textSecondary),
+          Icon(Icons.cloud_off_rounded, color: colors.primary),
           const SizedBox(height: AppSpacing.sm),
           Text(
             AppStrings.makanLoadError,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colors.textPrimary,
+                  color: colors.primary,
                 ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -256,15 +282,15 @@ class _AsiExclusiveHero extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: AppSurfaces.hero(context),
+      decoration: AppSurfaces.hero(context, radius: AppRadius.card + AppSpacing.xs),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   color: colors.primary,
                   shape: BoxShape.circle,
@@ -288,13 +314,13 @@ class _AsiExclusiveHero extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             AppStrings.asiExclusiveBody,
-            style: textTheme.bodySmall?.copyWith(color: colors.textPrimary),
+            style: textTheme.bodySmall?.copyWith(color: colors.primary),
           ),
           const SizedBox(height: AppSpacing.lg),
           FilledButton.icon(
             onPressed: () => context.go('/makan'),
-            icon: const Icon(Icons.add_rounded),
-            label: const Text(AppStrings.piringCta),
+            icon: const Icon(Icons.water_drop_outlined),
+            label: const Text(AppStrings.heroAsiCta),
           ),
         ],
       ),

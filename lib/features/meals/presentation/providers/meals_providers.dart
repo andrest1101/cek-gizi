@@ -35,21 +35,27 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
       [...?state.value]..sort((a, b) => a.eatenAt.compareTo(b.eatenAt));
 
   /// Catat satu kelompok pangan secara manual (PRD §6.4).
-  Future<void> addManualGroup({
+  ///
+  /// Jenis makan tidak ditanyakan — kelompok pangan bukan sesi makan.
+  /// `meal_type` disimpan sebagai klasifikasi kasar menurut jam perangkat
+  /// (mis. sarapan <10.00) dan TIDAK ditampilkan di UI; waktu makan yang
+  /// relevan untuk catatan bernama (scanner/resep) menyusul di Batch 5/8.
+  Future<FoodLog> addManualGroup({
     required String groupCode,
     required String groupLabel,
-    required MealType mealType,
+    DateTime? at,
   }) async {
     final child = ref.read(selectedChildProvider).value;
     if (child == null) throw StateError('Tidak ada anak yang dipilih.');
     final repo = ref.read(foodLogRepositoryProvider);
+    final now = at ?? DateTime.now();
     final canonical = PiringDayEvaluator.canonicalOrder([groupCode]);
     final log = await repo.addLog(
       FoodLog(
         id: '',
         childId: child.id,
-        eatenAt: DateTime.now(),
-        mealType: mealType,
+        eatenAt: now,
+        mealType: _inferMealType(now),
         source: FoodLogSource.manual,
         items: [
           FoodLogItem(
@@ -61,6 +67,25 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
       ),
     );
     state = AsyncData([..._ordered, log]);
+    return log;
+  }
+
+  /// Kembalikan catatan yang baru dihapus (aksi "Urungkan").
+  Future<void> restoreLog(FoodLog log) async {
+    final repo = ref.read(foodLogRepositoryProvider);
+    final restored = await repo.addLog(
+      FoodLog(
+        id: '',
+        childId: log.childId,
+        eatenAt: log.eatenAt,
+        mealType: log.mealType,
+        source: log.source,
+        items: log.items,
+        groups: log.groups,
+      ),
+    );
+    state = AsyncData([..._ordered, restored]
+      ..sort((a, b) => a.eatenAt.compareTo(b.eatenAt)));
   }
 
   /// Catat ASI untuk hari ini (toggle "ASI hari ini").
@@ -125,6 +150,16 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
 
   static bool _isSameDay(DateTime a, DateTime day) =>
       a.year == day.year && a.month == day.month && a.day == day.day;
+
+  /// Klasifikasi kasar jenis makan menurut jam perangkat (bukan klaim
+  /// yang ditampilkan ke pengguna — lihat catatan di `addManualGroup`).
+  static MealType _inferMealType(DateTime now) {
+    final hour = now.hour;
+    if (hour < 10) return MealType.breakfast;
+    if (hour < 14) return MealType.lunch;
+    if (hour < 17) return MealType.snack;
+    return MealType.dinner;
+  }
 }
 
 /// Ringkasan Piring Hari Ini (anak terpilih, hari ini, waktu perangkat).
