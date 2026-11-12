@@ -49,6 +49,16 @@ final class NutritionRules {
   List<String> tipsForMissing(Set<String> missingGroups) =>
       [for (final code in FoodGroup.allCodes)
         if (missingGroups.contains(code) && tips.containsKey(code)) tips[code]!];
+
+  /// Kode kelompok yang belum tercapai DAN punya tips (urut tetap PRD).
+  /// Dipakai UI agar dapat menampilkan nama kelompok + aksi catat.
+  List<String> missingCodesWithTips(Set<String> missingGroups) => [
+        for (final code in FoodGroup.allCodes)
+          if (missingGroups.contains(code) && tips.containsKey(code)) code,
+      ];
+
+  /// Tips untuk satu kode kelompok; null bila tidak tersedia.
+  String? tipFor(String groupCode) => tips[groupCode];
 }
 
 abstract final class NutritionRulesLoader {
@@ -56,6 +66,10 @@ abstract final class NutritionRulesLoader {
 
   static const allowedCountBasis = {'all', 'without_breast_milk'};
   static const _expectedAnimal = {'dairy', 'flesh', 'eggs'};
+
+  /// Batas panjang tips (karakter). Tips seed yang wajar < 140 karakter;
+  /// string yang terpotong/tersisip teks lain akan tertangkap di sini.
+  static const int maxTipLength = 140;
 
   static NutritionRules fromJsonString(String contents) {
     final decoded = jsonDecode(contents);
@@ -206,7 +220,19 @@ abstract final class NutritionRulesLoader {
           'nutrition_rules.json: nilai tips untuk "$key" kosong.',
         );
       }
-      tips[key] = value;
+      final tip = value.trim();
+      if (tip.length > maxTipLength) {
+        throw InvalidReferenceDataException(
+          'nutrition_rules.json: tips "$key" terlalu panjang '
+          '(${tip.length} > $maxTipLength karakter) — kemungkinan teks korup.',
+        );
+      }
+      if (tip.contains('\n')) {
+        throw InvalidReferenceDataException(
+          'nutrition_rules.json: tips "$key" berisi baris baru.',
+        );
+      }
+      tips[key] = tip;
     }
 
     // ── peninjauan (PRD §9.1): string atau null ───────────────────
