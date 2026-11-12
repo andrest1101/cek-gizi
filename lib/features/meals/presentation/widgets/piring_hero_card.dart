@@ -8,7 +8,6 @@ import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
-import 'package:cekgizi/features/meals/domain/services/dietary_diversity.dart';
 import 'package:cekgizi/features/meals/domain/services/piring_day.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_ring.dart';
@@ -55,8 +54,10 @@ class _PiringContent extends StatelessWidget {
     final colors = AppTheme.colorsOf(context);
     final textTheme = Theme.of(context).textTheme;
     final reached = piring.isTargetReached;
-    final animalMissing = !piring.animalProteinPresent;
+    final animalPresent = piring.animalProteinPresent;
     final noProfile = piring.profile == null;
+    final met = piring.countedCount;
+    final total = piring.targetCount;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -65,56 +66,25 @@ class _PiringContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Semantics(
-                  header: true,
-                  child: Text(
-                    AppStrings.piringTitle.toUpperCase(),
-                    style: textTheme.labelMedium?.copyWith(
-                      color: colors.primary,
-                      letterSpacing: 1.2,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
+          Semantics(
+            header: true,
+            child: Text(
+              AppStrings.piringTitle.toUpperCase(),
+              style: textTheme.labelMedium?.copyWith(
+                color: colors.primary,
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.w700,
               ),
-              if (reached)
-                Semantics(
-                  label: AppStrings.piringTargetReached,
-                  excludeSemantics: true,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.xs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colors.primary,
-                      borderRadius:
-                          BorderRadius.circular(AppRadius.pill),
-                    ),
-                    child: Text(
-                      AppStrings.piringReachedBadge,
-                      style: textTheme.labelMedium?.copyWith(
-                        color: colors.onPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Center(
             child: PiringRing(
-              met: piring.groups,
+              met: piring.countedGroups,
+              codes: piring.targetCodes,
               size: 196,
               strokeWidth: 18,
-              semanticsLabel: AppStrings.piringGroupsMetSemantics(
-                piring.groups.length,
-                FoodGroup.allCodes.length,
-              ),
+              semanticsLabel: AppStrings.piringGroupsMetSemantics(met, total),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -132,22 +102,35 @@ class _PiringContent extends StatelessWidget {
               text: AppStrings.piringTargetReached,
               bold: true,
             )
-          else if (animalMissing)
-            _StatusLine(
-              icon: Icons.info_outline_rounded,
-              color: colors.accent,
-              text: AppStrings.piringAnimalProteinMissing,
-            )
           else
             _StatusLine(
               icon: Icons.donut_small_rounded,
               color: colors.primary,
-              text: AppStrings.piringPartial(
-                piring.groups.length,
-                FoodGroup.allCodes.length,
-              ),
+              text: AppStrings.makanTodayProgress(met, total),
             ),
           const SizedBox(height: AppSpacing.xs),
+          _StatusLine(
+            icon: animalPresent
+                ? Icons.check_circle_outline_rounded
+                : Icons.info_outline_rounded,
+            color: animalPresent ? colors.primary : colors.accent,
+            text: animalPresent
+                ? AppStrings.piringAnimalProteinPresent
+                : AppStrings.piringAnimalProteinMissing,
+          ),
+          if (animalPresent) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              AppStrings.piringLegendAnimal,
+              textAlign: TextAlign.center,
+              style: textTheme.labelMedium?.copyWith(
+                color: colors.textSecondary,
+                fontSize: 11,
+                height: 1.3,
+              ),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.sm),
           Text(
             noProfile
                 ? AppStrings.piringNoProfile

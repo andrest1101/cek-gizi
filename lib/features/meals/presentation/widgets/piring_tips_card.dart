@@ -7,6 +7,7 @@ import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
+import 'package:cekgizi/features/meals/presentation/meals_actions.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 
@@ -45,11 +46,24 @@ class PiringTipsCard extends ConsumerWidget {
           loading: () => const _TipsSkeleton(),
           error: (_, _) => const SizedBox.shrink(),
           data: (rules) {
-            final tips = rules.tipsForMissing(diversity.missingGroups);
-            if (tips.isEmpty) return const SizedBox.shrink();
+            final codes = rules.missingCodesWithTips(diversity.missingGroups);
+            if (codes.isEmpty) return const SizedBox.shrink();
+            final code = codes.first;
+            final tip = rules.tipFor(code);
+            if (tip == null) return const SizedBox.shrink();
+            final groupLabel = AppStrings.groupLabel(code);
             return _TipsContent(
-              tip: tips.first,
+              tip: tip,
+              groupLabel: groupLabel,
               isReviewed: rules.isReviewed,
+              onLog: () => logFoodGroup(
+                context,
+                ref,
+                childId: child.id,
+                groupCode: code,
+                groupLabel: groupLabel,
+                alreadyLogged: piring.groups.contains(code),
+              ),
             );
           },
         );
@@ -59,10 +73,17 @@ class PiringTipsCard extends ConsumerWidget {
 }
 
 class _TipsContent extends StatelessWidget {
-  const _TipsContent({required this.tip, required this.isReviewed});
+  const _TipsContent({
+    required this.tip,
+    required this.groupLabel,
+    required this.isReviewed,
+    required this.onLog,
+  });
 
   final String tip;
+  final String groupLabel;
   final bool isReviewed;
+  final VoidCallback onLog;
 
   @override
   Widget build(BuildContext context) {
@@ -96,26 +117,31 @@ class _TipsContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Semantics(
-                  header: true,
-                  child: Text(
-                    AppStrings.tipTitle,
-                    style: textTheme.labelMedium?.copyWith(
-                      color: colors.accent,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
-                    ),
+                Text(
+                  AppStrings.tipTitle,
+                  style: textTheme.labelMedium?.copyWith(
+                    color: colors.textSecondary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  groupLabel,
+                  style: textTheme.titleMedium?.copyWith(
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   tip,
                   style: textTheme.bodySmall?.copyWith(
-                    color: colors.textPrimary,
+                    color: colors.textSecondary,
                   ),
                 ),
                 if (!isReviewed) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     AppStrings.piringUnreviewedCaption,
                     style: textTheme.labelMedium?.copyWith(
@@ -125,6 +151,21 @@ class _TipsContent extends StatelessWidget {
                     ),
                   ),
                 ],
+                const SizedBox(height: AppSpacing.xs),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: onLog,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(0, 48),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                      ),
+                      tapTargetSize: MaterialTapTargetSize.padded,
+                    ),
+                    child: const Text(AppStrings.tipsAction),
+                  ),
+                ),
               ],
             ),
           ),

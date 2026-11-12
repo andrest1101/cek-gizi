@@ -226,4 +226,160 @@ void main() {
     );
     expect(find.text(AppStrings.tipTitle), findsOneWidget);
   });
+
+  testWidgets(
+    'ketuk ulang kelompok yang sudah tercatat tidak menambah log duplikat',
+    (tester) async {
+      final child = fakeChild();
+      await _pumpApp(
+        tester,
+        child: child,
+        logs: [
+          fakeFoodLog(
+            id: 'seed-1',
+            childId: child.id,
+            eatenAt: DateTime.now(),
+            groups: const ['grains_tubers'],
+          ),
+        ],
+      );
+
+      await tester.tap(find.text(AppStrings.navMakan));
+      await tester.pumpAndSettle();
+      expect(find.text(AppStrings.makanTodayProgress(1, 8)), findsOneWidget);
+
+      await _scrollTo(tester, find.text(AppStrings.groupGrainsTubersShort));
+      await tester.tap(find.text(AppStrings.groupGrainsTubersShort));
+      await tester.pumpAndSettle();
+
+      // Bukan catatan baru — tawaran menghapus.
+      expect(
+        find.text(
+          AppStrings.makanGroupAlreadyLogged(AppStrings.groupGrainsTubers),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text(AppStrings.makanDeleteLog), findsOneWidget);
+
+      await tester.tap(find.text(AppStrings.makanDeleteLog));
+      await tester.pumpAndSettle();
+      await _scrollTo(tester, find.text(AppStrings.makanTodayEmpty), delta: -240);
+      expect(find.text(AppStrings.makanTodayEmpty), findsOneWidget);
+
+      await _scrollTo(tester, find.text(AppStrings.makanDiaryEmpty));
+      expect(find.text(AppStrings.makanDiaryEmpty), findsOneWidget);
+    },
+  );
+
+  testWidgets('hari sebelumnya dilipat; catatan terbuka setelah diketuk', (
+    tester,
+  ) async {
+    final child = fakeChild();
+    await _pumpApp(
+      tester,
+      child: child,
+      logs: [
+        fakeFoodLog(
+          id: 'yesterday-1',
+          childId: child.id,
+          eatenAt: DateTime.now().subtract(const Duration(days: 1)),
+          groups: const ['eggs'],
+          items: const [
+            FoodLogItem(name: 'Telur dadar kemarin', groups: ['eggs']),
+          ],
+        ),
+      ],
+    );
+
+    await tester.tap(find.text(AppStrings.navMakan));
+    await tester.pumpAndSettle();
+
+    await _scrollTo(tester, find.text(AppStrings.makanYesterday));
+    expect(find.text(AppStrings.makanYesterday), findsOneWidget);
+    // Item hari sebelumnya belum dibangun sebelum lipatan dibuka.
+    expect(find.text('Telur dadar kemarin'), findsNothing);
+
+    await tester.tap(find.text(AppStrings.makanYesterday));
+    await tester.pumpAndSettle();
+    expect(find.text('Telur dadar kemarin'), findsOneWidget);
+  });
+
+  testWidgets('usia 24–59 bulan: semesta 7 kelompok & ASI jadi sekunder', (
+    tester,
+  ) async {
+    final child = fakeChild(
+      birthDate: DateTime.now().subtract(const Duration(days: 900)),
+    );
+    const groups = [
+      'grains_tubers',
+      'legumes_nuts',
+      'dairy',
+      'flesh',
+      'eggs',
+    ];
+    await _pumpApp(
+      tester,
+      child: child,
+      logs: [
+        for (var i = 0; i < groups.length; i++)
+          fakeFoodLog(
+            id: 'log-$i',
+            childId: child.id,
+            eatenAt: DateTime.now(),
+            groups: [groups[i]],
+          ),
+      ],
+    );
+
+    await tester.tap(find.text(AppStrings.navMakan));
+    await tester.pumpAndSettle();
+
+    // Semesta target 7 (tanpa ASI), bukan 8.
+    expect(find.text(AppStrings.makanTodayProgress(5, 7)), findsOneWidget);
+    expect(find.text(AppStrings.makanAsiSecondaryNote), findsOneWidget);
+    final asiButton = tester.widget<TextButton>(
+      find
+          .ancestor(
+            of: find.text(AppStrings.makanAsiActionLog),
+            matching: find.byWidgetPredicate((widget) => widget is TextButton),
+          )
+          .first,
+    );
+    expect(asiButton.onPressed, isNotNull);
+  });
+
+  testWidgets('hero tetap menampilkan status protein hewani saat tercapai', (
+    tester,
+  ) async {
+    final child = fakeChild();
+    const groups = [
+      'grains_tubers',
+      'legumes_nuts',
+      'dairy',
+      'flesh',
+      'eggs',
+    ];
+    await _pumpApp(
+      tester,
+      child: child,
+      logs: [
+        for (var i = 0; i < groups.length; i++)
+          fakeFoodLog(
+            id: 'log-$i',
+            childId: child.id,
+            eatenAt: DateTime.now(),
+            groups: [groups[i]],
+          ),
+      ],
+    );
+
+    await _scrollTo(
+      tester,
+      find.text(AppStrings.piringTargetReached),
+      scrollable: _berandaScrollable,
+    );
+    // Satu status capaian (tidak ganda) + protein hewani tetap terlihat.
+    expect(find.text(AppStrings.piringTargetReached), findsOneWidget);
+    expect(find.text(AppStrings.piringAnimalProteinPresent), findsOneWidget);
+  });
 }

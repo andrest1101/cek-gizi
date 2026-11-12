@@ -24,6 +24,26 @@ final class PiringDay {
 
   int get metCount => groups.length;
 
+  /// Kelompok yang dihitung pada target usia ini: 8 kelompok, atau 7 bila
+  /// profil usia tidak menghitung ASI (24–59 bulan).
+  List<String> get targetCodes => profile?.countWithoutBreastMilk == true
+      ? [
+          for (final code in FoodGroup.allCodes)
+            if (code != 'breast_milk') code,
+        ]
+      : FoodGroup.allCodes;
+
+  int get targetCount => targetCodes.length;
+
+  /// Kelompok terisi yang masuk semesta target (ASI diabaikan bila tidak
+  /// dihitung pada usia ini).
+  Set<String> get countedGroups => {
+        for (final code in targetCodes)
+          if (groups.contains(code)) code,
+      };
+
+  int get countedCount => countedGroups.length;
+
   bool get hasLogs => logs.isNotEmpty;
 
   bool get isTargetReached => diversity?.isTargetReached ?? false;

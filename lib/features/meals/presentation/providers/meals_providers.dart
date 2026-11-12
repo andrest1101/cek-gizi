@@ -140,6 +140,31 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
     state = AsyncData(remaining);
   }
 
+  /// Hapus catatan hari ini yang mewakili satu kelompok (ketuk ulang tile).
+  ///
+  /// Hanya log dengan tepat satu kelompok tersebut yang dihapus; catatan
+  /// gabungan (mis. hasil scan) tidak ikut terhapus.
+  Future<void> removeGroupToday(String groupCode) async {
+    final today = DateTime.now();
+    final removable = [
+      for (final log in _ordered)
+        if (_isSameDay(log.eatenAt.toLocal(), today) &&
+            log.groups.length == 1 &&
+            log.groups.first == groupCode)
+          log,
+    ];
+    if (removable.isEmpty) return;
+    final repo = ref.read(foodLogRepositoryProvider);
+    for (final log in removable) {
+      await repo.deleteLog(log.id);
+    }
+    final removedIds = {for (final log in removable) log.id};
+    state = AsyncData([
+      for (final log in _ordered)
+        if (!removedIds.contains(log.id)) log,
+    ]);
+  }
+
   Future<void> deleteLog(String id) async {
     await ref.read(foodLogRepositoryProvider).deleteLog(id);
     state = AsyncData([
