@@ -206,9 +206,11 @@ class _StatusCard extends StatelessWidget {
             label: const Text(AppStrings.statusAddFirst),
           ),
           const SizedBox(height: AppSpacing.xs),
-          TextButton(
+          TextButton.icon(
             onPressed: onDetail,
-            child: const Text(AppStrings.statusViewDetail),
+            icon: const Icon(Icons.chevron_right_rounded),
+            label: const Text(AppStrings.statusViewDetail),
+            iconAlignment: IconAlignment.end,
           ),
         ],
       ),

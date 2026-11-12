@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import 'package:cekgizi/core/config/app_config.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
+import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/utils/greeting.dart';
+import 'package:cekgizi/core/utils/date_format.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/growth_status_card.dart';
@@ -31,6 +33,7 @@ class HomeScreen extends ConsumerWidget {
         child: RefreshIndicator(
           onRefresh: () => _refresh(ref),
           child: ListView(
+            key: const Key('home-list'),
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.screenPadding,
@@ -62,16 +65,16 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     );
                   }
-                  return const Column(
+                  return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      ChildSwitcherCard(),
-                      SizedBox(height: AppSpacing.lg),
-                      PiringHeroCard(),
-                      SizedBox(height: AppSpacing.lg),
-                      GrowthStatusCard(),
-                      SizedBox(height: AppSpacing.lg),
-                      PiringTipsCard(),
+                      const ChildSwitcherCard(),
+                      const SizedBox(height: AppSpacing.lg),
+                      const PiringHeroCard(),
+                      const SizedBox(height: AppSpacing.lg),
+                      const GrowthStatusCard(),
+                      const SizedBox(height: AppSpacing.lg),
+                      const PiringTipsCard(),
                     ],
                   );
                 },
@@ -91,13 +94,15 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class _HomeHeader extends StatelessWidget {
+class _HomeHeader extends ConsumerWidget {
   const _HomeHeader();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colorsOf(context);
     final textTheme = Theme.of(context).textTheme;
+    final now = DateTime.now();
+    final childName = ref.watch(selectedChildProvider).value?.nickname;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -107,16 +112,21 @@ class _HomeHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                Greeting.of(DateTime.now()),
-                style: textTheme.bodySmall?.copyWith(
+                IdDateFormat.eyebrow(now),
+                style: textTheme.labelMedium?.copyWith(
                   color: colors.textSecondary,
+                  letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: 2),
               Semantics(
                 header: true,
                 child: Text(
-                  AppConfig.appName,
+                  childName == null
+                      ? AppConfig.appName
+                      : '${Greeting.of(now)}, $childName',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: textTheme.titleLarge?.copyWith(
                     color: colors.textPrimary,
                   ),
@@ -125,10 +135,11 @@ class _HomeHeader extends StatelessWidget {
             ],
           ),
         ),
-        IconButton(
+        const SizedBox(width: AppSpacing.sm),
+        IconButton.filledTonal(
           tooltip: AppStrings.homeManageChild,
           onPressed: () => context.push('/children'),
-          icon: Icon(Icons.tune_rounded, color: colors.textPrimary),
+          icon: const Icon(Icons.tune_rounded, size: 21),
         ),
       ],
     );
@@ -143,9 +154,11 @@ class _HomeSkeleton extends StatelessWidget {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Skeleton(height: 84),
+        Skeleton(height: 56),
         SizedBox(height: AppSpacing.lg),
-        Skeleton(height: 280),
+        Skeleton(height: 72),
+        SizedBox(height: AppSpacing.lg),
+        Skeleton(height: 320, radius: AppRadius.card + AppSpacing.xs),
         SizedBox(height: AppSpacing.lg),
         Skeleton(height: 236),
       ],

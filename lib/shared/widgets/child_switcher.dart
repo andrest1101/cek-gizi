@@ -11,10 +11,12 @@ import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/shared/widgets/child_avatar.dart';
 
-/// Kartu anak aktif di Beranda: avatar, nama, usia, dan afordans ganti anak.
+/// Baris identitas anak di Beranda: avatar, nama, usia, dan chevron ke
+/// sheet ganti anak.
 ///
-/// Ketuk → sheet pilih anak + tautan "Kelola anak". Bila hanya satu anak,
-/// sheet tetap berguna sebagai jalan ke layar kelola.
+/// Tanpa permukaan kartu — sengaja ringan agar hero Piring Hari Ini yang
+/// menjadi fokus (PRD §7.1). Ketuk baris → sheet pilih anak +
+/// tautan "Kelola anak".
 class ChildSwitcherCard extends ConsumerWidget {
   const ChildSwitcherCard({super.key});
 
@@ -32,81 +34,65 @@ class ChildSwitcherCard extends ConsumerWidget {
     return Semantics(
       container: true,
       button: true,
-      label: AppStrings.homeChildCardSemantics(child.nickname, age),
+      label: '${child.nickname}, $age — ganti anak',
       excludeSemantics: true,
-      child: DecoratedBox(
-        decoration: AppSurfaces.card(context),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(AppRadius.card),
-            onTap: () => showChildSwitcherSheet(context),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Row(
-                children: [
-                  ChildAvatar(
-                    avatarKey: child.avatarKey,
-                    size: 52,
-                    semanticLabel: child.nickname,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppRadius.control),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.control),
+          onTap: () => showChildSwitcherSheet(context),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xs,
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                ChildAvatar(
+                  avatarKey: child.avatarKey,
+                  size: 48,
+                  semanticLabel: child.nickname,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        child.nickname,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: AppTheme.colorsOf(context).textPrimary,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        age,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppTheme.colorsOf(context).textSecondary,
+                            ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          child.nickname,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                            color: AppTheme.colorsOf(context).textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          age,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                            color: AppTheme.colorsOf(context).textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+                Container(
+                  width: 40,
+                  height: 40,
+                  margin: const EdgeInsets.only(left: AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AppSurfaces.sunken(context, radius: AppRadius.pill)
+                        .color,
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
-                    ),
-                    decoration: AppSurfaces.sunken(
-                      context,
-                      radius: AppRadius.pill,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.unfold_more_rounded,
-                          size: 18,
-                          color: AppTheme.colorsOf(context).textSecondary,
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Text(
-                          AppStrings.homeChangeChild,
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(
-                            color: AppTheme.colorsOf(context).textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: Icon(
+                    Icons.unfold_more_rounded,
+                    size: 22,
+                    color: AppTheme.colorsOf(context).textSecondary,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
