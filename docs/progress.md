@@ -263,6 +263,33 @@ Presentasi + satu perbaikan data tips. **Tidak ada dependency baru, tidak ada pe
 - Peninjauan `nutrition_rules.json` oleh ahli gizi/bidan (`reviewed_by` masih `null`). Perbaikan string korup = memperbaiki teks rusak, **bukan** mengubah aturan gizi.
 - Opsional lanjutan (belum dieksekusi): strip 7 hari terakhir; batas fetch riwayat (butuh keputusan retensi data).
 
+## Batch 6.5 — Copy polish bebas "tanda generate" + ikonografi kelola (2026-11-12)
+
+### Ruang lingkup
+Tanda baca, copy, dan ikon saja. **Tidak ada perubahan data gizi, z-score, tabel SD, entity, atau skema Supabase**; tidak ada dependency baru.
+
+### Perubahan
+1. **Em dash (U+2014) dihapus semua**: 84 kemunculan di 46 berkas `.dart` (termasuk seluruh komentar), plus copy yang tampil ke pengguna:
+   - 8 string `AppStrings`: onboardingBody2, consentIntro, consentBullets, childEmptyBody, validationAgeRange, statusTrendNeedsAttention, makanAsiSubtitle, makanGridHint — diganti titik/koma/titik dua yang wajar Bahasa Indonesia.
+   - Inline UI: `${growthMeasureSaved}: $childName`, `${statusDetailTitle}: $nickname`, label semantik ganti anak ("Ketuk untuk ganti anak"), `formatZ(null)` → `'-'`.
+   - Dev gallery `token_gallery_screen.dart` juga dirapikan.
+   - Token gallery/kementar tetap memakai tanda biasa; **data pemilik** (`assets/rules`, `assets/reference`, `docs/`) **tidak** diubah.
+2. **Ikon Kelola anak**: `tune_rounded` → `manage_accounts_rounded` (Beranda + sheet pilih anak) agar makna lebih jelas.
+3. **Tombol "Catat sekarang"** (tips) diberi ikon `add_rounded`.
+4. Tujuan: copy tidak terasa ditulis AI dan arah fungsionalnya jelas.
+
+### Berkas
+`lib/core/constants/app_strings.dart`, `add_measurement_sheet.dart`, `growth_status_card.dart`, `status_copy.dart`, `child_switcher.dart`, `home_screen.dart`, `piring_tips_card.dart`, `token_gallery_screen.dart`, `nutrition_rules.dart`, serta pembersihan komentar di ~40 berkas lain; `test/` ikut dibersihkan.
+
+### Verifikasi (2026-11-12)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **193/193 passed**.
+- DoD §10.1: gradien 0; `Colors.` di features/shared 0 (kecuali transparent); `GEMINI_API_KEY=<literal>` 0.
+
+### Catatan
+- Em dash di `docs/PRD.md` dan `_notes` pada `assets/reference/permenkes_2_2020_sd.json` sengaja dibiarkan (bukan UI; data pemilik).
+- Batch 6.4 (opsional: strip 7 hari / batas fetch) tetap menunggu keputusan retensi kamu.
+
 ## Batch 4.1 — Penyegaran Visual Beranda, Tumbuh, Onboarding, Consent, Anak (2026-11-11)
 
 ### Ruang lingkup

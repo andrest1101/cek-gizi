@@ -14,6 +14,7 @@
 - "Hari ini" dan "Hari sebelumnya" dipisah; hari lama dilipat.
 - Kelompok yang sudah tercatat tidak boleh menambah log duplikat; ketuk ulang menawarkan hapus.
 - ASI 24–59 bulan tetap bisa dicatat, tapi jadi aksi sekunder berlabel "tidak dihitung pada target".
+- Copy bersih dari tanda "hasil generate AI" (em dash U+2014), termasuk semua komentar kode.
 - Tanpa dependency baru, tanpa perubahan skema Supabase, tanpa menyentuh z-score/tabel SD.
 
 ## Status batch
@@ -24,6 +25,7 @@
 | 6.2 | Hierarki Beranda & Makan (header bersama, hero, tips, grid, diary) | Selesai (2026-11-12) |
 | 6.3 | Polish & konsistensi (Tumbuh empty state, copy, semantics, dokumen) | Selesai (2026-11-12) |
 | 6.4 | Opsional: strip 7 hari, batas fetch riwayat | Belum (butuh keputusan retensi) |
+| 6.5 | Copy polish: hapus em dash, ikon kelola anak, ikon tombol tips | Selesai (2026-11-12) |
 
 ---
 
@@ -77,6 +79,22 @@
 - DoD §10.1: gradien 0; `Colors.` di `lib/features`+`lib/shared` 0 (kecuali `Colors.transparent`); `GEMINI_API_KEY=<literal>` 0.
 - Layout 360×640 @1,3 light/dark: hijau.
 
+## Batch 6.5 — Copy polish bebas "tanda generate" + ikonografi kelola
+
+### Checklist
+- [x] Em dash (U+2014) dihapus semua: 84 kemunculan di 46 berkas `.dart` (termasuk semua komentar), disesuaikan ke titik/koma/titik dua.
+- [x] Copy yang tampil di app diperbaiki (8 string `AppStrings`): onboarding, consent, anak kosong, validasi, tren berat, ASI, hint grid.
+- [x] Inline UI: judul dialog simpan jadi `"...: $childName"`, detail angka pakai titik dua, label semantik "Ketuk untuk ganti anak", `formatZ(null)` → `'-'`.
+- [x] Ikon Kelola anak: `tune_rounded` → `manage_accounts_rounded` (Beranda + sheet anak).
+- [x] Tombol "Catat sekarang" pada tips diberi ikon tambah.
+- [x] `flutter analyze` bersih; `flutter test` **193/193 passed**.
+- [x] Update `docs/progress.md` (Batch 6.5).
+
+### Catatan
+- Data pemilik TIDAK diubah: `assets/rules/nutrition_rules.json` (kecuali perbaikan string korup), `assets/reference/*`, `PRD.md`.
+- `0–60`, `6–23`, `24–59` (en dash U+2013 pada rentang angka) sengaja dibiarkan karena wajar.
+- Em dash di komentar/dokumen ikut dibersihkan; ini tidak mengubah perilaku aplikasi.
+
 ---
 
 ## Catatan risiko / hal yang belum bisa diverifikasi AI
@@ -88,38 +106,28 @@
 - Batas fetch riwayat belum ada: `foodLogsProvider` masih mengambil seluruh riwayat anak (kandidat Batch 6.4).
 
 ## Langkah berikutnya
-1. Pemilik memverifikasi tampilan & alur di perangkat: Beranda → Makan (quick-add, duplikat, ASI, lipat hari sebelumnya) → Beranda.
-2. Siapkan `git add` per tema + pesan conventional commit (AI tidak commit/push).
+1. Pemilik memverifikasi tampilan & alur di perangkat: Beranda → Makan (quick-add, duplikat, ASI, lipat hari sebelumnya) → Beranda → Tumbuh.
+2. Commit manual sesuai kelompok di bawah (AI tidak commit/push).
 3. Lanjut Batch 5 setelah Cloud Billing + `GEMINI_API_KEY` + `foods_id.json` tersedia.
 
 ---
 
-## Siap commit (belum ada yang di-commit — commit manual oleh pemilik)
+## Siap commit (commit manual oleh pemilik)
 
-Perubahan dibagi per tema agar review mudah. AI tidak menjalankan commit.
+Pembersihan em dash menyentuh hampir semua berkas, jadi pemisahan per tema **tidak lagi bersih secara path**.
+Rekomendasi: satu commit refactor UI/UX penuh, atau commit granular dengan `git add -p`.
 
-**1. Fix data tips**
+**Opsi A (direkomendasikan) — satu commit refactor UI/UX**
 ```powershell
-git add assets/rules/nutrition_rules.json lib/domain_ref/nutrition_rules.dart test/domain_ref/nutrition_rules_test.dart
-git commit -m "fix(rules): perbaiki tips grains_tubers yang tersisip teks asing" -m "Loader kini menolak tips >140 karakter / berisi baris baru; seed tips lolos guard. Verifikasi: flutter analyze bersih; flutter test 193/193."
+git add -A
+git commit -m "refactor(ui): poles total Beranda, Makan, Tumbuh bebas copy AI" -m "Ring progres untuk ukuran kecil & celah busur dari stroke; semesta target mengikuti usia (8/7); quick-add menolak duplikat & menawarkan hapus; diary dipisah hari ini vs hari sebelumnya; header bersama ScreenHeader + panel hari ini; tumbuh satu empty state; ikon Kelola anak & tombol tips; copy bebas em dash; tips grains_tubers korup diperbaiki + guard loader. Verifikasi: flutter analyze bersih; flutter test 193/193."
 ```
 
-**2. Feat meals: ring berangka, anti-duplikat, diary dipisah**
-```powershell
-git add lib/features/meals lib/core/constants/app_strings.dart lib/shared/widgets/screen_header.dart test/features/piring_ring_test.dart test/features/makan_flow_test.dart
-git commit -m "feat(meals): ring progres berlabel & diary dipisah hari ini vs sebelumnya" -m "Celah busur dihitung dari stroke; ring mini jadi 1 busur monokrom; semesta target mengikuti usia (8/7); quick-add menolak duplikat & menawarkan hapus; hari sebelumnya dilipat; panel hari ini menggantikan header polos. Verifikasi: flutter analyze bersih; flutter test 193/193."
-```
-
-**3. Feat home/tumbuh: konsistensi header & empty state**
-```powershell
-git add lib/features/home lib/features/growth/presentation/screens/growth_screen.dart lib/shared/widgets/child_switcher.dart
-git commit -m "feat(home): hierarki Beranda konsisten & Tumbuh satu empty state" -m "Header bersama ScreenHeader; nama anak tidak diulang; tips tampil sebelum kartu tumbuh; Tumbuh tanpa grafik/riwayat saat kosong; TodayWatcher memuat ulang catatan hari ini saat resume & tengah malam. Verifikasi: flutter analyze bersih; flutter test 193/193."
-```
-
-**4. Docs**
-```powershell
-git add docs/progress.md refactor_sementara.md
-git commit -m "docs(progress): catat Batch 6.1 refactor UI/UX + pelacak refactor_sementara"
-```
+**Opsi B — tetap per tema (granular, pakai git add -p)**
+1. `fix(rules): perbaiki tips grains_tubers tersisip teks asing` — `assets/rules/nutrition_rules.json`, `lib/domain_ref/nutrition_rules.dart`, `test/domain_ref/nutrition_rules_test.dart`.
+2. `feat(meals): ring progres berlabel & diary dipisah` — seluruh `lib/features/meals`, `lib/core/constants/app_strings.dart`, `lib/shared/widgets/screen_header.dart`, `test/features/piring_ring_test.dart`, `test/features/makan_flow_test.dart`.
+3. `feat(home): hierarki Beranda konsisten & Tumbuh satu empty state` — `lib/features/home`, `growth_screen.dart`, `child_switcher.dart`.
+4. `style(copy): hapus semua em dash + rapikan copy UI` — sisa berkas (komentar & tanda baca).
+5. `docs(progress): catat Batch 6.1 & 6.5 + pelacak refactor_sementara`.
 
 Catatan: `lib/shared/widgets/child_identity_row.dart` kini tidak dipakai di mana pun — dibiarkan ada, bisa dihapus di commit terpisah bila pemilik setuju.
