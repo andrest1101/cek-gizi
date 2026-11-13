@@ -241,6 +241,13 @@ final class FakeFoodLogRepository implements FoodLogRepository {
   final List<FoodLog> _logs;
   int _counter = 1000;
 
+  int get logCount => _logs.length;
+
+  List<FoodLog> logs(String childId) => [
+        for (final log in _logs)
+          if (log.childId == childId) log,
+      ];
+
   @override
   Future<List<FoodLog>> listLogs(String childId) async {
     return [
