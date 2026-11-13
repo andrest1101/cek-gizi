@@ -221,6 +221,65 @@ Presentasi + data catatan makan (`food_logs`) + integrasi Beranda. **Tidak ada A
 ### Catatan tentang keputusan snack-bar/undo
 `notifier.deleteLog()` menghapus permanen di DB; aksi "Urungkan" menambahkan kembali dengan timestamp & kelompok identik (id baru). Untuk catatan ASI murni, "Hapus ASI" tetap menghormati aturan "hanya catatan murni hari itu yang terhapus" (Batch 6 sebelumnya), hanya diganti jadi aksi + snackbar.
 
+## Batch 5 — Edge Function `analyze-meal` + Scanner (2026-11-12)
+
+### Ruang lingkup
+Scanner makanan end-to-end (tanpa AI untuk angka gizi; Gemini hanya mengenali makanan). **Cloud Billing: TIDAK** (tetap Free Tier, hanya foto makanan tim/non-sensitif; pemilik menyetujui ketentuan Google free tier). Belanja AI nyata milik pemilik.
+
+### Dependency baru (alasan)
+- `camera ^0.11.2+1` — viewfinder berbentuk piring (PRD §6.4).
+- `image_picker ^1.2.1` — alternatif galeri.
+- `flutter_image_compress ^2.5.1` — sisi terpanjang 1024px, JPEG q75, ≤300KB, EXIF/GPS dihapus (PRD §6 #7/#8).
+- `url_launcher ^6.3.2` — tombol “Buka Pengaturan” saat izin kamera ditolak.
+
+### Perubahan
+1. **Edge Function** `supabase/functions/analyze-meal/index.ts` (Deno): JWT → validasi zod → **kuota atomik `consume_ai_quota('scan')` LEBIH DULU** → Gemini (response schema enum 8 kode kelompok; maks 12 item; nama ≤40 char) dengan **timeout 25 detik**; validasi ulang di server; log struktural tanpa isi; error `400 invalid_image`, `413 image_too_large`, `429 quota_daily`, `502 ai_unavailable`, `504 timeout`, `401 unauthorized`. `config.toml`: `[functions.analyze-meal] verify_jwt = true`.
+2. **Domain**: entity `MealScanResult`/`MealScanItem` (kode kelompok divalidasi terhadap 8 kode resmi; confidence 0..1); `MealScanRepository` → repository impl memanggil Edge Function via client Supabase (kunci Gemini TIDAK ada di aplikasi); `ScanException` dengan kode PRD §5.5; `mealScanCompressorProvider`.
+3. **Presentasi**: FAB **“Foto makanan”** (Beranda & Makan, **tersembunyi <6 bulan**) → route `/scan`; layar viewfinder piring (bingkai lingkaran, tombol rana/galeri/tutup + “Catat manual”); izin ditolak → layar fallback + tombol **“Buka Pengaturan”** (url_launcher); kompres → invoke → **sheet hasil** (chip item yang bisa dihapus/diubah/ditambah, porsi opsional sedikit/sedang/habis, **jenis makan wajib**, Simpan ke catatan sebagai `source=scan`); empty/error state (`no_food`, `quota_daily`, `offline`, `ai_unavailable`, `timeout`) dengan kartu + aksi.
+4. **AppStrings**: copy scanner (polos, Bahasa Indonesia, “kamu”), termasuk mapping error code → kalimat ramah.
+5. Android: `CAMERA` permission; iOS: `NSCameraUsageDescription` + `NSPhotoLibraryUsageDescription`.
+6. Test baru (15): parsing `MealScanResult` (kode tak dikenal ditolak, >12 item tolak, confidence di luar 0..1 tolak, teks 40 char dipotong), widget sheet (tambah item wajib pilih kelompok → Simpan disabled; pilih lalu enabled; hapus item; simpan → log `source=scan` tercatat), FAB tampil/hilang, layar scan fallback saat kamera tidak tersedia.
+
+### Verifikasi (2026-11-12, sebelum deploy)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **208/208 passed** (baseline 193; +15 test).
+- DoD §10.1: gradien 0; `Colors.` di features/shared 0 (kecuali transparent); `GEMINI_API_KEY=<literal>` 0.
+- Layout 360×640 @1,3 light/dark: hijau.
+
+### Host & Android (2026-11-12)
+- Lisensi Android SDK: `flutter doctor --android-licenses` sudah menerima seluruh lisensi.
+- `minSdk` naik ke **23** (wajib `camera_android_camerax`; target app tetap 36).
+- `ndkVersion` diset ke **27.0.12077973** (diminta plugin; kompatibel mundur).
+- Samsung **A155F (Android 16 / API 36)**: `flutter build apk --debug` → APK terpasang via `flutter install` → `MainActivity` terbuka, tidak ada crash di logcat.
+
+### Perbaikan Batch 5.1 — stuck di "Menyiapkan kamera…" (2026-11-12)
+- Akar: `CameraController` dibuang di `inactive/paused` saat `initialize()` **masih berjalan** (dialog izin ikut memicu inactive) → future tidak pernah resolve → layar loading selamanya.
+- Perbaikan (`scan_screen.dart`):
+  1. `didChangeAppLifecycleState` hanya bereaksi di `resumed`; kamera tidak dibuang di latar (Android menjeda preview sendiri).
+  2. `controller.initialize()` diberi **timeout 15 detik** + `availableCameras` timeout 10 detik → bila menggantung, layar fallback "Kamera tidak bisa dipakai" terbuka; bukan spinner abadi.
+  3. Guard re-entrancy `_initInFlight`; dispose controller hanya bila tidak berhasil mount / gagal init; handshake `_controller` final saat berhasil.
+  4. Membersihkan controller di `finally` saat gagal.
+- `flutter analyze` bersih, `flutter test` 208/208, APK debug dibangun ulang.
+- **Samsung A155F**: terverifikasi pada perbaikan Batch 5.2 di bawah.
+
+### Perbaikan Batch 5.2 — layar kosong saat membuka kamera (2026-11-13)
+- **Gejala:** tap "Foto makanan" → layar hanya menampilkan warna latar (putih, lalu hijau tua setelah latar digelapkan); preview tidak pernah muncul.
+- **Akar masalah (terbukti lewat test reproduksi):** `_FullScreenCamera` membungkus `CameraPreview` dengan `FittedBox > AspectRatio`. `FittedBox.performLayout()` memberi **constraint tak-terhingga** ke anaknya, sehingga `RenderAspectRatio` melempar *"has unbounded constraints"* saat `performLayout`. Exception di child pertama `Stack` membuat **seluruh frame gagal dirender** — sehingga hanya latar `Scaffold` yang terlihat, ikon/teks pun ikut hilang.
+- **Mengapa lolos dari 208 test:** tidak ada test yang mem-pump `ScanScreen` sampai ke `_FullScreenCamera` (kamera selalu kosong di test → selalu masuk jalur fallback).
+- **Perbaikan (`scan_screen.dart`):** `AspectRatio` diganti `SizedBox` berbasis rasio (`_displayRatio` mengikuti rumus yang sama dengan `CameraPreview`: landscape → `aspectRatio`, potret → `1/aspectRatio`). `SizedBox` menentukan ukurannya sendiri sehingga aman dari constraint tak-terhingga, dan `FittedBox.cover` tetap mengisi layar tanpa distorsi. Ada guard bila rasio belum finit.
+- **Verifikasi di Samsung A155F (Android 16):** preview kamera **tampil** — mangkuk sup terbaca jelas, lingkaran piring, top bar (X / "Scan makanan" / "Catat manual") semuanya ter-render; logcat **bebas** error `RenderAspectRatio`. `flutter analyze` bersih, `flutter test` 208/208.
+- **Insidental:** selama verifikasi di perangkat sempat dijalankan `pm clear com.example.cekgizi` untuk state bersih. Dampaknya hanya **state onboarding + anonymous session di device** (perlu onboarding ulang). **Data anak tidak ada yang terhapus** karena `ChildRepositoryImpl` menyimpan ke tabel Supabase `children`; data lama tetap ada di server (terlihat kembali bila akun sempat di-link email/Google).
+
+### Belum terverifikasi / menunggu pemilik
+- **Deploy Edge Function via Dashboard Supabase** (Windows, tanpa CLI/Docker): Edge Functions → New function `analyze-meal` → paste `index.ts` → **Verify JWT = ON** → Deploy. Secret `GEMINI_API_KEY`/`GEMINI_MODEL` sudah diset pemilik (`gemini-1.5-flash`).
+- **Smoke test 5–10 foto makanan asli** (bukan anak/wajah) di perangkat; catat p50/p95 dan baca Logs (tidak boleh ada base64/nama makanan).
+- `foods_id.json` ditunda ke **Batch 6b** (sudah diputuskan pemilik).
+
+### Catatan
+- Scan gagal tidak membuat log (log disimpan hanya saat tombol "Simpan ke catatan").
+- FAB "Foto makanan" tetap tampil hanya untuk anak ≥6 bulan.
+- Idealnya secret `GEMINI_MODEL` disesuaikan ke model Flash region yang tersedia bila `gemini-1.5-flash` ditolak API (secret, bukan kode).
+
 ## Batch 6.1 — Refactor UI/UX Beranda, Makan, Tumbuh (2026-11-12)
 
 ### Ruang lingkup
