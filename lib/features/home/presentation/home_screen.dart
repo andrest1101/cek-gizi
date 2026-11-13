@@ -19,6 +19,7 @@ import 'package:cekgizi/shared/widgets/child_switcher.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/photo_scan_fab.dart';
 
 /// Beranda (PRD §6.3, cakupan Batch 4): sapaan, anak aktif, status tumbuh.
 /// Kartu Piring Hari Ini & tips menyusul di Batch 6.
@@ -30,6 +31,7 @@ class HomeScreen extends ConsumerWidget {
     final childrenAsync = ref.watch(childrenListProvider);
 
     return Scaffold(
+      floatingActionButton: const PhotoScanFab(),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () => _refresh(ref),

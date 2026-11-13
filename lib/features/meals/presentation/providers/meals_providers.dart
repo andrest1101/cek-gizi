@@ -34,6 +34,42 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
   List<FoodLog> get _ordered =>
       [...?state.value]..sort((a, b) => a.eatenAt.compareTo(b.eatenAt));
 
+  /// Catat hasil scan sebagai satu log (PRD §6.4): item final yang sudah
+  /// diedit pengguna, `groups` union canonical, `source = scan`.
+  Future<FoodLog> addScanLog({
+    required List<FoodLogItem> items,
+    required MealType mealType,
+    DateTime? at,
+  }) async {
+    if (items.isEmpty) {
+      throw StateError('Tidak ada item yang disimpan.');
+    }
+    final child = ref.read(selectedChildProvider).value;
+    if (child == null) throw StateError('Tidak ada anak yang dipilih.');
+    final touched = <String>{};
+    for (final item in items) {
+      touched.addAll(item.groups);
+    }
+    final groups = PiringDayEvaluator.canonicalOrder(touched);
+    if (groups.isEmpty) {
+      throw StateError('Setiap item harus punya minimal satu kelompok.');
+    }
+    final repo = ref.read(foodLogRepositoryProvider);
+    final log = await repo.addLog(
+      FoodLog(
+        id: '',
+        childId: child.id,
+        eatenAt: at ?? DateTime.now(),
+        mealType: mealType,
+        source: FoodLogSource.scan,
+        items: items,
+        groups: groups,
+      ),
+    );
+    state = AsyncData([..._ordered, log]);
+    return log;
+  }
+
   /// Catat satu kelompok pangan secara manual (PRD §6.4).
   ///
   /// Jenis makan tidak ditanyakan - kelompok pangan bukan sesi makan.

@@ -326,11 +326,77 @@ abstract final class AppStrings {
       '$met dari $total kelompok';
   static const makanTodayEmpty = 'Belum ada kelompok tercatat';
   static const makanToday = 'Hari ini';
+  static const mealBreakfast = 'Sarapan';
+  static const mealLunch = 'Siang';
+  static const mealDinner = 'Malam';
+  static const mealSnack = 'Camilan';
   static const makanYesterday = 'Kemarin';
   static const makanLoadError =
       'Gagal memuat catatan makan. Periksa koneksi internet kamu, lalu coba lagi.';
   static const makanSaveError =
       'Gagal menyimpan catatan. Periksa koneksi internet kamu, lalu coba lagi.';
+
+  // ── Scan makanan (PRD §6.4) ───────────────────────────────────────
+  static const photoScanFab = 'Foto makanan';
+  static const photoScanFabSemantics =
+      'Foto makanan. Foto dikenali lalu dihapus; tidak disimpan.';
+  static const scanTitle = 'Scan makanan';
+  static const scanHint = 'Posisikan piring di dalam lingkaran';
+  static const scanShutter = 'Ambil foto';
+  static const scanShutterSemantics = 'Ambil foto makanan';
+  static const scanGallery = 'Galeri';
+  static const scanClose = 'Tutup';
+  static const scanAnalyzing = 'Mengenali isi piring.';
+  static const scanCameraPermissionTitle = 'Izin kamera dibutuhkan';
+  static const scanCameraPermissionBody =
+      'Izinkan akses kamera untuk memindai makanan kamu.';
+  static const scanCameraUnavailableTitle = 'Kamera tidak bisa dipakai';
+  static const scanCameraUnavailableBody =
+      'Kamera tidak bisa dipakai di perangkat ini. Kamu tetap bisa mencatat manual.';
+  static const scanOpenSettings = 'Buka Pengaturan';
+  static const scanNoFoodTitle = 'Makanan tidak terdeteksi';
+  static const scanNoFoodBody =
+      'Makanan tidak terdeteksi. Coba foto ulang dengan cahaya cukup.';
+  static const scanSheetTitle = 'Hasil pemindaian';
+  static const scanSheetSubtitle = 'Periksa lalu simpan ke catatan.';
+  static const scanConfidenceLow = 'kurang yakin';
+  static const scanAddSectionTitle = 'Tambah item';
+  static const scanAddItemHint = 'Nama makanan';
+  static const scanAddItemButton = 'Tambah';
+  static const scanItemEmptyGroups =
+      'Pilih minimal satu kelompok untuk item ini.';
+  static const scanSave = 'Simpan ke catatan';
+  static const scanSaved = 'Catatan tersimpan.';
+  static const scanSaveError =
+      'Gagal menyimpan catatan. Periksa koneksi internet kamu, lalu coba lagi.';
+  static const scanQuotaTitle = 'Kuota analisis habis';
+  static const scanBusyTitle = 'Layanan sedang sibuk';
+  static const scanOfflineTitle = 'Tidak ada koneksi internet';
+  static const scanManualButton = 'Catat manual';
+  static const scanRetry = 'Coba lagi';
+  static const scanPhotoAgain = 'Foto lagi';
+  static const scanGroupLabel = 'Kelompok';
+  static const scanMealTypeLabel = 'Jenis makan';
+  static const portionLabel = 'Porsi';
+  static const portionLittle = 'Sedikit';
+  static const portionMedium = 'Sedang';
+  static const portionFinished = 'Habis';
+  static String scanSheetError(String code) => switch (code) {
+        'quota_daily' =>
+          'Kuota analisis hari ini habis. Kamu masih bisa mencatat manual.',
+        'image_too_large' =>
+          'Foto terlalu besar. Coba lagi dengan cahaya terang di dekat jendela.',
+        'invalid_image' =>
+          'Foto tidak bisa dipakai. Coba foto ulang dengan cahaya cukup.',
+        'timeout' =>
+          'Prosesnya terlalu lama. Periksa koneksi internet kamu, lalu coba lagi.',
+        'ai_unavailable' => 'Layanan sedang sibuk, coba lagi sebentar.',
+        'offline' =>
+          'Tidak ada koneksi internet. Scan membutuhkan internet; kamu tetap bisa mencatat manual.',
+        'unauthorized' =>
+          'Sesi berakhir. Tutup lalu buka aplikasi lagi.',
+        _ => 'Layanan sedang sibuk, coba lagi sebentar.',
+      };
 
   // ── Navigasi ───────────────────────────────────────────────────
   static const navHome = 'Beranda';

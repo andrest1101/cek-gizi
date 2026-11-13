@@ -16,6 +16,7 @@ import 'package:cekgizi/features/meals/domain/services/piring_day.dart';
 import 'package:cekgizi/features/meals/presentation/meals_actions.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_ring.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/photo_scan_fab.dart';
 import 'package:cekgizi/shared/widgets/child_switcher.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
@@ -40,6 +41,7 @@ class MakanScreen extends ConsumerWidget {
     final child = ref.watch(selectedChildProvider).value;
 
     return Scaffold(
+      floatingActionButton: const PhotoScanFab(),
       body: SafeArea(
         child: child == null ? const _NoChild() : _MakanBody(child: child),
       ),
