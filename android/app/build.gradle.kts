@@ -8,7 +8,9 @@ plugins {
 android {
     namespace = "com.example.cekgizi"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // NDK 27.x sesuai permintaan plugin (camera, image_picker, compress,
+    // url_launcher, shared_preferences); kompatibel mundur.
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -21,7 +23,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.cekgizi"
-        minSdk = flutter.minSdkVersion
+        // camera_android_camerax (transitif dari paket camera) butuh minSdk >= 23.
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
