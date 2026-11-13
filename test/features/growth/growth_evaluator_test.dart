@@ -6,7 +6,7 @@ import 'package:cekgizi/features/growth/domain/services/growth_evaluator.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Tabel fixture PALSU untuk menguji MEKANISME (koreksi, pembagi, step).
-/// Bukan nilai Permenkes asli — verifikasi terhadap tabel resmi menyusul
+/// Bukan nilai Permenkes asli - verifikasi terhadap tabel resmi menyusul
 /// setelah berkas resmi disediakan pemilik (docs/reference-notes.md).
 final class _FakeTables implements AnthropometryReferenceTables {
   double? lastLengthHeightStep;

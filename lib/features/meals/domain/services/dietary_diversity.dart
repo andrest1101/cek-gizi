@@ -1,7 +1,7 @@
 /// Keragaman pangan "Piring Hari Ini" (PRD §3.7).
 ///
 /// Delapan kelompok (kode tetap, dipakai DB/DTO/UI). Aturan target HANYA
-/// berasal dari `nutrition_rules.json` (disediakan pemilik) — tidak ada
+/// berasal dari `nutrition_rules.json` (disediakan pemilik) - tidak ada
 /// angka target yang dihardcode di kode ini; kode ini menerima
 /// [DiversityProfile] sebagai parameter.
 library;
@@ -32,7 +32,7 @@ enum FoodGroup {
     'other_fruit_veg',
   ];
 
-  /// Protein hewani — pemeriksaan terpisah per hari (PRD §3.7).
+  /// Protein hewani - pemeriksaan terpisah per hari (PRD §3.7).
   static const List<String> animalProteinCodes = ['dairy', 'flesh', 'eggs'];
 
   static FoodGroup? fromCode(String code) {

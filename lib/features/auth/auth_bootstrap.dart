@@ -7,7 +7,7 @@ import 'package:cekgizi/features/auth/domain/use_cases/sign_in_anonymously_useca
 
 /// Inisialisasi backend saat startup aplikasi (dipanggil dari main).
 ///
-/// Kegagalan jaringan TIDAK menghentikan aplikasi — sesi bisa dicoba lagi
+/// Kegagalan jaringan TIDAK menghentikan aplikasi - sesi bisa dicoba lagi
 /// dari layar terkait nanti; pesan ramah ke pengguna disampaikan di UI
 /// (Batch 4+). Tidak ada data anak/log sensitif di sini.
 Future<void> bootstrapBackend() async {

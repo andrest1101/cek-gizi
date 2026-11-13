@@ -6,7 +6,7 @@ import 'package:cekgizi/features/growth/domain/services/growth_classification.da
 import 'package:cekgizi/features/growth/domain/services/measure_correction.dart';
 import 'package:cekgizi/features/growth/domain/services/z_score.dart';
 
-/// Entry point evaluasi z-score — menggabungkan koreksi 0,7 cm (PRD §3.2),
+/// Entry point evaluasi z-score - menggabungkan koreksi 0,7 cm (PRD §3.2),
 /// pencarian baris tabel, rumus §3.3, batas §3.5, dan klasifikasi §3.4.
 ///
 /// Dipakai oleh lapisan data/presentasi; seluruh logika dihitung di Domain.
@@ -30,7 +30,7 @@ abstract final class GrowthEvaluator {
     return GrowthClassification.haz(ZScore.calculate(value: corrected, sd: sd));
   }
 
-  /// BB/U (indeks WAZ) — tanpa koreksi cara ukur.
+  /// BB/U (indeks WAZ) - tanpa koreksi cara ukur.
   static ZScoreResult evaluateWaz({
     required Sex sex,
     required int ageMonths,
@@ -41,7 +41,7 @@ abstract final class GrowthEvaluator {
     return GrowthClassification.waz(ZScore.calculate(value: weightKg, sd: sd));
   }
 
-  /// BB/PB atau BB/TB (indeks WHZ) — panjang/tinggi dikoreksi dulu.
+  /// BB/PB atau BB/TB (indeks WHZ) - panjang/tinggi dikoreksi dulu.
   static ZScoreResult evaluateWhz({
     required Sex sex,
     required int ageMonths,

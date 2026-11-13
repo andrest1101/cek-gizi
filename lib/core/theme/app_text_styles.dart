@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Skala tipografi Plus Jakarta Sans (PRD §7.3).
 ///
-/// Style di sini hanya ukuran/tinggi/berat — **tanpa warna**. Warna diambil
+/// Style di sini hanya ukuran/tinggi/berat - **tanpa warna**. Warna diambil
 /// dari theme (`textTheme`) atau [AppColors] di call site.
 abstract final class AppTextStyles {
   const AppTextStyles._();
@@ -51,7 +51,7 @@ abstract final class AppTextStyles {
     fontWeight: FontWeight.w400,
   );
 
-  /// Body angka (16/24, w400, tabular figures) — berat, tinggi, z-score.
+  /// Body angka (16/24, w400, tabular figures) - berat, tinggi, z-score.
   static const TextStyle bodyTabular = TextStyle(
     fontFamily: fontFamily,
     fontSize: 16,

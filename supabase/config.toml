@@ -5,3 +5,8 @@ project_id = "hvjqjjqgwpmpqnchnxts"
 # Fungsi health boleh dipanggil tanpa JWT (keep-alive terjadwal, PRD §5.5/5.6).
 [functions.health]
 verify_jwt = false
+
+# analyze-meal WAJIB JWT (deploy via Dashboard: Verify JWT = ON di UI;
+# blok ini hanya berlaku bila deploy via CLI).
+[functions.analyze-meal]
+verify_jwt = true

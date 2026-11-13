@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Semua token warna (PRD §7.2) sebagai `ThemeExtension`.
 ///
-/// Widget DILARANG memakai literal warna — ambil dari sini:
+/// Widget DILARANG memakai literal warna - ambil dari sini:
 /// `Theme.of(context).extension<AppColors>()!.primary`.
 ///
 /// `statusWatch` = warna isi status "perlu perhatian" (ikon/pita),
@@ -55,10 +55,10 @@ final class AppColors extends ThemeExtension<AppColors> {
   /// Status normal (`#2E7D32` / `#7BD88F`).
   final Color statusGood;
 
-  /// Status perlu perhatian — isi (`#F2B84B` / `#F2C14E`).
+  /// Status perlu perhatian - isi (`#F2B84B` / `#F2C14E`).
   final Color statusWatch;
 
-  /// Status perlu perhatian — teks (`#8A5A12` / `#F2C14E`).
+  /// Status perlu perhatian - teks (`#8A5A12` / `#F2C14E`).
   final Color statusWatchText;
 
   /// Status perlu diperiksa segera (`#C0392B` / `#FF8E80`).

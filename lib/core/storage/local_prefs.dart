@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Flag lokal ringan (offline-safe): status onboarding & consent.
-/// Bukan sumber kebenaran data anak — hanya gating UI pertama buka.
+/// Bukan sumber kebenaran data anak - hanya gating UI pertama buka.
 final class LocalPrefs {
   LocalPrefs._(this._prefs);
 
@@ -10,7 +10,7 @@ final class LocalPrefs {
   static const _keyOnboardingCompleted = 'onboarding_completed';
   static const _keyConsentVersion = 'consent_version_accepted';
 
-  /// Versi teks consent terkini — bila dinaikkan, pengguna diminta setuju lagi.
+  /// Versi teks consent terkini - bila dinaikkan, pengguna diminta setuju lagi.
   static const String consentVersion = '1';
 
   static Future<LocalPrefs> load() async {

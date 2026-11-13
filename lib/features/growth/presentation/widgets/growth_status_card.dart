@@ -206,9 +206,11 @@ class _StatusCard extends StatelessWidget {
             label: const Text(AppStrings.statusAddFirst),
           ),
           const SizedBox(height: AppSpacing.xs),
-          TextButton(
+          TextButton.icon(
             onPressed: onDetail,
-            child: const Text(AppStrings.statusViewDetail),
+            icon: const Icon(Icons.chevron_right_rounded),
+            label: const Text(AppStrings.statusViewDetail),
+            iconAlignment: IconAlignment.end,
           ),
         ],
       ),
@@ -400,7 +402,7 @@ class _DetailSheet extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            '${AppStrings.statusDetailTitle} — $nickname',
+            '${AppStrings.statusDetailTitle}: $nickname',
             style: textTheme.titleMedium?.copyWith(color: colors.textPrimary),
           ),
           const SizedBox(height: AppSpacing.xs),

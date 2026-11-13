@@ -6,7 +6,7 @@ import 'package:cekgizi/core/theme/app_theme.dart';
 /// Blok skeleton untuk keadaan memuat (PRD §6.9).
 ///
 /// Sengaja statis (tanpa animasi berulang) agar tidak memicu frame terus
-/// menerus — termasuk saat widget test memakai `pumpAndSettle`.
+/// menerus - termasuk saat widget test memakai `pumpAndSettle`.
 class Skeleton extends StatelessWidget {
   const Skeleton({
     super.key,

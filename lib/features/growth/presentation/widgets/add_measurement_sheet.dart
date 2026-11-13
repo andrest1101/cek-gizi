@@ -373,7 +373,7 @@ class _ResultDialog extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return AlertDialog(
-      title: Text('${AppStrings.growthMeasureSaved} — $childName'),
+      title: Text('${AppStrings.growthMeasureSaved}: $childName'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

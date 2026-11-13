@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:cekgizi/core/theme/app_theme.dart';
 
-/// 8 avatar ilustrasi untuk profil anak (bukan foto asli — PRD §0 #7).
+/// 8 avatar ilustrasi untuk profil anak (bukan foto asli - PRD §0 #7).
 abstract final class AvatarCatalog {
   const AvatarCatalog._();
 

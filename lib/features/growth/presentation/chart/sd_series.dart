@@ -5,7 +5,7 @@ import 'package:cekgizi/features/growth/domain/entities/sex.dart';
 import 'package:cekgizi/features/growth/domain/repositories/anthropometry_reference_tables.dart';
 import 'package:cekgizi/features/growth/domain/services/measure_correction.dart';
 
-/// Titik grafik (x, y) tanpa ketergantungan paket chart — mudah diuji.
+/// Titik grafik (x, y) tanpa ketergantungan paket chart - mudah diuji.
 typedef SdPoint = ({double x, double y});
 
 /// Kumpulan kurva rujukan SD + rentang sumbu untuk satu indeks.
@@ -24,7 +24,7 @@ final class SdSeries {
     required this.upperIsPos3,
   });
 
-  /// Batas bawah luar (−3 SD) — garis bantu.
+  /// Batas bawah luar (−3 SD) - garis bantu.
   final List<SdPoint> neg3;
 
   /// Batas bawah klasifikasi (−2 SD).
@@ -46,7 +46,7 @@ final class SdSeries {
   /// Jarak label sumbu X (bulan atau cm).
   final double xInterval;
 
-  /// `upper` diambil dari kolom +3 SD (HAZ) — dipakai memilih pita.
+  /// `upper` diambil dari kolom +3 SD (HAZ) - dipakai memilih pita.
   final bool upperIsPos3;
 }
 

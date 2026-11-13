@@ -18,9 +18,10 @@ import 'package:cekgizi/features/growth/presentation/widgets/add_measurement_she
 import 'package:cekgizi/features/growth/presentation/widgets/growth_chart.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/growth_status_card.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/status_copy.dart';
-import 'package:cekgizi/shared/widgets/child_avatar.dart';
+import 'package:cekgizi/shared/widgets/child_switcher.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
+import 'package:cekgizi/shared/widgets/screen_header.dart';
 import 'package:cekgizi/shared/widgets/section_header.dart';
 import 'package:cekgizi/shared/widgets/segment_control.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
@@ -42,7 +43,6 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
     final child = ref.watch(selectedChildProvider).value;
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.growthTitle)),
       body: SafeArea(
         child: child == null
             ? const _NoChild()
@@ -92,103 +92,71 @@ class _GrowthBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final measurementsAsync = ref.watch(measurementsProvider(child.id));
+    final now = DateTime.now();
+    final hasMeasurements = measurementsAsync.value?.isNotEmpty ?? false;
+    // Saat data belum ada, cukup satu empty state di kartu status - grafik
+    // dan riwayat kosong disembunyikan agar tidak ada tiga blok kosong.
+    final showChart = measurementsAsync.isLoading || hasMeasurements;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenPadding,
-        AppSpacing.xs,
+        AppSpacing.md,
         AppSpacing.screenPadding,
         AppSpacing.xxxl + AppSpacing.lg,
       ),
       children: [
-        _ChildHeader(child: child),
+        ScreenHeader(
+          eyebrow: IdDateFormat.eyebrow(now),
+          title: AppStrings.growthTitle,
+          subtitle: AppStrings.growthSubtitle,
+          trailing: const ChildSwitcherButton(),
+        ),
         const SizedBox(height: AppSpacing.lg),
         const GrowthStatusCard(showMetrics: false),
-        const SizedBox(height: AppSpacing.lg),
-        GrowthChartCard(
-          child: child,
-          index: index,
-          onIndexChanged: onIndexChanged,
-          measurementsAsync: measurementsAsync,
-        ),
-        const SizedBox(height: AppSpacing.sectionGap),
-        const SectionHeader(title: AppStrings.growthHistoryTitle),
-        const SizedBox(height: AppSpacing.md),
-        measurementsAsync.when(
-          loading: () => const _HistorySkeleton(),
-          error: (error, stackTrace) => ErrorCard(
-            message: AppStrings.growthLoadError,
-            onRetry: () => ref.invalidate(measurementsProvider(child.id)),
+        if (showChart) ...[
+          const SizedBox(height: AppSpacing.lg),
+          GrowthChartCard(
+            child: child,
+            index: index,
+            onIndexChanged: onIndexChanged,
+            measurementsAsync: measurementsAsync,
           ),
-          data: (measurements) {
-            final sorted = GrowthSummary.sorted(measurements);
-            if (sorted.isEmpty) {
-              return Container(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                decoration: AppSurfaces.sunken(context),
-                child: Text(
-                  AppStrings.growthHistoryEmpty,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.colorsOf(context).textSecondary,
-                      ),
-                ),
-              );
-            }
-            return Column(
-              children: [
-                for (final measurement in sorted.reversed)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: _MeasurementTile(measurement: measurement),
+          const SizedBox(height: AppSpacing.sectionGap),
+          const SectionHeader(title: AppStrings.growthHistoryTitle),
+          const SizedBox(height: AppSpacing.md),
+          measurementsAsync.when(
+            loading: () => const _HistorySkeleton(),
+            error: (error, stackTrace) => ErrorCard(
+              message: AppStrings.growthLoadError,
+              onRetry: () => ref.invalidate(measurementsProvider(child.id)),
+            ),
+            data: (measurements) {
+              final sorted = GrowthSummary.sorted(measurements);
+              if (sorted.isEmpty) {
+                return Container(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: AppSurfaces.sunken(context),
+                  child: Text(
+                    AppStrings.growthHistoryEmpty,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppTheme.colorsOf(context).textSecondary,
+                        ),
                   ),
-              ],
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _ChildHeader extends StatelessWidget {
-  const _ChildHeader({required this.child});
-
-  final ChildProfile child;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
-    return Row(
-      children: [
-        ChildAvatar(
-          avatarKey: child.avatarKey,
-          size: 40,
-          semanticLabel: child.nickname,
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                child.nickname,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: textTheme.titleMedium?.copyWith(
-                  color: colors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                child.ageLabel(DateTime.now()),
-                style: textTheme.bodySmall?.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-            ],
+                );
+              }
+              return Column(
+                children: [
+                  for (final measurement in sorted.reversed)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: _MeasurementTile(measurement: measurement),
+                    ),
+                ],
+              );
+            },
           ),
-        ),
+        ],
       ],
     );
   }

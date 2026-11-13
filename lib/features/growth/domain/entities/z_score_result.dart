@@ -3,7 +3,7 @@ import 'anthropometry_index.dart';
 /// Hasil evaluasi z-score satu indeks.
 ///
 /// [statusCode] bernilai null bila z di luar rentang yang masuk akal
-/// (PRD §3.5) — UI menampilkan peringatan "Angka ini tampak tidak biasa…"
+/// (PRD §3.5) - UI menampilkan peringatan "Angka ini tampak tidak biasa…"
 /// dan TIDAK menampilkan klasifikasi.
 final class ZScoreResult {
   const ZScoreResult({

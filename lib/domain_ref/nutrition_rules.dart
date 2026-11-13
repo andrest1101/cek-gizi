@@ -5,7 +5,7 @@ import 'package:cekgizi/features/meals/domain/services/dietary_diversity.dart';
 
 /// Aturan keragaman pangan & tips harian (`assets/rules/nutrition_rules.json`).
 ///
-/// Semua aturan berasal dari berkas itu — TIDAK di-hardcode (PRD §3.7,
+/// Semua aturan berasal dari berkas itu - TIDAK di-hardcode (PRD §3.7,
 /// aturan agen: jangan karangan data gizi). Berkas saat ini adalah seed
 /// dari Lampiran A PRD dengan `reviewed_by: null` → konten BELUM ditinjau
 /// ahli gizi; aplikasi WAJIB menampilkan penanda (PRD §9.1).
@@ -22,10 +22,10 @@ final class NutritionRules {
 
   final String version;
 
-  /// Delapan kode kelompok pangan (PRD §3.7) — persis divalidasi.
+  /// Delapan kode kelompok pangan (PRD §3.7) - persis divalidasi.
   final Set<String> groups;
 
-  /// Sumber protein hewani (PRD §3.7) — persis [dairy, flesh, eggs].
+  /// Sumber protein hewani (PRD §3.7) - persis [dairy, flesh, eggs].
   final Set<String> animalSource;
 
   /// Profil target keragaman (mpasi_6_23, balita_24_59, …). Tidak tumpang
@@ -49,6 +49,16 @@ final class NutritionRules {
   List<String> tipsForMissing(Set<String> missingGroups) =>
       [for (final code in FoodGroup.allCodes)
         if (missingGroups.contains(code) && tips.containsKey(code)) tips[code]!];
+
+  /// Kode kelompok yang belum tercapai DAN punya tips (urut tetap PRD).
+  /// Dipakai UI agar dapat menampilkan nama kelompok + aksi catat.
+  List<String> missingCodesWithTips(Set<String> missingGroups) => [
+        for (final code in FoodGroup.allCodes)
+          if (missingGroups.contains(code) && tips.containsKey(code)) code,
+      ];
+
+  /// Tips untuk satu kode kelompok; null bila tidak tersedia.
+  String? tipFor(String groupCode) => tips[groupCode];
 }
 
 abstract final class NutritionRulesLoader {
@@ -56,6 +66,10 @@ abstract final class NutritionRulesLoader {
 
   static const allowedCountBasis = {'all', 'without_breast_milk'};
   static const _expectedAnimal = {'dairy', 'flesh', 'eggs'};
+
+  /// Batas panjang tips (karakter). Tips seed yang wajar < 140 karakter;
+  /// string yang terpotong/tersisip teks lain akan tertangkap di sini.
+  static const int maxTipLength = 140;
 
   static NutritionRules fromJsonString(String contents) {
     final decoded = jsonDecode(contents);
@@ -206,7 +220,19 @@ abstract final class NutritionRulesLoader {
           'nutrition_rules.json: nilai tips untuk "$key" kosong.',
         );
       }
-      tips[key] = value;
+      final tip = value.trim();
+      if (tip.length > maxTipLength) {
+        throw InvalidReferenceDataException(
+          'nutrition_rules.json: tips "$key" terlalu panjang '
+          '(${tip.length} > $maxTipLength karakter), kemungkinan teks korup.',
+        );
+      }
+      if (tip.contains('\n')) {
+        throw InvalidReferenceDataException(
+          'nutrition_rules.json: tips "$key" berisi baris baru.',
+        );
+      }
+      tips[key] = tip;
     }
 
     // ── peninjauan (PRD §9.1): string atau null ───────────────────

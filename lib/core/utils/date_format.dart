@@ -7,8 +7,22 @@ abstract final class IdDateFormat {
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
   ];
 
+  static const _weekdays = [
+    'Senin',
+    'Selasa',
+    'Rabu',
+    'Kamis',
+    'Jumat',
+    'Sabtu',
+    'Minggu',
+  ];
+
   static String full(DateTime d) => '${d.day} ${_months[d.month - 1]} ${d.year}';
 
   static String short(DateTime d) =>
       '${d.day} ${_months[d.month - 1].substring(0, 3)} ${d.year}';
+
+  /// Eyebrow tanggal untuk header Beranda, mis. "Rabu, 11 Nov".
+  static String eyebrow(DateTime d) =>
+      '${_weekdays[d.weekday - 1]}, ${d.day} ${_months[d.month - 1].substring(0, 3)}';
 }

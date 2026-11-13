@@ -1,11 +1,11 @@
 import 'package:cekgizi/core/config/app_config.dart';
 
 /// Semua copy UI terpusat di sini (Bahasa Indonesia, nada hangat dan
-/// tidak menghakimi — PRD §7.6). Widget tidak boleh menulis string bebas.
+/// tidak menghakimi - PRD §7.6). Widget tidak boleh menulis string bebas.
 abstract final class AppStrings {
   const AppStrings._();
 
-  /// Disclaimer tetap (PRD §8.5) — wajib tampil di Tentang & onboarding.
+  /// Disclaimer tetap (PRD §8.5) - wajib tampil di Tentang & onboarding.
   static const String disclaimer =
       '${AppConfig.appName} adalah alat bantu edukasi dan pemantauan. '
       'Hasilnya bukan diagnosis dan tidak menggantikan pemeriksaan tenaga '
@@ -35,7 +35,7 @@ abstract final class AppStrings {
       'belum tercapai hari ini.';
   static const onboardingTitle2 = 'Tumbuh dalam konteks';
   static const onboardingBody2 =
-      'Pantau tinggi, berat, dan status pertumbuhan menurut Permenkes 2/2020 — '
+      'Pantau tinggi, berat, dan status pertumbuhan menurut Permenkes 2/2020, '
       'dengan bahasa yang tenang dan jelas.';
   static const onboardingTitle3 = 'Pendamping, bukan dokter';
   static const onboardingBody3 =
@@ -48,10 +48,10 @@ abstract final class AppStrings {
   static const consentTitle = 'Sebelum mulai, baca ini dulu';
   static const consentIntro =
       '${AppConfig.appName} membantu memantau tumbuh kembang dan gizi balita '
-      'kamu. Kami hanya menyimpan yang kamu izinkan — tidak lebih.';
+      'kamu. Kami hanya menyimpan yang kamu izinkan, tidak lebih.';
   static const consentBullets = <String>[
     'Data yang tersimpan: nama panggilan, tanggal lahir, jenis kelamin, berat, tinggi, dan catatan perkembangannya.',
-    'Foto makanan dikirim hanya untuk dikenali oleh AI dan dihapus setelah dianalisis — foto tidak disimpan.',
+    'Foto makanan dikirim hanya untuk dikenali oleh AI dan dihapus setelah dianalisis. Foto tidak disimpan.',
     'Data kamu sendiri yang bisa mengaksesnya (pengamanan tingkat baris di server).',
     'Kamu bisa mengekspor data, menghapus riwayat chat, atau menghapus akun beserta seluruh datanya kapan pun di Pengaturan.',
   ];
@@ -88,7 +88,7 @@ abstract final class AppStrings {
   static const childMaxReached = 'Maksimal 5 anak per akun.';
   static const childEmptyTitle = 'Belum ada anak terdaftar';
   static const childEmptyBody =
-      'Tambahkan anak pertama — cukup nama panggilan, tgl lahir, dan jenis kelamin.';
+      'Tambahkan anak pertama. Cukup nama panggilan, tanggal lahir, dan jenis kelamin.';
   static const childEmptyCta = 'Tambah anak';
   static const childAgeYears = 'tahun';
   static const childAgeMonths = 'bulan';
@@ -107,6 +107,8 @@ abstract final class AppStrings {
 
   // ── Tumbuh ─────────────────────────────────────────────────────
   static const growthTitle = 'Tumbuh';
+  static const growthSubtitle =
+      'Pantau berat, tinggi, dan status gizi anak menurut Permenkes 2/2020.';
   static const growthAddMeasurement = 'Tambah ukuran';
   static const growthTabLengthHeight = 'Tinggi/Umur';
   static const growthTabWeight = 'Berat/Umur';
@@ -172,7 +174,7 @@ abstract final class AppStrings {
   static const validationDateBeforeBirth =
       'Tanggal ukur tidak boleh sebelum anak lahir.';
   static const validationAgeRange =
-      'Usia saat ukur di luar 0–60 bulan — remaja tidak bisa dipantau aplikasi ini.';
+      'Usia saat ukur di luar 0–60 bulan. Remaja tidak bisa dipantau aplikasi ini.';
   static const validationDuplicateDate =
       'Sudah ada pengukuran pada tanggal ini. Ubah atau hapus dulu yang lama.';
   static const validationRequired = 'Wajib diisi.';
@@ -206,12 +208,199 @@ abstract final class AppStrings {
   static const statusViewDetail = 'Lihat detail';
   static const statusCardTitle = 'Status pertumbuhan';
   static const statusTrendNeedsAttention =
-      'Berat turun dibanding pengukuran sebelumnya — sebaiknya periksakan.';
+      'Berat turun dibanding pengukuran sebelumnya. Sebaiknya periksakan.';
   static const statusTrendTracked = 'Tren sesuai. Lanjutkan pemantauan rutin.';
   static const statusAddFirst = 'Tambah ukuran';
 
+  // ── Piring Hari Ini (PRD §3.7, §6.3) ─────────────────────────────
+  static const piringTitle = 'Piring Hari Ini';
+  static const piringEmpty = 'Belum ada catatan makan hari ini.';
+  static const piringAnimalProteinMissing = 'Belum ada protein hewani hari ini.';
+  static const piringAnimalProteinPresent = 'Protein hewani sudah ada hari ini.';
+  static const piringLegendAnimal = 'Busur oranye menandai protein hewani.';
+  static const piringTargetReached = 'Keragaman pangan hari ini tercapai';
+  static const piringGroupsLabel = 'kelompok';
+  static const piringCta = 'Catat makanan';
+  static const piringUnreviewedCaption =
+      'Aturan keragaman pangan belum ditinjau ahli gizi.';
+  static const piringNoProfile =
+      'Target keragaman belum tersedia untuk usia ini. Tetap catat kelompok yang dimakan.';
+  static const tipTitle = 'Tips hari ini';
+  static const tipsAction = 'Catat sekarang';
+  static const asiExclusiveTitle = 'Bayi di bawah 6 bulan';
+  static const asiExclusiveBody =
+      'ASI eksklusif adalah yang terbaik untuk usia ini. Setelah usia 6 bulan, '
+      'diversifikasi pangan bisa dimulai dengan pendampingan bidan atau ahli gizi.';
+  static String piringGroupsMetSemantics(int met, int total) =>
+      'Keragaman pangan hari ini: $met dari $total kelompok terisi.';
+  static String piringTargetNote(int target, {required bool breastMilkNotCounted}) =>
+      breastMilkNotCounted
+          ? 'Target hari ini: $target kelompok (ASI tidak dihitung).'
+          : 'Target hari ini: $target kelompok.';
+  static const heroAsiCta = 'Catat ASI';
+
+  // ── Kelompok pangan (PRD §3.7) ─────────────────────────────────
+  static const groupGrainsTubersShort = 'Makanan pokok';
+  static const groupLegumesNutsShort = 'Tempe & kacang';
+  static const groupDairyShort = 'Susu & olahan';
+  static const groupFleshShort = 'Lauk hewani';
+  static const groupEggsShort = 'Telur';
+  static const groupVitAFruitVegShort = 'Buah/sayur A';
+  static const groupOtherFruitVegShort = 'Buah/sayur lain';
+  static const groupGrainsTubers = 'Makanan pokok';
+  static const groupGrainsTubersExamples = 'Nasi, bubur, kentang, ubi';
+  static const groupLegumesNuts = 'Kacang dan biji-bijian';
+  static const groupLegumesNutsExamples = 'Tahu, tempe, kacang hijau';
+  static const groupDairy = 'Susu dan olahannya';
+  static const groupDairyExamples = 'Susu, yogurt, keju';
+  static const groupFlesh = 'Daging, ikan, unggas, hati';
+  static const groupFleshExamples = 'Ikan kembung, hati ayam, daging';
+  static const groupEggs = 'Telur';
+  static const groupEggsExamples = 'Telur rebus, orak-arik';
+  static const groupVitAFruitVeg = 'Buah & sayur vitamin A';
+  static const groupVitAFruitVegExamples = 'Wortel, labu, bayam, pepaya, mangga';
+  static const groupOtherFruitVeg = 'Buah & sayur lainnya';
+  static const groupOtherFruitVegExamples = 'Pisang, apel, kol, buncis';
+
+  /// Label kelompok menurut kode resmi PRD §3.7 (dipakai tips & aksi).
+  static String groupLabel(String code) => switch (code) {
+        'breast_milk' => 'ASI',
+        'grains_tubers' => groupGrainsTubers,
+        'legumes_nuts' => groupLegumesNuts,
+        'dairy' => groupDairy,
+        'flesh' => groupFlesh,
+        'eggs' => groupEggs,
+        'vit_a_fruit_veg' => groupVitAFruitVeg,
+        'other_fruit_veg' => groupOtherFruitVeg,
+        _ => code,
+      };
+
+  /// Label pendek untuk tombol aksi (muat di 360dp).
+  static String groupShortLabel(String code) => switch (code) {
+        'breast_milk' => 'ASI',
+        'grains_tubers' => groupGrainsTubersShort,
+        'legumes_nuts' => groupLegumesNutsShort,
+        'dairy' => groupDairyShort,
+        'flesh' => groupFleshShort,
+        'eggs' => groupEggsShort,
+        'vit_a_fruit_veg' => groupVitAFruitVegShort,
+        'other_fruit_veg' => groupOtherFruitVegShort,
+        _ => code,
+      };
+
+  // ── Makan (PRD §6.4) ───────────────────────────────────────────
+  static const makanTitle = 'Makan';
+  static const makanSubtitle =
+      'Ketuk kelompok pangan yang sudah dimakan anak hari ini.';
+  static const makanAsiToday = 'ASI hari ini';
+  static const makanAsiSubtitle =
+      'Cukup satu tanda untuk hari ini. Tidak perlu menghitung berapa disusukan.';
+  static const makanAsiSecondaryNote =
+      'ASI tetap boleh dicatat, tetapi tidak dihitung pada target usia ini.';
+  static const makanAsiActionLog = 'Catat ASI';
+  static const makanAsiActionRemove = 'Hapus catatan ASI';
+  static const makanAsiLogged = 'ASI tercatat hari ini';
+  static const makanAsiLoggedFeedback = 'ASI hari ini tercatat.';
+  static const makanAsiRemovedFeedback = 'Catatan ASI hari ini dihapus.';
+  static const makanGridTitle = 'Catat kelompok pangan';
+  static const makanGridHint =
+      'Ketuk sekali, catatan langsung tersimpan. Tanda centang berarti '
+      'kelompok itu sudah tercatat hari ini.';
+  static const makanDiaryTodayTitle = 'Catatan hari ini';
+  static const makanPreviousTitle = 'Hari sebelumnya';
+  static const makanPreviousHint = 'Ketuk satu hari untuk melihat catatannya.';
+  static const makanDiaryEmpty =
+      'Belum ada catatan hari ini. Ketuk kelompok pangan di atas untuk mulai.';
+  static const makanDeleteLog = 'Hapus catatan';
+  static const makanLogDeleted = 'Catatan dihapus.';
+  static const makanUndoAction = 'Urungkan';
+  static String makanLogAdded(String label) => '$label ditambahkan ke catatan.';
+  static String makanGroupAlreadyLogged(String label) =>
+      '$label sudah tercatat hari ini.';
+  static String makanGroupLogSemantics(String label) => 'Catat $label';
+  static String makanGroupLoggedSemantics(String label) =>
+      '$label, sudah tercatat hari ini';
+  static String makanDayToggleSemantics(String day, int met, int total) =>
+      '$day, $met dari $total kelompok. Ketuk untuk membuka catatan.';
+  static String makanTodayProgress(int met, int total) =>
+      '$met dari $total kelompok';
+  static const makanTodayEmpty = 'Belum ada kelompok tercatat';
+  static const makanToday = 'Hari ini';
+  static const mealBreakfast = 'Sarapan';
+  static const mealLunch = 'Siang';
+  static const mealDinner = 'Malam';
+  static const mealSnack = 'Camilan';
+  static const makanYesterday = 'Kemarin';
+  static const makanLoadError =
+      'Gagal memuat catatan makan. Periksa koneksi internet kamu, lalu coba lagi.';
+  static const makanSaveError =
+      'Gagal menyimpan catatan. Periksa koneksi internet kamu, lalu coba lagi.';
+
+  // ── Scan makanan (PRD §6.4) ───────────────────────────────────────
+  static const photoScanFab = 'Foto makanan';
+  static const photoScanFabSemantics =
+      'Foto makanan. Foto dikenali lalu dihapus; tidak disimpan.';
+  static const scanTitle = 'Scan makanan';
+  static const scanHint = 'Posisikan piring di dalam lingkaran';
+  static const scanShutter = 'Ambil foto';
+  static const scanShutterSemantics = 'Ambil foto makanan';
+  static const scanGallery = 'Galeri';
+  static const scanClose = 'Tutup';
+  static const scanAnalyzing = 'Mengenali isi piring.';
+  static const scanCameraPermissionTitle = 'Izin kamera dibutuhkan';
+  static const scanCameraPermissionBody =
+      'Izinkan akses kamera untuk memindai makanan kamu.';
+  static const scanCameraUnavailableTitle = 'Kamera tidak bisa dipakai';
+  static const scanCameraUnavailableBody =
+      'Kamera tidak bisa dipakai di perangkat ini. Kamu tetap bisa mencatat manual.';
+  static const scanOpenSettings = 'Buka Pengaturan';
+  static const scanNoFoodTitle = 'Makanan tidak terdeteksi';
+  static const scanNoFoodBody =
+      'Makanan tidak terdeteksi. Coba foto ulang dengan cahaya cukup.';
+  static const scanSheetTitle = 'Hasil pemindaian';
+  static const scanSheetSubtitle = 'Periksa lalu simpan ke catatan.';
+  static const scanConfidenceLow = 'kurang yakin';
+  static const scanAddSectionTitle = 'Tambah item';
+  static const scanAddItemHint = 'Nama makanan';
+  static const scanAddItemButton = 'Tambah';
+  static const scanItemEmptyGroups =
+      'Pilih minimal satu kelompok untuk item ini.';
+  static const scanSave = 'Simpan ke catatan';
+  static const scanSaved = 'Catatan tersimpan.';
+  static const scanSaveError =
+      'Gagal menyimpan catatan. Periksa koneksi internet kamu, lalu coba lagi.';
+  static const scanQuotaTitle = 'Kuota analisis habis';
+  static const scanBusyTitle = 'Layanan sedang sibuk';
+  static const scanOfflineTitle = 'Tidak ada koneksi internet';
+  static const scanManualButton = 'Catat manual';
+  static const scanRetry = 'Coba lagi';
+  static const scanPhotoAgain = 'Foto lagi';
+  static const scanGroupLabel = 'Kelompok';
+  static const scanMealTypeLabel = 'Jenis makan';
+  static const portionLabel = 'Porsi';
+  static const portionLittle = 'Sedikit';
+  static const portionMedium = 'Sedang';
+  static const portionFinished = 'Habis';
+  static String scanSheetError(String code) => switch (code) {
+        'quota_daily' =>
+          'Kuota analisis hari ini habis. Kamu masih bisa mencatat manual.',
+        'image_too_large' =>
+          'Foto terlalu besar. Coba lagi dengan cahaya terang di dekat jendela.',
+        'invalid_image' =>
+          'Foto tidak bisa dipakai. Coba foto ulang dengan cahaya cukup.',
+        'timeout' =>
+          'Prosesnya terlalu lama. Periksa koneksi internet kamu, lalu coba lagi.',
+        'ai_unavailable' => 'Layanan sedang sibuk, coba lagi sebentar.',
+        'offline' =>
+          'Tidak ada koneksi internet. Scan membutuhkan internet; kamu tetap bisa mencatat manual.',
+        'unauthorized' =>
+          'Sesi berakhir. Tutup lalu buka aplikasi lagi.',
+        _ => 'Layanan sedang sibuk, coba lagi sebentar.',
+      };
+
   // ── Navigasi ───────────────────────────────────────────────────
   static const navHome = 'Beranda';
+  static const navMakan = 'Makan';
   static const navGrowth = 'Tumbuh';
 
   // ── Beranda ────────────────────────────────────────────────────
@@ -219,15 +408,14 @@ abstract final class AppStrings {
   static const greetingNoon = 'Selamat siang';
   static const greetingEvening = 'Selamat sore';
   static const greetingNight = 'Selamat malam';
-  static const homeSummaryLabel = 'Ringkasan hari ini';
   static const homeManageChild = 'Kelola anak';
-  static const homeChangeChild = 'Ganti';
   static const homeSwitchChildHint =
       'Pilih anak untuk melihat ringkasannya di Beranda.';
+  static const childSwitcherTooltip = 'Ganti anak';
+  static String homeGreeting(String greeting, String nickname) =>
+      '$greeting, $nickname';
   static const homeLoadError =
       'Tidak bisa memuat data. Periksa koneksi internet kamu, lalu coba lagi.';
-  static String homeChildCardSemantics(String nickname, String age) =>
-      '$nickname, $age. Ketuk untuk ganti atau kelola anak.';
 
   // ── Navigasi lain ──────────────────────────────────────────────
   static const routeNotFoundTitle = 'Halaman tidak ditemukan';

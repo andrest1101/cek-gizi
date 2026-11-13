@@ -8,6 +8,7 @@ import 'package:cekgizi/core/router.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/growth/presentation/providers/growth_providers.dart';
+import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 
 import 'fakes.dart';
 
@@ -30,6 +31,8 @@ void main() {
           childRepositoryProvider.overrideWithValue(FakeChildRepository()),
           growthRepositoryProvider.overrideWithValue(FakeGrowthRepository()),
           permenkesTablesProvider.overrideWith((ref) => Future.value(const FakeAnthropometryTables())),
+          foodLogRepositoryProvider.overrideWithValue(FakeFoodLogRepository()),
+          nutritionRulesProvider.overrideWith((ref) => Future.value(fakeNutritionRules())),
         ],
         child: const CekGiziApp(),
       ),
@@ -55,6 +58,8 @@ void main() {
           childRepositoryProvider.overrideWithValue(FakeChildRepository([])),
           growthRepositoryProvider.overrideWithValue(FakeGrowthRepository()),
           permenkesTablesProvider.overrideWith((ref) => Future.value(const FakeAnthropometryTables())),
+          foodLogRepositoryProvider.overrideWithValue(FakeFoodLogRepository()),
+          nutritionRulesProvider.overrideWith((ref) => Future.value(fakeNutritionRules())),
         ],
         child: const CekGiziApp(),
       ),
@@ -82,6 +87,8 @@ void main() {
             ]),
           ),
           permenkesTablesProvider.overrideWith((ref) => Future.value(const FakeAnthropometryTables())),
+          foodLogRepositoryProvider.overrideWithValue(FakeFoodLogRepository()),
+          nutritionRulesProvider.overrideWith((ref) => Future.value(fakeNutritionRules())),
         ],
         child: const CekGiziApp(),
       ),

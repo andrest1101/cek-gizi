@@ -175,6 +175,180 @@ Kode Batch 2 selesai & terverifikasi analyze/test; **uji RLS = Success (lulus, 2
 - Peninjauan konten gizi oleh ahli gizi/bidan (`reviewed_by`/`reviewed_on` di isi `nutrition_rules.json`) — PRD §9.1/§13.
 - Verifikasi OWNER terhadap tabel Permenkes + sel cacat — PRD §13.
 
+## Batch 6 — Diary & Piring Hari Ini (2026-11-11)
+
+### Ruang lingkup
+Presentasi + data catatan makan (`food_logs`) + integrasi Beranda. **Tidak ada AI, tidak ada dependency baru** (scanner tetap Batch 5, butuh Cloud Billing/Gemini key — PRD §13.3). Domain lama dipakai ulang: `DietaryDiversity`, `NutritionRules`, tabel `food_logs` + RLS (Batch 2).
+
+### Dependency baru
+**Tidak ada.** Ring digambar dengan `CustomPainter` (arc) sendiri; tidak menambah paket. `fl_chart` tetap 0.71.0.
+
+### Perubahan
+1. **Domain & data (meals)**: `FoodLog` + `MealType`/`FoodLogSource`/`FoodLogItem`; `FoodLogRepository` (kontrak) + `FoodLogRepositoryImpl` (Supabase, RLS); `piring_day.dart` — evaluator murni Piring Hari Ini (union kelompok, filter hari zona perangkat, `byDay` untuk diary, profil usia dari JSON); `NutritionRules` dimuat dari asset via `loadNutritionRules()` → `nutritionRulesProvider`.
+2. **Navigasi**: destinasi **Makan** (PRD §6.2) di antara Beranda dan Tumbuh (`/makan`); hairline + icon `restaurant_rounded`.
+3. **Layar Makan** (PRD §6.4, tanpa scanner): `ChildIdentityRow`; ringkasan hari ini (ring mini + jumlah kelompok, naked); **kontrol ASI** sebagai tombol aksi eksplisit — "Catat ASI" (belum tercatat, `FilledButton`) → berubah jadi sub-status "ASI tercatat hari ini" + tombol outlined **"Hapus ASI"** (hapus = catatan ASI murni hari itu saja); kartu **"Bayi di bawah 6 bulan: ASI eksklusif"** menggantikan grid untuk <6 bln; grid **7 kelompok pangan** (ASI lewat tombol khusus; **tanpa** sheet jenis makan — ketuk sekali = langsung tersimpan + snackbar **"Urungkan"**; tanda hijau = sudah tercatat hari ini); **Diary** per hari (subheader naked dengan ring mini + label hari & jumlah kelompok; baris item: ikon 40 + nama + jam; hapus lewat swipe atau tombol hapus — **selalu dengan snackbar "Urungkan"**, tanpa dialog).
+   - Catatan implementasi: `food_logs.meal_type` NOT NULL — untuk catatan kelompok manual disimpan klasifikasi kasar menurut jam perangkat dan **tidak ditampilkan di UI** (bukan klaim sesi makan). Jenis makan baru relevan untuk catatan pangan bernama (Batch 5/8).
+4. **Beranda** (PRD §6.3, §7.1): header eyebrow tanggal ("Rabu, 11 Nov") + sapaan personal ("Selamat pagi, Arka") + tombol kelola (icon tonal); **identitas anak naked** (baris, bukan kartu); hero **Piring Hari Ini** (`primaryContainer`, satu-satunya permukaan solid berwarna, radius 24; ring ±196dp, busur menyala `primary` / protein hewani `accent` / belum `surfaceVariant`; center "n/8 kelompok"; status satu baris: kosong / protein hewani belum ada / target tercapai ✓ / progres; catatan target usia-di bawah ring, mis. "Target hari ini: 5 kelompok (ASI tidak dihitung)"; badge "Tercapai"; CTA "Catat makanan" → tab Makan), tips dijadikan **band tipis** (`surfaceVariant` radius 12, judul "TIPS HARI INI" berwarna accent, satu tips dari JSON, penanda "belum ditinjau ahli gizi" bila `reviewed_by: null`); di bawah 6 bulan hero ASI eksklusif.
+5. **Beranda "Status pertumbuhan" & Tumbuh**: `_ChildHeader` diekstrak jadi `ChildIdentityRow` (dipakai Tumbuh & Makan); CTA "Lihat detail" jadi `TextButton.icon` dengan chevron di Beranda.
+6. `AppStrings`: copy Piring Hari Ini, kelompok pangan (nama pendek untuk tile + label lengkap), kontrol ASI, diary, tips, dan label nav `Makan`.
+
+### Keputusan desain
+- **Tanpa FAB "Foto makanan"** — muncul di Batch 5 bersama scanner.
+- **Pencarian daftar pangan (`foods_id.json`) ditunda** — file belum disediakan; jalur "ketuk kelompok pangan langsung" (PRD §6.4) berfungsi penuh tanpa AI/file itu.
+- **Quick-add tanpa sheet tipe makan** — keragaman 5/7 tidak peduli *kapan*; tanya jenis makan hanya mengundang jawaban yang salah ("nasi = camilan?"). Sheet "Untuk kapan?" dihapus total (bersama `meal_type_sheet.dart`).
+- **Penghapusan selalu dengan snackbar "Urungkan"** (model Gmail) — menggantikan percampuran dialog dan tanpa konfirmasi; tidak ada lag konfirmasi.
+- **`food_logs.items` denormal**: nama = nama kelompok yang diketuk; `groups` union disortir sesuai acuan PRD (`canonicalOrder`).
+- **Ring selalu 8 busur** (lit = union hari ini, termasuk ASI); target/protein hewani dinilai profil usia (6–23: 5/8; 24–59: 5/7 tanpa ASI) — keduanya terpisah, konsisten aturan JSON; catatan target selalu tampil di hero agar angka "5/8" tidak mengundang kebingungan dengan target 5/7.
+- Selama `nutrition_rules.json` belum ditinjau (`reviewed_by: null`), tips menampilkan penanda "belum ditinjau ahli gizi" (PRD §9.1).
+
+### Berkas
+- Domain/data: `features/meals/{domain,data}/...` (`food_log.dart`, `food_log_repository.dart`, `food_log_model.dart`, `food_log_repository_impl.dart`, `piring_day.dart`), `lib/domain_ref/nutrition_rules_asset.dart`.
+- Presentasi: `meals/presentation/{providers,screens,widgets}` (MakanScreen, piring_ring, piring_hero_card, piring_tips_card), `home_screen.dart`, `app_shell.dart`, `router.dart`, `shared/widgets/child_identity_row.dart`, `child_switcher.dart` (kartu anak → baris naked), `growth_status_card.dart` (CTA "Lihat detail" + chevron), `growth_screen.dart` (refaktor kecil), `app_strings.dart`, `core/utils/date_format.dart` (eyebrow tanggal).
+- Dihapus: `meals/presentation/widgets/meal_type_sheet.dart`.
+- Test: `test/features/piring_day_test.dart` (evaluator), `makan_flow_test.dart` (alur quick-add → ring naik → target tercapai → undo snackbar → kontrol ASI → <6 bln → tips), `layout_scale_test.dart` (+Makan & tips, 360dp @1,3 light/dark), `growth_flow_test.dart` (CTA di-AC scroll + restore ASI dipakai notifier), `app_test.dart`, `fakes.dart` (+`FakeFoodLogRepository`, `fakeNutritionRules`, `fakeFoodLog`).
+
+### Verifikasi (2026-11-11, setelah revisi UI/UX Batch 6)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **179/179 passed** (baseline: 165).
+- Layout 360×640 @1,3 light/dark: Beranda (hero + tips), Makan, Tumbuh, Onboarding, Consent, kelola/formulir anak — tanpa overflow.
+- DoD §10.1: gradien 0; `Colors.` di `lib/features`+`lib/shared` → 0 (kecuali `Colors.transparent`); `GEMINI_API_KEY=<literal>` → 0.
+
+### Belum terverifikasi / menunggu kamu
+- Alur di perangkat nyata: Beranda (ring & tips) → Makan (quick-add kelompok, kontrol ASI, hapus item & snackbar "Urungkan") → Beranda.
+- `foods_id.json` dari pemilik (≥120 pangan, ditinjau ahli gizi) → pencarian pangan bernama menyusul (Batch 5/6b).
+- Peninjauan `nutrition_rules.json` oleh ahli gizi/bidan (penanda di UI akan otomatis hilang saat `reviewed_by` terisi).
+
+### Catatan tentang keputusan snack-bar/undo
+`notifier.deleteLog()` menghapus permanen di DB; aksi "Urungkan" menambahkan kembali dengan timestamp & kelompok identik (id baru). Untuk catatan ASI murni, "Hapus ASI" tetap menghormati aturan "hanya catatan murni hari itu yang terhapus" (Batch 6 sebelumnya), hanya diganti jadi aksi + snackbar.
+
+## Batch 5 — Edge Function `analyze-meal` + Scanner (2026-11-12)
+
+### Ruang lingkup
+Scanner makanan end-to-end (tanpa AI untuk angka gizi; Gemini hanya mengenali makanan). **Cloud Billing: TIDAK** (tetap Free Tier, hanya foto makanan tim/non-sensitif; pemilik menyetujui ketentuan Google free tier). Belanja AI nyata milik pemilik.
+
+### Dependency baru (alasan)
+- `camera ^0.11.2+1` — viewfinder berbentuk piring (PRD §6.4).
+- `image_picker ^1.2.1` — alternatif galeri.
+- `flutter_image_compress ^2.5.1` — sisi terpanjang 1024px, JPEG q75, ≤300KB, EXIF/GPS dihapus (PRD §6 #7/#8).
+- `url_launcher ^6.3.2` — tombol “Buka Pengaturan” saat izin kamera ditolak.
+
+### Perubahan
+1. **Edge Function** `supabase/functions/analyze-meal/index.ts` (Deno): JWT → validasi zod → **kuota atomik `consume_ai_quota('scan')` LEBIH DULU** → Gemini (response schema enum 8 kode kelompok; maks 12 item; nama ≤40 char) dengan **timeout 25 detik**; validasi ulang di server; log struktural tanpa isi; error `400 invalid_image`, `413 image_too_large`, `429 quota_daily`, `502 ai_unavailable`, `504 timeout`, `401 unauthorized`. `config.toml`: `[functions.analyze-meal] verify_jwt = true`.
+2. **Domain**: entity `MealScanResult`/`MealScanItem` (kode kelompok divalidasi terhadap 8 kode resmi; confidence 0..1); `MealScanRepository` → repository impl memanggil Edge Function via client Supabase (kunci Gemini TIDAK ada di aplikasi); `ScanException` dengan kode PRD §5.5; `mealScanCompressorProvider`.
+3. **Presentasi**: FAB **“Foto makanan”** (Beranda & Makan, **tersembunyi <6 bulan**) → route `/scan`; layar viewfinder piring (bingkai lingkaran, tombol rana/galeri/tutup + “Catat manual”); izin ditolak → layar fallback + tombol **“Buka Pengaturan”** (url_launcher); kompres → invoke → **sheet hasil** (chip item yang bisa dihapus/diubah/ditambah, porsi opsional sedikit/sedang/habis, **jenis makan wajib**, Simpan ke catatan sebagai `source=scan`); empty/error state (`no_food`, `quota_daily`, `offline`, `ai_unavailable`, `timeout`) dengan kartu + aksi.
+4. **AppStrings**: copy scanner (polos, Bahasa Indonesia, “kamu”), termasuk mapping error code → kalimat ramah.
+5. Android: `CAMERA` permission; iOS: `NSCameraUsageDescription` + `NSPhotoLibraryUsageDescription`.
+6. Test baru (15): parsing `MealScanResult` (kode tak dikenal ditolak, >12 item tolak, confidence di luar 0..1 tolak, teks 40 char dipotong), widget sheet (tambah item wajib pilih kelompok → Simpan disabled; pilih lalu enabled; hapus item; simpan → log `source=scan` tercatat), FAB tampil/hilang, layar scan fallback saat kamera tidak tersedia.
+
+### Verifikasi (2026-11-12, sebelum deploy)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **208/208 passed** (baseline 193; +15 test).
+- DoD §10.1: gradien 0; `Colors.` di features/shared 0 (kecuali transparent); `GEMINI_API_KEY=<literal>` 0.
+- Layout 360×640 @1,3 light/dark: hijau.
+
+### Host & Android (2026-11-12)
+- Lisensi Android SDK: `flutter doctor --android-licenses` sudah menerima seluruh lisensi.
+- `minSdk` naik ke **23** (wajib `camera_android_camerax`; target app tetap 36).
+- `ndkVersion` diset ke **27.0.12077973** (diminta plugin; kompatibel mundur).
+- Samsung **A155F (Android 16 / API 36)**: `flutter build apk --debug` → APK terpasang via `flutter install` → `MainActivity` terbuka, tidak ada crash di logcat.
+
+### Perbaikan Batch 5.1 — stuck di "Menyiapkan kamera…" (2026-11-12)
+- Akar: `CameraController` dibuang di `inactive/paused` saat `initialize()` **masih berjalan** (dialog izin ikut memicu inactive) → future tidak pernah resolve → layar loading selamanya.
+- Perbaikan (`scan_screen.dart`):
+  1. `didChangeAppLifecycleState` hanya bereaksi di `resumed`; kamera tidak dibuang di latar (Android menjeda preview sendiri).
+  2. `controller.initialize()` diberi **timeout 15 detik** + `availableCameras` timeout 10 detik → bila menggantung, layar fallback "Kamera tidak bisa dipakai" terbuka; bukan spinner abadi.
+  3. Guard re-entrancy `_initInFlight`; dispose controller hanya bila tidak berhasil mount / gagal init; handshake `_controller` final saat berhasil.
+  4. Membersihkan controller di `finally` saat gagal.
+- `flutter analyze` bersih, `flutter test` 208/208, APK debug dibangun ulang.
+- **Samsung A155F**: terverifikasi pada perbaikan Batch 5.2 di bawah.
+
+### Perbaikan Batch 5.2 — layar kosong saat membuka kamera (2026-11-13)
+- **Gejala:** tap "Foto makanan" → layar hanya menampilkan warna latar (putih, lalu hijau tua setelah latar digelapkan); preview tidak pernah muncul.
+- **Akar masalah (terbukti lewat test reproduksi):** `_FullScreenCamera` membungkus `CameraPreview` dengan `FittedBox > AspectRatio`. `FittedBox.performLayout()` memberi **constraint tak-terhingga** ke anaknya, sehingga `RenderAspectRatio` melempar *"has unbounded constraints"* saat `performLayout`. Exception di child pertama `Stack` membuat **seluruh frame gagal dirender** — sehingga hanya latar `Scaffold` yang terlihat, ikon/teks pun ikut hilang.
+- **Mengapa lolos dari 208 test:** tidak ada test yang mem-pump `ScanScreen` sampai ke `_FullScreenCamera` (kamera selalu kosong di test → selalu masuk jalur fallback).
+- **Perbaikan (`scan_screen.dart`):** `AspectRatio` diganti `SizedBox` berbasis rasio (`_displayRatio` mengikuti rumus yang sama dengan `CameraPreview`: landscape → `aspectRatio`, potret → `1/aspectRatio`). `SizedBox` menentukan ukurannya sendiri sehingga aman dari constraint tak-terhingga, dan `FittedBox.cover` tetap mengisi layar tanpa distorsi. Ada guard bila rasio belum finit.
+- **Verifikasi di Samsung A155F (Android 16):** preview kamera **tampil** — mangkuk sup terbaca jelas, lingkaran piring, top bar (X / "Scan makanan" / "Catat manual") semuanya ter-render; logcat **bebas** error `RenderAspectRatio`. `flutter analyze` bersih, `flutter test` 208/208.
+- **Insidental:** selama verifikasi di perangkat sempat dijalankan `pm clear com.example.cekgizi` untuk state bersih. Dampaknya hanya **state onboarding + anonymous session di device** (perlu onboarding ulang). **Data anak tidak ada yang terhapus** karena `ChildRepositoryImpl` menyimpan ke tabel Supabase `children`; data lama tetap ada di server (terlihat kembali bila akun sempat di-link email/Google).
+
+### Belum terverifikasi / menunggu pemilik
+- **Deploy Edge Function via Dashboard Supabase** (Windows, tanpa CLI/Docker): Edge Functions → New function `analyze-meal` → paste `index.ts` → **Verify JWT = ON** → Deploy. Secret `GEMINI_API_KEY`/`GEMINI_MODEL` sudah diset pemilik (`gemini-1.5-flash`).
+- **Smoke test 5–10 foto makanan asli** (bukan anak/wajah) di perangkat; catat p50/p95 dan baca Logs (tidak boleh ada base64/nama makanan).
+- `foods_id.json` ditunda ke **Batch 6b** (sudah diputuskan pemilik).
+
+### Catatan
+- Scan gagal tidak membuat log (log disimpan hanya saat tombol "Simpan ke catatan").
+- FAB "Foto makanan" tetap tampil hanya untuk anak ≥6 bulan.
+- Idealnya secret `GEMINI_MODEL` disesuaikan ke model Flash region yang tersedia bila `gemini-1.5-flash` ditolak API (secret, bukan kode).
+
+## Batch 6.1 — Refactor UI/UX Beranda, Makan, Tumbuh (2026-11-12)
+
+### Ruang lingkup
+Presentasi + satu perbaikan data tips. **Tidak ada dependency baru, tidak ada perubahan skema Supabase**, dan z-score/tabel SD tidak disentuh (Domain tetap murni & teruji).
+
+### Keluhan yang diperbaiki
+1. **Ring mini riwayat hijau+oranye tanpa arti** → diganti busur progres monokrom + angka `n/total`; setiap hari juga menulis ringkasan "3 dari 8 kelompok". Delapan segmen pada 36–56dp memang tidak terbaca.
+2. **Header Makan polos/berantakan** → header bersama `ScreenHeader` (tanggal, judul, satu kalimat penjelas) + tombol avatar ganti anak (48dp). Ditambah panel "hari ini" (ring 56dp, status target, status protein hewani) sebagai pengganti ring kosong.
+3. **Ujung busur menumpuk/masuk** → celah antar busur dihitung dari ketebalan stroke: `(stroke + 4dp) / radius`. Hero 196dp/stroke 18dp ≈ 14,2°, sehingga round cap menyisakan jarak terlihat ±4dp dan busur tidak saling menimpa.
+4. **Riwayat kemarin membingungkan** → dipisah: **Catatan hari ini** selalu terbuka (empty state mengarahkan), **Hari sebelumnya** dilipat per hari dan hanya memuat catatan saat diketuk.
+5. **Teks tips aneh** → string `grains_tubers` di `nutrition_rules.json` yang tersisipi lirik diperbaiki; loader menolak tips >140 karakter atau berisi baris baru; kartu tips kini menampilkan **nama kelompok** + aksi "Catat sekarang" yang langsung mencatat.
+
+### Perubahan lain
+- **Anti-duplikat**: mengetuk kelompok yang sudah tercatat tidak menambah log; snackbar menawarkan hapus. `removeGroupToday` hanya menghapus log satu-kelompok pada hari itu (catatan gabungan tidak disentuh).
+- **Semesta target mengikuti usia**: ring hero, jumlah segmen, dan angka ringkasan memakai 8 kelompok (6–23 bln) atau 7 kelompok (24–59 bln, tanpa ASI) agar tidak kontradiktif dengan target 5/7.
+- **Hero**: badge "Tercapai" ganda dihapus; status protein hewani selalu tampil; legenda "Busur oranye menandai protein hewani" muncul saat protein hewani sudah ada.
+- **ASI 24–59 bulan**: aksi menjadi sekunder + copy "tidak dihitung pada target usia ini".
+- **`TodayWatcher`** di `AppShell`: `foodLogsProvider` diinvalidasi saat app resume dan saat melewati tengah malam, sehingga label "Hari ini"/"Kemarin" tidak beku.
+- **Tumbuh**: header konsisten + chip anak; saat belum ada pengukuran hanya satu empty state (grafik & riwayat kosong disembunyikan).
+- **Beranda**: urutan header → identitas anak → hero → tips → status tumbuh; nama anak tidak diulang di baris ganti anak.
+- Copy baru terpusat di `AppStrings` (tanpa emoji, suara "kamu", status selalu ikon + teks).
+
+### Berkas utama
+- `lib/shared/widgets/screen_header.dart` (baru), `lib/shared/widgets/child_switcher.dart` (+`ChildSwitcherButton`, kartu tanpa duplikasi nama).
+- `lib/features/meals/presentation/screens/makan_screen.dart` (header, panel hari ini, grid anti-duplikat, diary hari ini vs hari sebelumnya).
+- `lib/features/meals/presentation/widgets/piring_ring.dart` (celah dari stroke, semesta 7/8, `PiringProgressRing`).
+- `lib/features/meals/presentation/widgets/piring_hero_card.dart`, `piring_tips_card.dart`, `meals_actions.dart` (baru: quick-add + snackbar undo/duplikat).
+- `lib/features/meals/domain/services/piring_day.dart` (`targetCodes`, `countedGroups`), `lib/domain_ref/nutrition_rules.dart` (guard panjang/baris baru + `missingCodesWithTips`).
+- `lib/features/home/presentation/{home_screen,app_shell}.dart`, `lib/features/growth/presentation/screens/growth_screen.dart`, `lib/core/constants/app_strings.dart`, `assets/rules/nutrition_rules.json`.
+- Test baru: `test/features/piring_ring_test.dart`; tambahan di `test/domain_ref/nutrition_rules_test.dart` dan `test/features/makan_flow_test.dart`.
+
+### Verifikasi (2026-11-12)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **193/193 passed** (baseline 179; +14 test baru: geometri celah busur, ring progres, guard tips, anti-duplikat, hari sebelumnya dilipat, ASI 24–59, hero protein hewani).
+- Layout 360×640 @1,3 light/dark → tidak ada overflow (test lama tetap hijau).
+- DoD §10.1: gradien 0; `Colors.` di `lib/features`+`lib/shared` → 0 (kecuali `Colors.transparent`); `GEMINI_API_KEY=<literal>` → 0.
+
+### Belum terverifikasi / menunggu kamu
+- Verifikasi visual & alur di perangkat nyata (kontras hero di dark, kerapatan tipografi, animasi lipat hari sebelumnya).
+- Peninjauan `nutrition_rules.json` oleh ahli gizi/bidan (`reviewed_by` masih `null`). Perbaikan string korup = memperbaiki teks rusak, **bukan** mengubah aturan gizi.
+- Opsional lanjutan (belum dieksekusi): strip 7 hari terakhir; batas fetch riwayat (butuh keputusan retensi data).
+
+## Batch 6.5 — Copy polish bebas "tanda generate" + ikonografi kelola (2026-11-12)
+
+### Ruang lingkup
+Tanda baca, copy, dan ikon saja. **Tidak ada perubahan data gizi, z-score, tabel SD, entity, atau skema Supabase**; tidak ada dependency baru.
+
+### Perubahan
+1. **Em dash (U+2014) dihapus semua**: 84 kemunculan di 46 berkas `.dart` (termasuk seluruh komentar), plus copy yang tampil ke pengguna:
+   - 8 string `AppStrings`: onboardingBody2, consentIntro, consentBullets, childEmptyBody, validationAgeRange, statusTrendNeedsAttention, makanAsiSubtitle, makanGridHint — diganti titik/koma/titik dua yang wajar Bahasa Indonesia.
+   - Inline UI: `${growthMeasureSaved}: $childName`, `${statusDetailTitle}: $nickname`, label semantik ganti anak ("Ketuk untuk ganti anak"), `formatZ(null)` → `'-'`.
+   - Dev gallery `token_gallery_screen.dart` juga dirapikan.
+   - Token gallery/kementar tetap memakai tanda biasa; **data pemilik** (`assets/rules`, `assets/reference`, `docs/`) **tidak** diubah.
+2. **Ikon Kelola anak**: `tune_rounded` → `manage_accounts_rounded` (Beranda + sheet pilih anak) agar makna lebih jelas.
+3. **Tombol "Catat sekarang"** (tips) diberi ikon `add_rounded`.
+4. Tujuan: copy tidak terasa ditulis AI dan arah fungsionalnya jelas.
+
+### Berkas
+`lib/core/constants/app_strings.dart`, `add_measurement_sheet.dart`, `growth_status_card.dart`, `status_copy.dart`, `child_switcher.dart`, `home_screen.dart`, `piring_tips_card.dart`, `token_gallery_screen.dart`, `nutrition_rules.dart`, serta pembersihan komentar di ~40 berkas lain; `test/` ikut dibersihkan.
+
+### Verifikasi (2026-11-12)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **193/193 passed**.
+- DoD §10.1: gradien 0; `Colors.` di features/shared 0 (kecuali transparent); `GEMINI_API_KEY=<literal>` 0.
+
+### Catatan
+- Em dash di `docs/PRD.md` dan `_notes` pada `assets/reference/permenkes_2_2020_sd.json` sengaja dibiarkan (bukan UI; data pemilik).
+- Batch 6.4 (opsional: strip 7 hari / batas fetch) tetap menunggu keputusan retensi kamu.
+
 ## Batch 4.1 — Penyegaran Visual Beranda, Tumbuh, Onboarding, Consent, Anak (2026-11-11)
 
 ### Ruang lingkup

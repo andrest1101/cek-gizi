@@ -1,6 +1,6 @@
-/// Tingkat "red flag" untuk Tanya Gizi — PRD §3.8.
+/// Tingkat "red flag" untuk Tanya Gizi - PRD §3.8.
 ///
-/// Dijalankan di server (Edge Function) untuk SEMUA pesan user — di sini
+/// Dijalankan di server (Edge Function) untuk SEMUA pesan user - di sini
 /// tersedia versi Dart agar aturan yang sama bisa dites unit dan dipakai
 /// ulang di klien untuk pratinjau UI (kartu khusus safety).
 ///

@@ -6,7 +6,7 @@ import 'package:cekgizi/features/growth/domain/entities/sex.dart';
 import 'package:cekgizi/features/growth/domain/repositories/anthropometry_reference_tables.dart';
 
 /// Tabel referensi Permenkes 2/2020 yang diekstrak dari PDF resmi
-/// (`assets/reference/permenkes_2_2020_sd.json`) — menjalankan validasi saat
+/// (`assets/reference/permenkes_2_2020_sd.json`) - menjalankan validasi saat
 /// parse (jumlah baris, kontinuitas kunci, monotonicity). Jika berkas rusak,
 /// lempar [InvalidReferenceDataException], jangan diam-diam lanjut.
 ///
@@ -170,7 +170,7 @@ final class PermenkesReferenceTables implements AnthropometryReferenceTables {
 
   String _sexKey(Sex sex) => sex == Sex.male ? 'male' : 'female';
 
-  /// Informasi rentang tabel WHZ (start, step, jumlah baris) — untuk grafik.
+  /// Informasi rentang tabel WHZ (start, step, jumlah baris) - untuk grafik.
   @override
   ({double start, double step, int length}) whzTableInfo({
     required Sex sex,

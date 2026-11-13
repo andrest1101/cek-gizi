@@ -1,7 +1,7 @@
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/features/growth/domain/entities/anthropometry_index.dart';
 
-/// Nada status (PRD §7.2: warna status tidak pernah sinyal tunggal —
+/// Nada status (PRD §7.2: warna status tidak pernah sinyal tunggal -
 /// selalu disertai ikon dan teks).
 enum StatusTone { good, watch, alert }
 
@@ -168,7 +168,7 @@ abstract final class GrowthStatusCopy {
 
   /// "-0,53" gaya Indonesia; null aman.
   static String formatZ(double? z) {
-    if (z == null) return '—';
+    if (z == null) return '-';
     return z.toStringAsFixed(2).replaceFirst('.', ',');
   }
 

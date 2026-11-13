@@ -33,7 +33,7 @@ void main() {
     });
 
     test('angka aneh tidak ditolak di sini (itu tugas §3.5 di GrowthClassification)', () {
-      // Walaupun z besar, rumus tetap jalan — klasifikasi yang menolak.
+      // Walaupun z besar, rumus tetap jalan - klasifikasi yang menolak.
       final z = ZScore.calculate(value: 0, sd: sd);
       expect(z, closeTo(-23.333, 1e-2));
     });

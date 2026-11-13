@@ -2,7 +2,7 @@
 ///
 /// Lapisan data melempar [Failure]; lapisan presentasi memetakannya ke copy
 /// ramah + tombol coba lagi (AppStrings). Presentation TIDAK boleh berisi
-/// logika bisnis — hanya memetakan Failure ke UI.
+/// logika bisnis - hanya memetakan Failure ke UI.
 sealed class Failure {
   const Failure();
 }
@@ -37,7 +37,7 @@ final class NotFoundFailure extends Failure {
   const NotFoundFailure();
 }
 
-/// Kesalahan tak terduga — log teknis di lapisan data, jangan data anak.
+/// Kesalahan tak terduga - log teknis di lapisan data, jangan data anak.
 final class UnexpectedFailure extends Failure {
   const UnexpectedFailure();
 }

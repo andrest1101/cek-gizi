@@ -14,7 +14,7 @@ import 'package:cekgizi/shared/widgets/section_header.dart';
 /// token di kedua tema"). Ini alat developer, bukan alur pengguna; diganti
 /// oleh Beranda asli di Batch 4.
 ///
-/// Tidak memakai literal warna sama sekali — semua dari [AppColors] dan
+/// Tidak memakai literal warna sama sekali - semua dari [AppColors] dan
 /// `Theme.of(context)`.
 class TokenGalleryScreen extends StatelessWidget {
   const TokenGalleryScreen({super.key});
@@ -271,14 +271,14 @@ class _SpacingScale extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const entries = <(String, double)>[
-      ('xs — 4', AppSpacing.xs),
-      ('sm — 8', AppSpacing.sm),
-      ('md — 12', AppSpacing.md),
-      ('lg — 16', AppSpacing.lg),
-      ('xl — 20 (padding layar)', AppSpacing.xl),
-      ('xxl — 24', AppSpacing.xxl),
-      ('xxxl — 32', AppSpacing.xxxl),
-      ('sectionGap — 28', AppSpacing.sectionGap),
+      ('xs - 4', AppSpacing.xs),
+      ('sm - 8', AppSpacing.sm),
+      ('md - 12', AppSpacing.md),
+      ('lg - 16', AppSpacing.lg),
+      ('xl - 20 (padding layar)', AppSpacing.xl),
+      ('xxl - 24', AppSpacing.xxl),
+      ('xxxl - 32', AppSpacing.xxxl),
+      ('sectionGap - 28', AppSpacing.sectionGap),
     ];
     return Column(
       children: [
@@ -320,9 +320,9 @@ class _RadiusSamples extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final entries = <(String, double)>[
-      ('control — 12', AppRadius.control),
-      ('card — 20', AppRadius.card),
-      ('pill — 999', AppRadius.pill),
+      ('control - 12', AppRadius.control),
+      ('card - 20', AppRadius.card),
+      ('pill - 999', AppRadius.pill),
     ];
     return Wrap(
       spacing: AppSpacing.md,
@@ -356,9 +356,9 @@ class _MotionTokens extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = <String>[
-      'fast — ${AppMotion.fast.inMilliseconds}ms · easeOutCubic',
-      'normal — ${AppMotion.normal.inMilliseconds}ms · easeOutCubic',
-      'ring — ${AppMotion.ring.inMilliseconds}ms · easeOutCubic',
+      'fast - ${AppMotion.fast.inMilliseconds}ms · easeOutCubic',
+      'normal - ${AppMotion.normal.inMilliseconds}ms · easeOutCubic',
+      'ring - ${AppMotion.ring.inMilliseconds}ms · easeOutCubic',
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
