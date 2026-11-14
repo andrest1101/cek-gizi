@@ -14,6 +14,7 @@ import 'package:cekgizi/features/growth/presentation/growth_summary.dart';
 import 'package:cekgizi/features/growth/presentation/providers/growth_providers.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/add_measurement_sheet.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/status_copy.dart';
+import 'package:cekgizi/shared/illustrations/seedling_illustration.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/metric_tile.dart';
@@ -295,6 +296,7 @@ class _EmptyStatus extends StatelessWidget {
       child: EmptyState(
         icon: Icons.straighten_rounded,
         iconSemantics: AppStrings.growthNoMeasurementsTitle,
+        illustration: const SeedlingIllustration(),
         title: AppStrings.growthNoMeasurementsTitle,
         body: AppStrings.growthNoMeasurementsBody,
         action: FilledButton(

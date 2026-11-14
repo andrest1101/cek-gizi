@@ -10,6 +10,7 @@ class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
     required this.icon,
+    this.illustration,
     required this.title,
     this.iconSemantics,
     this.body,
@@ -17,6 +18,9 @@ class EmptyState extends StatelessWidget {
   });
 
   final IconData icon;
+
+  /// Ilustrasi (bergambar) pengganti ikon; bila diisi, menggantikan [icon].
+  final Widget? illustration;
 
   /// Judul singkat (titleMedium), mis. "Belum ada catatan makan hari ini."
   final String title;
@@ -40,10 +44,11 @@ class EmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          TonalIconCircle(
-            icon: icon,
-            iconSemantics: iconSemantics ?? title,
-          ),
+          illustration ??
+              TonalIconCircle(
+                icon: icon,
+                iconSemantics: iconSemantics ?? title,
+              ),
           const SizedBox(height: AppSpacing.lg),
           Text(
             title,

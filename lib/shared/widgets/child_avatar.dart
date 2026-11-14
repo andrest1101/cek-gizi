@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:cekgizi/core/theme/app_theme.dart';
 
-/// 8 avatar ilustrasi untuk profil anak (bukan foto asli - PRD §0 #7).
+/// 13 avatar ilustrasi untuk profil anak (bukan foto asli - PRD §0 #7).
 abstract final class AvatarCatalog {
   const AvatarCatalog._();
 
@@ -15,6 +15,11 @@ abstract final class AvatarCatalog {
     'cloud': Icons.cloud_rounded,
     'flower': Icons.local_florist_rounded,
     'moon': Icons.bedtime_rounded,
+    'bunny': Icons.cruelty_free_rounded,
+    'paw': Icons.pets_rounded,
+    'music': Icons.music_note_rounded,
+    'cookie': Icons.cookie_rounded,
+    'sailboat': Icons.sailing_rounded,
   };
 
   static IconData of(String key) => icons[key] ?? Icons.spa_rounded;

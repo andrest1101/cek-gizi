@@ -9,6 +9,7 @@ import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
+import 'package:cekgizi/shared/illustrations/seedling_illustration.dart';
 import 'package:cekgizi/shared/widgets/child_avatar.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
@@ -51,6 +52,7 @@ class ChildrenScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(AppSpacing.screenPadding),
                   child: EmptyState(
                     icon: Icons.child_care_rounded,
+                    illustration: const SeedlingIllustration(),
                     title: AppStrings.childEmptyTitle,
                     body: AppStrings.childEmptyBody,
                     action: FilledButton(
