@@ -241,6 +241,11 @@ final class FakeFoodLogRepository implements FoodLogRepository {
   final List<FoodLog> _logs;
   int _counter = 1000;
 
+  /// Rentang terakhir yang diminta (untuk menguji batas query).
+  DateTime? lastFrom;
+  DateTime? lastTo;
+  int listCalls = 0;
+
   int get logCount => _logs.length;
 
   List<FoodLog> logs(String childId) => [
@@ -249,10 +254,20 @@ final class FakeFoodLogRepository implements FoodLogRepository {
       ];
 
   @override
-  Future<List<FoodLog>> listLogs(String childId) async {
+  Future<List<FoodLog>> listLogs(
+    String childId, {
+    DateTime? from,
+    DateTime? to,
+  }) async {
+    listCalls++;
+    lastFrom = from;
+    lastTo = to;
     return [
       for (final log in _logs)
-        if (log.childId == childId) log,
+        if (log.childId == childId &&
+            (from == null || !log.eatenAt.isBefore(from)) &&
+            (to == null || log.eatenAt.isBefore(to)))
+          log,
     ]..sort((a, b) => a.eatenAt.compareTo(b.eatenAt));
   }
 

@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:cekgizi/app.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
-import 'package:cekgizi/core/router.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
@@ -72,6 +71,8 @@ class _SheetHarness extends StatelessWidget {
 Future<void> _pumpHome(
   WidgetTester tester, {
   required ChildProfile child,
+  FakeFoodLogRepository? repo,
+  List<CameraDescription> cameras = const [],
 }) async {
   final prefs = await _prefs({
     'onboarding_completed': true,
@@ -89,12 +90,14 @@ Future<void> _pumpHome(
         permenkesTablesProvider.overrideWith(
           (ref) => Future.value(const FakeAnthropometryTables()),
         ),
-        foodLogRepositoryProvider.overrideWithValue(FakeFoodLogRepository()),
+        foodLogRepositoryProvider.overrideWithValue(
+          repo ?? FakeFoodLogRepository(),
+        ),
         nutritionRulesProvider.overrideWith(
           (ref) => Future.value(fakeNutritionRules()),
         ),
         availableCamerasProvider.overrideWith(
-          (ref) => Future<List<CameraDescription>>.value(const []),
+          (ref) => Future<List<CameraDescription>>.value(cameras),
         ),
       ],
       child: const CekGiziApp(),
@@ -162,6 +165,62 @@ void main() {
     // Di lingkungan test plugin kamera tidak tersedia → layar fallback.
     expect(find.text(AppStrings.scanCameraUnavailableTitle), findsOneWidget);
   });
+
+  testWidgets(
+    'Catat manual dari pemindai: isi nama & kelompok, lalu tersimpan sebagai catatan manual',
+    (tester) async {
+      final child = fakeChild();
+      final repo = FakeFoodLogRepository();
+      await _pumpHome(tester, child: child, repo: repo);
+
+      // Buka pemindai → fallback kamera tampil.
+      await tester.tap(find.text(AppStrings.photoScanFab));
+      await tester.pumpAndSettle();
+      expect(find.text(AppStrings.scanCameraUnavailableTitle), findsOneWidget);
+
+      // Buka sheet "Catat manual" dari tombol fallback.
+      await tester.tap(find.byKey(const ValueKey('scan-fallback-manual')));
+      await tester.pumpAndSettle();
+      // Sheet terbuka (judulnya sama dengan tombol fallback; scope ke sheet).
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('manual-food-sheet')),
+          matching: find.text(AppStrings.manualFoodTitle),
+        ),
+        findsOneWidget,
+      );
+
+      // Simpan dinonaktifkan sebelum nama dan kelompok diisi.
+      var save = tester.widget<FilledButton>(
+        find.byKey(const Key('manual-food-save')),
+      );
+      expect(save.onPressed, isNull);
+
+      await tester.enterText(
+        find.byKey(const Key('manual-food-name')),
+        'Bubur ayam',
+      );
+      await tester.tap(find.byKey(const ValueKey('manual-food-group-grains_tubers')));
+      await tester.tap(find.byKey(const ValueKey('manual-food-group-flesh')));
+      await tester.pumpAndSettle();
+      save = tester.widget<FilledButton>(
+        find.byKey(const Key('manual-food-save')),
+      );
+      expect(save.onPressed, isNotNull);
+
+      await tester.tap(find.byKey(const Key('manual-food-save')));
+      await tester.pumpAndSettle();
+
+      expect(find.text(AppStrings.manualFoodSaved), findsOneWidget);
+      expect(repo.logCount, 1);
+      final log = repo.logs(child.id).single;
+      expect(log.source, FoodLogSource.manual);
+      expect(log.items.single.name, 'Bubur ayam');
+      expect(log.groups, ['grains_tubers', 'flesh']);
+      // Kembali ke Beranda setelah menyimpan.
+      expect(find.text(AppStrings.scanCameraUnavailableTitle), findsNothing);
+    },
+  );
 
   testWidgets('sheet hasil: hapus item lalu simpan tercatat', (tester) async {
     final child = fakeChild();

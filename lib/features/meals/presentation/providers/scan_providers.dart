@@ -13,13 +13,13 @@ final mealScanRepositoryProvider = Provider<MealScanRepository>(
   (ref) => MealScanRepositoryImpl(ref.watch(supabaseClientProvider)),
 );
 
-/// Daftar kamera yang tersedia — dipisah jadi provider agar widget test
+/// Daftar kamera yang tersedia - dipisah jadi provider agar widget test
 /// bisa meng-override tanpa plugin kamera.
 final availableCamerasProvider = FutureProvider<List<CameraDescription>>(
   (ref) => availableCameras(),
 );
 
-/// Kompresi foto hasil scan — dipisah jadi antarmuka agar widget test
+/// Kompresi foto hasil scan - dipisah jadi antarmuka agar widget test
 /// tidak memuat plugin kamera/kompresi.
 abstract interface class ScanImageCompressor {
   /// Mengembalikan JPEG ≤ 300 KB bila memungkinkan; melempar [ScanException]

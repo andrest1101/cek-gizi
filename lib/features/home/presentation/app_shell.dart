@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
+import 'package:cekgizi/core/time/clock.dart';
+import 'package:cekgizi/core/time/local_dates.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 
@@ -53,8 +55,8 @@ class _AppShellState extends ConsumerState<AppShell>
 
   void _scheduleMidnightRefresh() {
     _midnightTimer?.cancel();
-    final now = DateTime.now();
-    final nextMidnight = DateTime(now.year, now.month, now.day + 1);
+    final now = ref.read(clockProvider)();
+    final nextMidnight = startOfNextLocalDay(now);
     _midnightTimer = Timer(
       nextMidnight.difference(now) + const Duration(seconds: 1),
       () {
@@ -68,6 +70,8 @@ class _AppShellState extends ConsumerState<AppShell>
     final childId = ref.read(selectedChildProvider).value?.id;
     if (childId == null) return;
     ref.invalidate(foodLogsProvider(childId));
+    ref.invalidate(historyLogsProvider(childId));
+    ref.invalidate(historySummaryProvider(childId));
   }
 
   @override

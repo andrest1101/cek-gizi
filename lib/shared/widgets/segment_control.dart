@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:cekgizi/core/theme/app_colors.dart';
+import 'package:cekgizi/core/theme/app_motion.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
@@ -81,8 +82,6 @@ class _Segment<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final backgroundColor =
-        isSelected ? AppSurfaces.cardColor(context) : Colors.transparent;
 
     return Semantics(
       button: true,
@@ -90,24 +89,29 @@ class _Segment<T> extends StatelessWidget {
       label: option.semanticLabel,
       excludeSemantics: true,
       child: Material(
-        color: backgroundColor,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(AppRadius.pill),
         child: InkWell(
           borderRadius: BorderRadius.circular(AppRadius.pill),
           onTap: onTap,
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 44),
+          child: AnimatedContainer(
+            duration: AppMotion.of(context, AppMotion.fast),
+            curve: AppMotion.easeOutCubic,
+            constraints: const BoxConstraints(minHeight: 48),
             alignment: Alignment.center,
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.sm,
               vertical: AppSpacing.sm,
             ),
-            decoration: isSelected
-                ? BoxDecoration(
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                    border: Border.all(color: colors.outline, width: 1),
-                  )
-                : null,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppSurfaces.cardColor(context)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              border: isSelected
+                  ? Border.all(color: colors.outline, width: 1)
+                  : null,
+            ),
             child: Text(
               option.label,
               maxLines: 1,

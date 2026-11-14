@@ -17,6 +17,7 @@ import 'package:cekgizi/features/children/presentation/providers/children_provid
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/meals/domain/entities/meal_scan.dart';
 import 'package:cekgizi/features/meals/presentation/providers/scan_providers.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/manual_food_sheet.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/meal_scan_result_sheet.dart';
 
 /// Layar scanner makanan (PRD §6.4): viewfinder berbentuk piring.
@@ -137,7 +138,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
         try {
           await controller.dispose();
         } catch (_) {
-          // abaikan — controller gagal diinisialisasi
+          // abaikan - controller gagal diinisialisasi
         }
       }
       _initInFlight = false;
@@ -145,6 +146,16 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
   }
 
   ChildProfile? get _child => ref.read(selectedChildProvider).value;
+
+  /// Buka sheet "Catat manual" untuk anak terpilih (offline-first);
+  /// setelah tersimpan, kembali ke layar sebelumnya.
+  void _openManualEntry() {
+    final child = _child;
+    if (child == null) return;
+    showManualFoodSheet(context, childId: child.id).then((saved) {
+      if (saved == true && mounted) context.pop();
+    });
+  }
 
   Future<void> _analyzeFile(XFile file) async {
     final child = _child;
@@ -253,7 +264,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
     final cameraError = _cameraError;
 
     return Scaffold(
-      // Latar gelap: ikon/teks kita berwarna terang — tetap terbaca
+      // Latar gelap: ikon/teks kita berwarna terang - tetap terbaca
       // walau preview kamera sedang memuat atau gagal ditampilkan.
       backgroundColor: colors.textPrimary,
       body: SafeArea(
@@ -262,7 +273,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
                 kind: cameraError,
                 onRetry: _initCamera,
                 onOpenSettings: _openAppSettings,
-                onManual: () => context.go('/makan'),
+                onManual: _openManualEntry,
               )
             : Stack(
                 fit: StackFit.expand,
@@ -289,7 +300,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
                     const _PlateOverlay(),
                     _TopBar(
                       onClose: () => context.pop(),
-                      onManual: () => context.go('/makan'),
+                      onManual: _openManualEntry,
                     ),
                     _BottomBar(
                       onGallery: _pickFromGallery,
@@ -303,7 +314,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
                       code: _scanError!,
                       onCloseError: () => setState(() => _scanError = null),
                       onRetry: _initCamera,
-                      onManual: () => context.go('/makan'),
+                      onManual: _openManualEntry,
                     ),
                 ],
               ),
@@ -340,7 +351,7 @@ class _FullScreenCamera extends StatelessWidget {
   Widget build(BuildContext context) {
     final ratio = _displayRatio;
     if (ratio <= 0) {
-      // Rasio belum siap — tampilkan preview apa adanya tanpa scaling.
+      // Rasio belum siap - tampilkan preview apa adanya tanpa scaling.
       return CameraPreview(controller);
     }
 
@@ -428,6 +439,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           TextButton(
+            key: const ValueKey('scan-topbar-manual'),
             onPressed: onManual,
             child: Text(
               AppStrings.scanManualButton,
@@ -635,6 +647,7 @@ class _ScanErrorPanel extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
+                    key: const ValueKey('scan-error-manual'),
                     onPressed: onManual,
                     child: const Text(AppStrings.scanManualButton),
                   ),
@@ -744,6 +757,7 @@ class _CameraFallback extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 TextButton(
+                  key: const ValueKey('scan-fallback-manual'),
                   onPressed: onManual,
                   child: const Text(AppStrings.scanManualButton),
                 ),

@@ -15,6 +15,8 @@ import 'package:cekgizi/features/meals/presentation/providers/meals_providers.da
 import 'package:cekgizi/features/growth/presentation/widgets/growth_status_card.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_hero_card.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_tips_card.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/week_strip.dart';
+import 'package:cekgizi/shared/illustrations/seedling_illustration.dart';
 import 'package:cekgizi/shared/widgets/child_switcher.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
@@ -59,6 +61,7 @@ class HomeScreen extends ConsumerWidget {
                       padding: const EdgeInsets.only(top: AppSpacing.lg),
                       child: EmptyState(
                         icon: Icons.child_care_rounded,
+                        illustration: const SeedlingIllustration(),
                         title: AppStrings.childEmptyTitle,
                         body: AppStrings.childEmptyBody,
                         action: FilledButton(
@@ -68,12 +71,17 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     );
                   }
+                  final selectedChild = ref.watch(selectedChildProvider).value;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const ChildSwitcherCard(),
                       const SizedBox(height: AppSpacing.lg),
                       const PiringHeroCard(),
+                      if (selectedChild != null) ...[
+                        const SizedBox(height: AppSpacing.lg),
+                        HomeWeekStrip(childId: selectedChild.id),
+                      ],
                       const SizedBox(height: AppSpacing.lg),
                       const PiringTipsCard(),
                       const SizedBox(height: AppSpacing.lg),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_colors.dart';
+import 'package:cekgizi/core/theme/app_motion.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/meals/domain/services/dietary_diversity.dart';
@@ -218,13 +219,19 @@ class PiringProgressRing extends StatelessWidget {
       child: SizedBox(
         width: size,
         height: size,
-        child: CustomPaint(
-          size: Size.square(size),
-          painter: _ProgressRingPainter(
-            progress: safeMet / safeTotal,
-            trackColor: colors.surfaceVariant,
-            progressColor: colors.primary,
-            strokeWidth: strokeWidth,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: safeMet / safeTotal),
+          duration: AppMotion.of(context, AppMotion.ring),
+          curve: AppMotion.easeOutCubic,
+          builder: (context, value, child) => CustomPaint(
+            size: Size.square(size),
+            painter: _ProgressRingPainter(
+              progress: value,
+              trackColor: colors.surfaceVariant,
+              progressColor: colors.primary,
+              strokeWidth: strokeWidth,
+            ),
+            child: child,
           ),
           child: showCount
               ? Center(

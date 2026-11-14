@@ -7,7 +7,7 @@ import 'package:cekgizi/features/meals/domain/repositories/meal_scan_repository.
 
 /// Implementasi `analyze-meal` (Edge Function, PRD §5.5).
 ///
-/// Kunci Gemini TIDAK pernah ada di sini — hanya lewat function.
+/// Kunci Gemini TIDAK pernah ada di sini - hanya lewat function.
 /// Foto dikompresi di sisi klien (≤ 1,5 MB) lalu dikirim base64; tidak
 /// ada yang tersimpan di Storage atau database.
 class MealScanRepositoryImpl implements MealScanRepository {
@@ -61,7 +61,7 @@ class MealScanRepositoryImpl implements MealScanRepository {
           return (decoded['error'] as String).trim();
         }
       } catch (_) {
-        // bukan JSON — jatuh ke default di bawah
+        // bukan JSON - jatuh ke default di bawah
       }
     }
     return switch (exception.status) {

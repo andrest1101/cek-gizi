@@ -19,12 +19,6 @@ import 'package:cekgizi/features/onboarding/presentation/screens/onboarding_scre
 import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 
-/// Dikonfigurasi di `main()`; tes melakukan override dengan prefs dari
-/// SharedPreferences mock.
-final localPrefsProvider = Provider<LocalPrefs>(
-  (ref) => throw UnimplementedError('Override localPrefsProvider di main().'),
-);
-
 final routerProvider = Provider<GoRouter>((ref) {
   final prefs = ref.watch(localPrefsProvider);
 

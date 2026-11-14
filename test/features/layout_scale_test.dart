@@ -5,10 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:cekgizi/app.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
-import 'package:cekgizi/core/router.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/growth/presentation/providers/growth_providers.dart';
+import 'package:cekgizi/features/meals/domain/entities/food_log.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 
 import '../fakes.dart';
@@ -35,7 +35,11 @@ void main() {
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
   }
 
-  Future<void> pumpApp(WidgetTester tester, LocalPrefs prefs) async {
+  Future<void> pumpApp(
+    WidgetTester tester,
+    LocalPrefs prefs, {
+    List<FoodLog> logs = const [],
+  }) async {
     final child = fakeChild();
     await tester.pumpWidget(
       ProviderScope(
@@ -51,7 +55,9 @@ void main() {
           permenkesTablesProvider.overrideWith(
             (ref) => Future.value(const FakeAnthropometryTables()),
           ),
-          foodLogRepositoryProvider.overrideWithValue(FakeFoodLogRepository()),
+          foodLogRepositoryProvider.overrideWithValue(
+            FakeFoodLogRepository(logs),
+          ),
           nutritionRulesProvider.overrideWith((ref) => Future.value(fakeNutritionRules())),
         ],
         child: const CekGiziApp(),
@@ -181,6 +187,61 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         expect(find.text(AppStrings.tipTitle), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Riwayat Makan (ringkasan + kalender) muat di 360dp @1.3 (${brightness.name})',
+      (tester) async {
+        useSmallScreen(tester, brightness);
+        final child = fakeChild();
+        await pumpApp(
+          tester,
+          await prefsFor({
+            'onboarding_completed': true,
+            'consent_version_accepted': '1',
+          }),
+          logs: [
+            fakeFoodLog(
+              id: 'yesterday-1',
+              childId: child.id,
+              eatenAt: DateTime.now().subtract(const Duration(days: 1)),
+              groups: const ['eggs'],
+            ),
+          ],
+        );
+
+        await tester.tap(find.text(AppStrings.navMakan));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(AppStrings.makanSectionHistory));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        final historyScrollable = find
+            .descendant(
+              of: find.byKey(const Key('makan-history-list')),
+              matching: find.byType(Scrollable),
+            )
+            .first;
+        await tester.scrollUntilVisible(
+          find.text(AppStrings.makanHistorySummaryTitle),
+          120,
+          scrollable: historyScrollable,
+          maxScrolls: 40,
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.text(AppStrings.makanHistorySummaryTitle), findsOneWidget);
+
+        await tester.scrollUntilVisible(
+          find.text(AppStrings.makanHistoryCalendarTitle),
+          120,
+          scrollable: historyScrollable,
+          maxScrolls: 40,
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.text(AppStrings.makanHistoryCalendarTitle), findsOneWidget);
       },
     );
 

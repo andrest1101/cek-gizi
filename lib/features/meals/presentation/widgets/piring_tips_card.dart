@@ -62,7 +62,6 @@ class PiringTipsCard extends ConsumerWidget {
                 childId: child.id,
                 groupCode: code,
                 groupLabel: groupLabel,
-                alreadyLogged: piring.groups.contains(code),
               ),
             );
           },

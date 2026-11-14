@@ -124,6 +124,8 @@ abstract final class AppStrings {
   static const growthHistoryTitle = 'Riwayat pengukuran';
   static const growthChartTitle = 'Grafik pertumbuhan';
   static const growthChartCaption = 'Tabel rujukan: Permenkes 2/2020';
+  static const growthTrendHint =
+      'Belum cukup data untuk melihat tren. Tambah satu ukuran lagi.';
   static const growthLegendBand = 'Rentang wajar';
   static const growthLegendLimit = 'Batas ±2 SD';
   static const growthLegendMedian = 'Median';
@@ -288,10 +290,32 @@ abstract final class AppStrings {
         _ => code,
       };
 
+  /// Contoh makanan untuk satu kelompok (baris bantuan di checklist).
+  static String groupExamples(String code) => switch (code) {
+        'breast_milk' => 'Cukup satu tanda untuk hari ini',
+        'grains_tubers' => groupGrainsTubersExamples,
+        'legumes_nuts' => groupLegumesNutsExamples,
+        'dairy' => groupDairyExamples,
+        'flesh' => groupFleshExamples,
+        'eggs' => groupEggsExamples,
+        'vit_a_fruit_veg' => groupVitAFruitVegExamples,
+        'other_fruit_veg' => groupOtherFruitVegExamples,
+        _ => '',
+      };
+
   // ── Makan (PRD §6.4) ───────────────────────────────────────────
   static const makanTitle = 'Makan';
   static const makanSubtitle =
-      'Ketuk kelompok pangan yang sudah dimakan anak hari ini.';
+      'Catat apa yang anak makan hari ini. Porsi tidak dinilai.';
+
+  // Segment Hari ini / Riwayat.
+  static const makanSectionToday = 'Hari ini';
+  static const makanSectionHistory = 'Riwayat';
+  static const makanSectionTodaySemantics = 'Catatan makan hari ini';
+  static const makanSectionHistorySemantics =
+      'Riwayat catatan makan 30 hari terakhir';
+
+  // ASI.
   static const makanAsiToday = 'ASI hari ini';
   static const makanAsiSubtitle =
       'Cukup satu tanda untuk hari ini. Tidak perlu menghitung berapa disusukan.';
@@ -302,21 +326,65 @@ abstract final class AppStrings {
   static const makanAsiLogged = 'ASI tercatat hari ini';
   static const makanAsiLoggedFeedback = 'ASI hari ini tercatat.';
   static const makanAsiRemovedFeedback = 'Catatan ASI hari ini dihapus.';
-  static const makanGridTitle = 'Catat kelompok pangan';
+
+  // Checklist kelompok pangan.
+  static const makanGridTitle = 'Catat yang sudah dimakan';
   static const makanGridHint =
-      'Ketuk sekali, catatan langsung tersimpan. Tanda centang berarti '
-      'kelompok itu sudah tercatat hari ini.';
+      'Ketuk satu kelompok, catatan langsung tersimpan. Ketuk lagi untuk '
+      'menghapus.';
+  static const makanChecklistActionLog = 'Catat';
+  static const makanChecklistActionRemove = 'Hapus';
+  static const makanChecklistCounted = 'Tercatat';
+  static const makanChecklistUncounted = 'Belum tercatat';
+  static const makanChecklistOptional = 'Tidak dihitung di usia ini';
+  static String makanChecklistSemantics(
+    String label,
+    String examples,
+    bool logged,
+  ) =>
+      logged
+          ? '$label, sudah tercatat. $examples'
+          : '$label, belum tercatat. $examples';
+  static String makanChecklistActionSemantics(String label, bool logged) =>
+      logged ? 'Hapus catatan $label' : 'Catat $label';
+  static String makanChecklistCountSemantics(int met, int total) =>
+      '$met dari $total kelompok tercatat hari ini.';
+
+  // Composer "Catat satu kali makan".
+  static const makanComposerCta = 'Catat makan';
+  static const makanComposerHint =
+      'Untuk satu piring yang berisi beberapa kelompok sekaligus.';
+  static const catatMakanTitle = 'Catat satu kali makan';
+  static const catatMakanSubtitle =
+      'Pilih waktu makan dan kelompok yang ada di piring.';
+  static const catatMakanMealTypeLabel = 'Waktu makan';
+  static const catatMakanGroupsLabel = 'Kelompok yang dimakan';
+  static const catatMakanGroupsHint = 'Pilih minimal satu. Boleh lebih dari satu.';
+  static const catatMakanPortionLabel = 'Porsi (opsional)';
+  static const catatMakanPortionHint =
+      'Porsi hanya catatan kamu, bukan penilaian.';
+  static const catatMakanSave = 'Simpan catatan';
+  static const catatMakanSaved = 'Catatan makan tersimpan.';
+  static const catatMakanEmptyGroups = 'Pilih minimal satu kelompok dulu.';
+  static const catatMakanError =
+      'Gagal menyimpan catatan. Periksa koneksi internet kamu, lalu coba lagi.';
+  static String catatMakanSelectedCount(int count) => '$count kelompok dipilih';
+
+  // Diary hari ini.
   static const makanDiaryTodayTitle = 'Catatan hari ini';
-  static const makanPreviousTitle = 'Hari sebelumnya';
-  static const makanPreviousHint = 'Ketuk satu hari untuk melihat catatannya.';
   static const makanDiaryEmpty =
-      'Belum ada catatan hari ini. Ketuk kelompok pangan di atas untuk mulai.';
+      'Belum ada catatan hari ini. Ketuk kelompok di atas untuk mulai.';
+  static const makanTimelineHint =
+      'Geser catatan ke kiri atau ketuk ikon hapus untuk membuangnya.';
   static const makanDeleteLog = 'Hapus catatan';
   static const makanLogDeleted = 'Catatan dihapus.';
   static const makanUndoAction = 'Urungkan';
   static String makanLogAdded(String label) => '$label ditambahkan ke catatan.';
   static String makanGroupAlreadyLogged(String label) =>
       '$label sudah tercatat hari ini.';
+  static const makanGroupInCombinedLog =
+      'Kelompok ini tercatat dalam catatan gabungan. Hapus lewat daftar '
+      'catatan hari ini.';
   static String makanGroupLogSemantics(String label) => 'Catat $label';
   static String makanGroupLoggedSemantics(String label) =>
       '$label, sudah tercatat hari ini';
@@ -335,6 +403,119 @@ abstract final class AppStrings {
       'Gagal memuat catatan makan. Periksa koneksi internet kamu, lalu coba lagi.';
   static const makanSaveError =
       'Gagal menyimpan catatan. Periksa koneksi internet kamu, lalu coba lagi.';
+
+  // Riwayat makan.
+  static const makanHistoryTitle = 'Riwayat makan';
+  static const makanHistorySubtitle =
+      'Lihat catatan 30 hari terakhir anak kamu.';
+  static const makanHistoryLoadError =
+      'Gagal memuat riwayat makan. Periksa koneksi internet kamu, lalu coba lagi.';
+  static const makanHistoryEmptyTitle = 'Belum ada catatan';
+  static const makanHistoryEmptyBody =
+      'Mulai catat makan hari ini. Riwayat akan muncul di sini.';
+  static const makanHistoryEmptyCta = 'Catat makan hari ini';
+  static const makanHistoryDayEmpty = 'Tidak ada catatan pada hari ini.';
+  static const makanHistoryWindowNote =
+      'Riwayat yang tersedia: 30 hari terakhir.';
+  static const makanHistorySummaryTitle = '30 hari terakhir';
+  static const makanHistoryCalendarTitle = 'Pilih tanggal';
+  static const makanHistoryCalendarHint =
+      'Ketuk tanggal untuk melihat catatannya.';
+  static const makanHistoryPrevMonth = 'Bulan sebelumnya';
+  static const makanHistoryNextMonth = 'Bulan berikutnya';
+  static String makanHistoryDaysWithLogs(int logged, int total) =>
+      '$logged dari $total hari ada catatan';
+  static String makanHistoryTargetDays(int days) =>
+      '$days hari mencapai target';
+  static String makanHistoryAnimalDays(int days) =>
+      '$days hari ada protein hewani';
+  static String makanHistoryDaySemantics(
+    String day,
+    int met,
+    int total,
+    bool hasLogs,
+  ) =>
+      hasLogs
+          ? '$day, $met dari $total kelompok. Ketuk untuk melihat catatan.'
+          : '$day, belum ada catatan.';
+  static String makanHistoryDayProgress(int met, int total) =>
+      '$met dari $total kelompok';
+  static const makanHistoryLegendLogged = 'Ada catatan';
+  static const makanHistoryLegendReached = 'Target tercapai';
+
+  // Info "Cara kerja Piring Hari Ini".
+  static const piringInfoOpen = 'Cara kerja';
+  static const piringInfoOpenSemantics = 'Cara kerja Piring Hari Ini';
+  static const piringInfoTitle = 'Cara kerja Piring Hari Ini';
+  static const piringInfoIntro =
+      'Piring Hari Ini adalah catatan keragaman pangan, bukan penilaian gizi.';
+  static const piringInfoResetTitle = 'Mulai dari nol setiap hari';
+  static const piringInfoResetBody =
+      'Semua catatan pada hari ini dihitung menurut waktu perangkat. Saat '
+      'tengah malam, hitungan mulai lagi dari nol.';
+  static const piringInfoTargetTitle = 'Target kelompok';
+  static String piringInfoTargetBody(
+    int target, {
+    required bool breastMilkNotCounted,
+  }) =>
+      breastMilkNotCounted
+          ? 'Target usia ini: minimal $target dari 7 kelompok. ASI tidak dihitung.'
+          : 'Target usia ini: minimal $target dari 8 kelompok.';
+  static const piringInfoAsiTitle = 'ASI dicatat sekali';
+  static const piringInfoAsiBody =
+      'Cukup satu tanda untuk hari ini. Kamu tidak perlu menghitung berapa '
+      'kali menyusui.';
+  static const piringInfoAnimalTitle = 'Protein hewani dicek terpisah';
+  static const piringInfoAnimalBody =
+      'Susu, lauk hewani, dan telur tetap masuk hitungan kelompok, lalu dicek '
+      'lagi sebagai protein hewani.';
+  static const piringInfoNotJudgingTitle = 'Catatan, bukan penilaian';
+  static const piringInfoNotJudgingBody =
+      'Porsi dan jumlah tidak dinilai. Yang dilihat hanya variasi kelompok '
+      'pangan.';
+  static const piringInfoClose = 'Tutup';
+
+  // Tur singkat sekali jalan.
+  static const piringTourTitle = 'Mulai dari sini';
+  static const piringTourBody =
+      'Ketuk kelompok yang sudah dimakan hari ini. Kalau satu piring berisi '
+      'beberapa kelompok, pakai "Catat satu kali makan" agar cukup sekali '
+      'simpan.';
+  static const piringTourDismiss = 'Mengerti';
+  static const piringTourSemantics = 'Panduan singkat Piring Hari Ini';
+
+  // Strip 7 hari di Beranda & Riwayat.
+  static const homeWeekTitle = '7 hari terakhir';
+  static const homeWeekHistoryCta = 'Lihat riwayat';
+  static const homeWeekEmpty = 'Belum ada catatan minggu ini.';
+  static const homeWeekHint = 'Ketuk satu hari untuk melihat catatannya.';
+  static const homeWeekToday = 'Hari ini';
+  static const homeWeekLoadError = 'Riwayat belum bisa dimuat.';
+  static String homeWeekDaySemantics(
+    String day,
+    int met,
+    int total, {
+    required bool hasLogs,
+    required bool reached,
+  }) {
+    if (!hasLogs) return '$day, belum ada catatan.';
+    final suffix = reached ? ' Target tercapai.' : '';
+    return '$day, $met dari $total kelompok.$suffix';
+  }
+
+  // ── Catat manual (di dalam pemindai) ─────────────────────────────
+  static const manualFoodTitle = 'Catat manual';
+  static const manualFoodSubtitle =
+      'Tulis nama makanannya, lalu pilih kelompoknya.';
+  static const manualFoodNameLabel = 'Nama makanan';
+  static const manualFoodNameHint = 'Mis. bubur ayam, telur rebus, tahu';
+  static const manualFoodGroupsLabel = 'Kelompok yang dimakan';
+  static const manualFoodSave = 'Simpan catatan';
+  static const manualFoodSaved = 'Catatan makan tersimpan.';
+  static const manualFoodError =
+      'Gagal menyimpan catatan. Periksa koneksi internet kamu, lalu coba lagi.';
+  static const manualFoodEmptyName = 'Tulis nama makanannya dulu.';
+  static const manualFoodEmptyGroups = 'Pilih minimal satu kelompok.';
 
   // ── Scan makanan (PRD §6.4) ───────────────────────────────────────
   static const photoScanFab = 'Foto makanan';

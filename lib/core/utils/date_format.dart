@@ -19,6 +19,14 @@ abstract final class IdDateFormat {
 
   static String full(DateTime d) => '${d.day} ${_months[d.month - 1]} ${d.year}';
 
+  /// Nama bulan + tahun, mis. "November 2026" (header kalender).
+  static String monthYear(DateTime d) =>
+      '${_months[d.month - 1]} ${d.year}';
+
+  /// Nama hari pendek, mis. "Sen" (strip 7 hari).
+  static String weekdayShort(DateTime d) =>
+      _weekdays[d.weekday - 1].substring(0, 3);
+
   static String short(DateTime d) =>
       '${d.day} ${_months[d.month - 1].substring(0, 3)} ${d.year}';
 

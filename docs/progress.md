@@ -458,3 +458,83 @@ Logic PRD §3.1–3.8, Dart murni, tanpa Flutter, 100% unit-tested:
 
 ### Status
 Domain inti terbangun + unit test hijau; nilai tabel & loader `nutrition_rules.json` menunggu file dari pemilik.
+
+## UX Refactor (UX-1 & UX-2) — Informasi & Riwayat (2026-11-13)
+
+### Dependency baru
+**Tidak ada.** Semua elemen (segment control, strip 7 hari, kalender, ring) dibuat sendiri dari komponen yang sudah ada; tidak ada paket tambahan.
+
+### UX-1 — Infrastruktur "Hari ini" & riwayat
+1. `lib/core/time/clock.dart` (`clockProvider`) dan `lib/core/time/local_dates.dart` (rentang hari/bulan, `localRecentDaysRange`, `localDayRange`, `localMonthRange`, `localDayDifference`, `addLocalMonths`) — aritmetika tanggal lokal murni dan teruji.
+2. `FoodLogRepository.listLogs(childId, {from, to})`; query Supabase dibatasi rentang (`gte`/`lt`, limit 1000, urut naik) sehingga catatan hari ini tidak lagi menarik seluruh riwayat dan batas baris server tidak bisa memotong data terbaru.
+3. `foodLogsProvider` kini hanya hari ini; `historyLogsProvider` (30 hari, `FutureProvider.family`) dan `historySummaryProvider` (evaluasi per hari dengan usia SAAT ITU) baru; `piringTodayProvider` memakai `clockProvider`.
+4. Domain baru `meals/domain/services/history_summary.dart` (`HistoryDay`, `HistorySummary`, `HistoryEvaluator`, jendela 30 hari termasuk hari ini, target mengikuti `nutrition_rules.json` per usia saat itu).
+5. `AppShell` (TodayWatcher) meng-invalidate provider hari ini dan riwayat saat resume serta melewati tengah malam; `localPrefsProvider` dipindah ke `core/storage/local_prefs.dart` (router tidak lagi mendefinisikannya).
+6. Unit test: `test/features/history_summary_test.dart` (7 test) dan `test/core/time/local_dates_test.dart` (7 test); `makan_flow_test` diberi assert reset target saat ganti hari.
+
+### UX-2 — Arsitektur informasi & copy (layar Makan → `Hari ini | Riwayat`)
+1. **Navigasi Makan kini dua bagian (segmented)**: "Hari ini" (target harian + checklist + catatan hari ini) dan "Riwayat" (30 hari terakhir: ringkasan, strip 7 hari, kalender bulan, detail hari). Destinasi tetap 3; riwayat tidak memperbanyak tab.
+2. **Checklist kelompok pangan berlabel**: ASI baris pertama; tiap baris ikon + nama + contoh; status selalu berpasangan (ikon + teks "Tercatat"/"Belum tercatat", tidak pernah warna saja); aksi eksplisit "Catat" / "Hapus" (atau "Catat ASI" untuk ASI); baris juga bisa diketuk; tombol "Hapus" hanya tampil bila SEMUA catatan yang memuat kelompok itu adalah catatan satu-kelompok (tidak menghapus kelompok yang ikut tercatat di catatan gabungan); baris ASI diberi catatan sekunder di usia 24–59 bulan.
+3. **Composer "Catat satu kali makan"**: sheet (waktu makan, centang beberapa kelompok, porsi opsional — porsi tidak dinilai); menghasilkan SATU `FoodLog` multi-kelompok memakai field yang sudah ada (`meal_type`, `items[].portion`, `groups`); tombol Simpan nonaktif sampai minimal satu kelompok dipilih; snackbar dengan "Urungkan".
+4. **Timeline "Catatan hari ini"** dipakai ulang untuk hari ini dan riwayat (`FoodLogList`/`FoodLogRow`): hapus lewat geser atau tombol + "Urungkan".
+5. **Riwayat**: kartu ringkasan 30 hari (hari ada catatan / mencapai target / ada protein hewani); strip 7 hari ketuk untuk memilih hari; kalender bulan (hanya tanggal yang masuk jendela 30 hari dan bukan masa depan yang bisa dipilih); detail hari (progress ring + protein hewani + daftar catatan yang bisa dihapus); error/offline dengan tombol "Coba lagi"; empty state "Belum ada catatan" + CTA kembali ke catatan hari ini.
+6. **Beranda**: strip 7 hari di bawah hero (`HomeWeekStrip`) + tombol "Lihat riwayat" yang membuka tab Makan bagian Riwayat; ketuk satu hari langsung membuka hari itu.
+7. **Copy dan onboarding ringan**: tur singkat sekali jalan (`PiringTourCard`, flag `piring_tour_seen` di `LocalPrefs`, bisa ditutup); sheet penjelasan "Cara kerja Piring Hari Ini" (aturan target, reset harian, ASI sekali per hari, protein hewani dicek terpisah, porsi tidak dinilai, penanda aturan belum ditinjau ahli gizi).
+8. **Header layar di-pin** (ScreenHeader + segment tetap terlihat saat menggulir); FAB "Foto makanan" diberi `heroTag: null` (menghindari duplicate Hero tag antara Beranda/Makan yang sebelumnya memicu assertion runtime di widget test).
+9. **`SegmentControl` minimum height 44 → 48dp** (target sentuh); `makanSectionProvider`/`historySelectedDayProvider` (`NotifierProvider`) membuat Beranda dapat mem-pre-select hari riwayat sebelum pindah tab.
+10. **Catatan arsitektur (penting)**: nested autoDispose family providers (`foodLogsProvider` + `piringTodayProvider` + `historySummaryProvider`) memicu assertion `UncontrolledProviderScope` saat `TickerMode` pindah tab dengan invalidation tertunda. Keempat provider itu dijadikan non-autoDispose (murah; di-invalidate eksplisit saat mutasi; invalidation didefer dengan `addPostFrameCallback`).
+11. **Test**: `makan_flow_test` diperluas (riwayat menggantikan "hari sebelumnya dilipat", composer, lembar Cara kerja, tur sekali jalan, strip 7 hari Beranda → Riwayat, aksi ASI via key); `layout_scale_test` tetap hijau (360dp @1.3, light/dark); Semantics label untuk strip hari dan sel kalender.
+
+### Verifikasi (2026-11-13)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **226/226 passed**.
+- DoD §10.1: `LinearGradient|RadialGradient|SweepGradient` → 0; `\bColors\.(?!transparent)` di `lib/features` + `lib/shared` → 0; `GEMINI_API_KEY=<literal>` → 0; em dash (U+2014) di `.dart` → 0 (8 sisa komentar dari Batch 5 dirapikan).
+- Layout: `test/features/layout_scale_test.dart` — Beranda/Tumbuh/Onboarding/Consent/Makan muat di 360×640 @1.3, light + dark, tanpa overflow.
+
+### Belum terverifikasi (butuh kamu)
+- Emulator/perangkat tidak tersedia saat pengerjaan (`adb` hanya menampilkan `emulator-5562` dalam status `offline`; SM A155F tidak terhubung). Verifikasi visual di perangkat (light/dark, navigasi Hari ini ↔ Riwayat, composer, kalender) belum dilakukan.
+- Review ahli gizi `nutrition_rules.json` (`reviewed_by: null`) masih terbuka (PRD §9.1); tips dan target tetap dari berkas itu, tidak dikarang.
+- Scanner end-to-end menunggu deploy Edge Function `analyze-meal` (kuota server 15/hari, Asia/Jakarta).
+
+### Next (UX-3 .. UX-5)
+- UX-3: design system v2 — motion (press states, transisi), ilustrasi `CustomPainter`, opsi avatar.
+- UX-4: scanner manual (nama item tanpa foto), kamera fallback, alur "foto gagal → catat manual".
+- UX-5: Tumbuh (empty state/informasi lebih ramah), onboarding/consent audit, audit a11y menyeluruh (360dp @1.3, target 48dp, Semantics), dokumen akhir + rencana commit per kategori (AI tidak commit).
+
+
+## UX Refactor — UX-3, UX-4, UX-5 (2026-11-13)
+
+### Dependency baru
+**Tidak ada.** Ilustrasi dari `CustomPainter` (bukan PNG/aset), animasi memakai `TweenAnimationBuilder`/`AnimatedSwitcher` bawaan Flutter, motion token dari `AppMotion` yang sudah ada.
+
+### UX-3 — Design system v2: motion, ilustrasi, avatar
+1. `lib/core/theme/app_motion.dart` — token motion dipertahankan (`fast` 200, `normal` 250, `ring` 400, `easeOutCubic`) + tambahan helper `AppMotion.of(context, d)` yang mengembalikan `Duration.zero` bila pengguna meminta "kurangi animasi". (Pertama kali ditimpa lalu dipulihkan; token asli dipertahankan.)
+2. **Ilustrasi kosong (CustomPainter, token-only, light/dark)**: `lib/shared/illustrations/empty_plate_illustration.dart` (piring bersih + sendok/garpu/uap) dan `seedling_illustration.dart` (bibit di pot). `EmptyState` kini menerima parameter `illustration` opsional. Dipakai di empty state Tumbuh (kartu status), Beranda/Anak (belum ada anak), Riwayat "Belum ada catatan" (piring), dan "Catatan hari ini" kosong.
+3. **Motion**: `PiringProgressRing` teranimasi (`TweenAnimationBuilder`, 400ms); `AnimatedSwitcher` (250ms fade) saat pindah Hari ini/Riwayat; `AnimatedContainer` pada pilihan segment (200ms) dan baris checklist saat diketuk.
+4. **Avatar baru**: `bunny`, `paw`, `music`, `cookie`, `sailboat` ditambahkan ke `AvatarCatalog` (total 13 opsi); form avatar otomatis memakai `Wrap` sehingga tidak overflow.
+5. **Test**: test piring_ring & makan_flow tetap hijau (nilai progres hanya saat cincin digambar ulang).
+
+### UX-4 — Catat manual tanpa foto dari pemindai
+1. Sheet "**Catat manual**" (`manual_food_sheet.dart`): ketik nama makanan (60 char), pilih kelompok (chip, minimal satu), pilih waktu makan (segment), simpan satu `FoodLog` `source = manual` via `addManualItemLog` pada notifier (item bernama; `groups` union canonical; porsi tidak dinilai dan tidak ditanyakan).
+2. Tombol "Catat manual" di pemindai (fallback kamera, top bar, panel error) kini membuka sheet itu (dulu lompat ke tab Makan). Berhasil disimpan → kembali ke layar sebelumnya + snackbar dengan "Urungkan".
+3. Tombol Simpan dinonaktifkan sampai nama dan minimal satu kelompok terisi; error ramah bila gagal.
+4. **Test**: `scan_flow_test` — alur fallback tanpa kamera: buka pemindai → sheet terbuka → validasi simpan nonaktif → isi nama + dua kelompok → tersimpan, `log.source == manual`, `groups == ['grains_tubers','flesh']`, kembali ke Beranda.
+
+### UX-5 — Tumbuh & audit a11y; dokumen akhir
+1. **Tumbuh**: kartu grafik menampilkan catatan "Belum cukup data untuk melihat tren. Tambah satu ukuran lagi." hanya saat pengukuran `< 2` (copy `growthTrendHint`, terpusat di `AppStrings`).
+2. **Audit a11y (360×640 @1.3, light/dark)**: semua `IconButton` punya `tooltip`; segment ketuk ≥48dp (`SegmentControl` minHeight 48); status tidak pernah hanya warna (ikon + teks); Semantics untuk strip 7 hari/sel kalender/segment grup; `layout_scale_test` diperluas dengan segment Riwayat (ringkasan + kalender) di 360dp @1.3, light & dark — **tanpa overflow**.
+   - Catatan trade-off: sel kalender & strip 7 hari ≈45-46dp lebar di 360dp (320dp konten / 7 kolom); tinggi 48dp; jadi tidak bisa 100% ≥48dp lebar tanpa mengurangi padding layar. Dicatat sebagai trade-off sadar.
+3. **Copy & klaim**: tidak ada klaim diagnosis/pencegahan di seluruh `lib/` (hanya kalimat negasi/edukasi); nama aplikasi selalu dari `AppConfig.appName`.
+4. **Dokumen**: `docs/commit-plan.md` baru (rencana staging `git add` + pesan konvensional per commit, dengan hasil verifikasi); catatan UX-1..UX-5 terpusat di sini; seluruh em dash di `.dart` dibersihkan (8 sisa komentar Batch 5).
+
+### Verifikasi (2026-11-13, UX-1..UX-5)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **229/229 passed**.
+- DoD §10.1: gradien 0; `\bColors\.(?!transparent)` di `lib/features` + `lib/shared` → 0; `GEMINI_API_KEY=<literal>` 0; em dash di `.dart` → 0.
+- Layout: `test/features/layout_scale_test.dart` mencakup Beranda, Tumbuh, Onboarding, Consent, Makan hari ini, **Riwayat Makan (ringkasan + kalender)**, Kelola anak & formulir anak — semuanya 360dp @1.3 light/dark tanpa overflow.
+
+### Belum terverifikasi (butuh kamu)
+- Emulator/perangkat tidak tersedia saat pengerjaan; verifikasi visual di perangkat (transisi, ilustrasi, kalender, sheet catat manual) belum dilakukan.
+- Review ahli gizi `nutrition_rules.json` masih terbuka; scanner end-to-end menunggu deploy `analyze-meal`.
+- Commit BELUM dijalankan (manual oleh pemilik); lihat `docs/commit-plan.md`.
+
