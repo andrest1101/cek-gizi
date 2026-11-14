@@ -12,13 +12,33 @@ final class FoodLogRepositoryImpl implements FoodLogRepository {
 
   static const _columns = 'id, child_id, eaten_at, meal_type, source, items, groups';
 
+  /// Pagar keras agar satu permintaan tidak pernah menarik ribuan baris.
+  /// Rentang tanggal di UI selalu jauh di bawah angka ini.
+  static const int _maxRowsPerRequest = 1000;
+
   @override
-  Future<List<FoodLog>> listLogs(String childId) async {
-    final rows = await _client
+  Future<List<FoodLog>> listLogs(
+    String childId, {
+    DateTime? from,
+    DateTime? to,
+  }) async {
+    var query = _client
         .from('food_logs')
         .select(_columns)
-        .eq('child_id', childId)
-        .order('eaten_at');
+        .eq('child_id', childId);
+
+    // `eaten_at` adalah timestamptz. Batas hari dihitung di zona perangkat,
+    // lalu dikirim dalam UTC agar perbandingan di server tepat.
+    if (from != null) {
+      query = query.gte('eaten_at', from.toUtc().toIso8601String());
+    }
+    if (to != null) {
+      query = query.lt('eaten_at', to.toUtc().toIso8601String());
+    }
+
+    final rows = await query
+        .order('eaten_at')
+        .limit(_maxRowsPerRequest);
     return [
       for (final row in rows as List)
         FoodLogModel.fromMap(row as Map<String, dynamic>),
