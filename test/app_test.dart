@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:cekgizi/app.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
-import 'package:cekgizi/core/router.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/growth/presentation/providers/growth_providers.dart';
