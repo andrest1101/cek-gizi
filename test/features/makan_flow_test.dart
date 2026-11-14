@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:cekgizi/app.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
-import 'package:cekgizi/core/router.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
@@ -20,23 +19,50 @@ final _berandaScrollable = find.descendant(
   matching: find.byType(Scrollable),
 );
 
-final _makanScrollable = find.descendant(
-  of: find.byKey(const Key('makan-list')),
-  matching: find.byType(Scrollable),
-).first;
+/// Cari scrollable layar yang sedang aktif (Makan hari ini / Makan Riwayat /
+/// Beranda). Cabang yang offstage tidak dipilih.
+Finder? _firstShellScrollable(WidgetTester tester) {
+  for (final key in const [
+    Key('makan-list'),
+    Key('makan-history-list'),
+    Key('home-list'),
+  ]) {
+    final candidate = find.descendant(
+      of: find.byKey(key),
+      matching: find.byType(Scrollable),
+    );
+    if (tester.any(candidate)) return candidate;
+  }
+  return null;
+}
 
 Future<void> _scrollTo(
   WidgetTester tester,
   Finder finder, {
   Finder? scrollable,
-  double delta = 240,
-}) {
-  return tester.scrollUntilVisible(
-    finder,
-    delta,
-    scrollable: scrollable ?? _makanScrollable,
-    maxScrolls: 60,
-  );
+}) async {
+  final effective = scrollable ?? _firstShellScrollable(tester);
+  if (effective == null) {
+    await tester.pumpAndSettle();
+    return;
+  }
+  final viewport = tester.getRect(effective);
+  // Reset ke bagian paling atas, lalu maju selangkah-selangkah sampai
+  // elemen benar-benar masuk viewport. `scrollUntilVisible` tidak memeriksa
+  // batas viewport, jadi elemen bisa "ditemukan" padahal terpotong.
+  await tester.drag(effective, const Offset(0, -10000));
+  await tester.pumpAndSettle();
+  for (var i = 0; i < 90; i++) {
+    if (tester.any(finder)) {
+      final rect = tester.getRect(finder);
+      if (rect.center.dy >= viewport.top && rect.center.dy <= viewport.bottom) {
+        break;
+      }
+    }
+    await tester.drag(effective, const Offset(0, 120));
+    await tester.pumpAndSettle();
+  }
+  await tester.pumpAndSettle();
 }
 
 /// Menjalankan aplikasi dengan fake repository; [logs] = seed food_logs.
@@ -111,7 +137,7 @@ void main() {
         AppStrings.groupEggsShort,
         AppStrings.groupOtherFruitVegShort,
       ]) {
-        await _scrollTo(tester, find.text(shortLabel), delta: -240);
+        await _scrollTo(tester, find.text(shortLabel));
         await tester.tap(find.text(shortLabel));
         await tester.pumpAndSettle();
       }
@@ -161,22 +187,25 @@ void main() {
     await tester.tap(find.text(AppStrings.navMakan));
     await tester.pumpAndSettle();
 
-    // Tap "Catat ASI" → snackbar & tombol berubah jadi "Tercatat".
+    // Baris ASI ada di bawah panel; gulir ke sana.
+    await _scrollTo(tester, find.text(AppStrings.makanAsiActionLog));
+
+    // Tap "Catat ASI" → tombol berubah menjadi "Tercatat".
     expect(find.text(AppStrings.makanAsiActionLog), findsOneWidget);
-    await tester.tap(find.text(AppStrings.makanAsiActionLog));
+    await tester.tap(find.byKey(const ValueKey('group-action-breast_milk')));
     await tester.pumpAndSettle();
 
     expect(find.text(AppStrings.makanAsiLogged), findsOneWidget);
     expect(find.text(AppStrings.makanAsiLoggedFeedback), findsOneWidget);
 
     // Ketuk tombol "Hapus ASI" → catatan ASI dihapus (tanpa scroll).
-    await tester.tap(find.text(AppStrings.makanAsiActionRemove));
+    await tester.tap(find.byKey(const ValueKey('group-action-breast_milk')));
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.makanAsiActionLog), findsOneWidget);
     expect(find.text(AppStrings.makanAsiSubtitle), findsOneWidget);
 
     // Catat lagi → entri ASI tampil di diary (scroll ke bawah).
-    await tester.tap(find.text(AppStrings.makanAsiActionLog));
+    await tester.tap(find.byKey(const ValueKey('group-action-breast_milk')));
     await tester.pumpAndSettle();
     await _scrollTo(tester, find.text('ASI'));
     expect(find.text('ASI'), findsOneWidget);
@@ -200,6 +229,7 @@ void main() {
     expect(find.text(AppStrings.makanGridTitle), findsNothing);
     expect(find.text(AppStrings.asiExclusiveTitle), findsOneWidget);
     // Tombol catat ASI tetap bisa dipakai.
+    await _scrollTo(tester, find.text(AppStrings.makanAsiActionLog));
     expect(find.text(AppStrings.makanAsiActionLog), findsOneWidget);
   });
 
@@ -263,7 +293,7 @@ void main() {
 
       await tester.tap(find.text(AppStrings.makanDeleteLog));
       await tester.pumpAndSettle();
-      await _scrollTo(tester, find.text(AppStrings.makanTodayEmpty), delta: -240);
+      await _scrollTo(tester, find.text(AppStrings.makanTodayEmpty));
       expect(find.text(AppStrings.makanTodayEmpty), findsOneWidget);
 
       await _scrollTo(tester, find.text(AppStrings.makanDiaryEmpty));
@@ -271,10 +301,11 @@ void main() {
     },
   );
 
-  testWidgets('hari sebelumnya dilipat; catatan terbuka setelah diketuk', (
+  testWidgets('riwayat: catatan kemarin tampil dan tidak menomori target hari ini', (
     tester,
   ) async {
     final child = fakeChild();
+    final yesterday = DateTime.now().subtract(const Duration(days: 1));
     await _pumpApp(
       tester,
       child: child,
@@ -282,7 +313,7 @@ void main() {
         fakeFoodLog(
           id: 'yesterday-1',
           childId: child.id,
-          eatenAt: DateTime.now().subtract(const Duration(days: 1)),
+          eatenAt: yesterday,
           groups: const ['eggs'],
           items: const [
             FoodLogItem(name: 'Telur dadar kemarin', groups: ['eggs']),
@@ -294,14 +325,29 @@ void main() {
     await tester.tap(find.text(AppStrings.navMakan));
     await tester.pumpAndSettle();
 
-    await _scrollTo(tester, find.text(AppStrings.makanYesterday));
-    expect(find.text(AppStrings.makanYesterday), findsOneWidget);
-    // Item hari sebelumnya belum dibangun sebelum lipatan dibuka.
+    // Hari ini tetap kosong; catatan kemarin tidak masuk hitungan.
+    expect(find.text(AppStrings.makanTodayEmpty), findsOneWidget);
+    expect(find.text('0/8'), findsOneWidget);
+    // Item kemarin belum dibangun di bagian Hari ini.
     expect(find.text('Telur dadar kemarin'), findsNothing);
 
-    await tester.tap(find.text(AppStrings.makanYesterday));
+    // Buka Riwayat dan pilih kemarin di strip 7 hari.
+    await tester.tap(find.text(AppStrings.makanSectionHistory));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(AppStrings.makanHistoryDaysWithLogs(1, 30)),
+      findsOneWidget,
+    );
+    final yesterdayFinder = find.byKey(
+      ValueKey('week-day-${yesterday.year}-${yesterday.month}-${yesterday.day}'),
+    );
+    await tester.ensureVisible(yesterdayFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(yesterdayFinder);
     await tester.pumpAndSettle();
     expect(find.text('Telur dadar kemarin'), findsOneWidget);
+    // Kemarin ditandai sebagai hari di luar hari ini.
+    expect(find.text(AppStrings.makanYesterday), findsWidgets);
   });
 
   testWidgets('usia 24–59 bulan: semesta 7 kelompok & ASI jadi sekunder', (
@@ -336,6 +382,7 @@ void main() {
 
     // Semesta target 7 (tanpa ASI), bukan 8.
     expect(find.text(AppStrings.makanTodayProgress(5, 7)), findsOneWidget);
+    await _scrollTo(tester, find.text(AppStrings.makanAsiSecondaryNote));
     expect(find.text(AppStrings.makanAsiSecondaryNote), findsOneWidget);
     final asiButton = tester.widget<TextButton>(
       find
@@ -381,5 +428,123 @@ void main() {
     // Satu status capaian (tidak ganda) + protein hewani tetap terlihat.
     expect(find.text(AppStrings.piringTargetReached), findsOneWidget);
     expect(find.text(AppStrings.piringAnimalProteinPresent), findsOneWidget);
+  });
+
+  testWidgets('catat satu kali makan: simpan beberapa kelompok sekaligus', (
+    tester,
+  ) async {
+    final child = fakeChild();
+    await _pumpApp(tester, child: child);
+
+    await tester.tap(find.text(AppStrings.navMakan));
+    await tester.pumpAndSettle();
+
+    await _scrollTo(tester, find.text(AppStrings.makanComposerCta));
+    await tester.tap(find.text(AppStrings.makanComposerCta));
+    await tester.pumpAndSettle();
+
+    // Sheet terbuka; memilih waktu makan ini opsional tapi harus bisa.
+    expect(find.text(AppStrings.catatMakanTitle), findsOneWidget);
+    // Simpan dinonaktifkan saat belum ada kelompok.
+    var save = tester.widget<FilledButton>(
+      find.byKey(const Key('catat-makan-save')),
+    );
+    expect(save.onPressed, isNull);
+
+    // Ketuk kolom pertama dulu (masih terlihat di atas), lalu gulir ke telur.
+    await tester.tap(
+      find.byKey(const ValueKey('catat-makan-group-grains_tubers')),
+    );
+    final sheetScroll = find.byKey(const Key('catat-makan-sheet'));
+    await _scrollTo(
+      tester,
+      find.byKey(const ValueKey('catat-makan-group-eggs')),
+      scrollable: sheetScroll,
+    );
+    await tester.tap(find.byKey(const ValueKey('catat-makan-group-eggs')));
+    await tester.pumpAndSettle();
+    save = tester.widget<FilledButton>(
+      find.byKey(const Key('catat-makan-save')),
+    );
+    expect(save.onPressed, isNotNull);
+    expect(find.text(AppStrings.catatMakanSelectedCount(2)), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('catat-makan-save')));
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.catatMakanSaved), findsOneWidget);
+    // Kembali ke atas daftar: panel hari ini menampilkan 2 dari 8 kelompok.
+    await _scrollTo(tester, find.text(AppStrings.makanTodayProgress(2, 8)));
+    expect(find.text(AppStrings.makanTodayProgress(2, 8)), findsOneWidget);
+    await _scrollTo(tester, find.text('Makanan pokok, Telur'));
+    expect(find.text('Makanan pokok, Telur'), findsOneWidget);
+  });
+
+  testWidgets('Cara kerja: lembar penjelasan tampil dan bisa ditutup', (
+    tester,
+  ) async {
+    final child = fakeChild();
+    await _pumpApp(tester, child: child);
+
+    await tester.tap(find.text(AppStrings.navMakan));
+    await tester.pumpAndSettle();
+
+    await _scrollTo(tester, find.text(AppStrings.piringInfoOpen));
+    await tester.tap(find.text(AppStrings.piringInfoOpen));
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.piringInfoTitle), findsOneWidget);
+    expect(find.text(AppStrings.piringInfoResetBody), findsOneWidget);
+    expect(find.text(AppStrings.piringInfoNotJudgingTitle), findsOneWidget);
+
+    await _scrollTo(
+      tester,
+      find.text(AppStrings.piringInfoClose),
+      scrollable: find.byKey(const Key('piring-info-sheet')),
+    );
+    await tester.tap(find.text(AppStrings.piringInfoClose));
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.piringInfoTitle), findsNothing);
+  });
+
+  testWidgets('panduan singkat tampil lalu menutup; tersimpan di prefs', (
+    tester,
+  ) async {
+    final child = fakeChild();
+    await _pumpApp(tester, child: child);
+
+    await tester.tap(find.text(AppStrings.navMakan));
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.piringTourTitle), findsOneWidget);
+    await tester.tap(find.text(AppStrings.piringTourDismiss));
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.piringTourTitle), findsNothing);
+  });
+
+  testWidgets('beranda: strip 7 hari menautkan ke riwayat Makan', (tester) async {
+    final child = fakeChild();
+    await _pumpApp(
+      tester,
+      child: child,
+      logs: [
+        fakeFoodLog(
+          id: 'today-1',
+          childId: child.id,
+          eatenAt: DateTime.now(),
+          groups: const ['eggs'],
+        ),
+      ],
+    );
+
+    expect(find.text(AppStrings.homeWeekTitle), findsOneWidget);
+    final historyCta = find.text(AppStrings.homeWeekHistoryCta);
+    await tester.ensureVisible(historyCta);
+    await tester.pumpAndSettle();
+    await tester.tap(historyCta);
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.makanHistorySummaryTitle), findsOneWidget);
+    expect(find.text(AppStrings.makanHistoryDaysWithLogs(1, 30)), findsOneWidget);
   });
 }
