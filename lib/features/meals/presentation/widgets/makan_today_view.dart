@@ -12,6 +12,7 @@ import 'package:cekgizi/features/meals/domain/services/piring_day.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/catat_makan_sheet.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/food_group_checklist.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/food_group_logo.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/food_log_list.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_info_sheet.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_ring.dart';
@@ -370,14 +371,10 @@ class _AsiExclusiveCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: colors.primary,
+              color: colors.primaryContainer,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.water_drop_rounded,
-              size: 20,
-              color: colors.onPrimary,
-            ),
+            child: const FoodGroupLogo(code: 'breast_milk', size: 34),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(

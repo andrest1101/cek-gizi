@@ -10,6 +10,7 @@ import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/meals/domain/services/piring_day.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/food_group_logo.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_ring.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 
@@ -275,10 +276,10 @@ class _AsiExclusiveHero extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: colors.primary,
+                  color: colors.primaryContainer,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.water_drop_rounded, color: colors.onPrimary),
+                child: const FoodGroupLogo(code: 'breast_milk', size: 40),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(

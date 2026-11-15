@@ -12,6 +12,7 @@ import 'package:cekgizi/features/meals/domain/entities/food_log.dart';
 import 'package:cekgizi/features/meals/domain/services/dietary_diversity.dart';
 import 'package:cekgizi/features/meals/presentation/meal_presentation.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/food_group_logo.dart';
 import 'package:cekgizi/shared/widgets/segment_control.dart';
 
 /// Buka composer "Catat satu kali makan" (PRD §6.4).
@@ -242,10 +243,9 @@ class _CatatMakanSheetState extends ConsumerState<CatatMakanSheet> {
                           horizontal: AppSpacing.md,
                           vertical: AppSpacing.xs,
                         ),
-                        secondary: Icon(
-                          foodGroupIcon(code),
-                          color: colors.textSecondary,
-                          size: 22,
+                        secondary: FoodGroupLogo(
+                          code: code,
+                          size: 26,
                         ),
                         title: Text(
                           AppStrings.groupShortLabel(code),
