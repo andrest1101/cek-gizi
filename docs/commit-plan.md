@@ -102,7 +102,27 @@ pilihan staging `git add -p` bila ingin benar-benar terpisah, atau biarkan menya
 `makan_today_view.dart`, `makan_history_view.dart`, `home_screen.dart` berisi
 campuran UX-2/UX-3; mirip dengan di atas.
 
-## Commit 4 — feat(scanner): catat manual tanpa foto (UX-4)
+## Commit 4 — feat(makan): logo kelompok pangan (UX-6)
+
+```bash
+git add assets/logo_kelompok_norm/ \
+  lib/features/meals/presentation/widgets/food_group_logo.dart \
+  lib/features/meals/presentation/widgets/food_group_checklist.dart \
+  lib/features/meals/presentation/widgets/food_log_list.dart \
+  lib/features/meals/presentation/widgets/catat_makan_sheet.dart \
+  lib/features/meals/presentation/widgets/piring_info_sheet.dart \
+  lib/features/meals/presentation/widgets/piring_hero_card.dart \
+  lib/features/meals/presentation/widgets/makan_today_view.dart \
+  lib/features/meals/presentation/meal_presentation.dart \
+  pubspec.yaml test/features/food_group_logo_test.dart
+git commit -m "feat(makan): logo kelompok pangan di checklist, timeline & composer (UX-6)" \
+  -m "- normalisasi satu kali: sisi terpanjang konten tiap logo = 392px (76.5% kanvas); originals tidak dibundel" \
+  -m "- widget FoodGroupLogo tunggal; lingkaran primaryContainer seragam; status tercatat tetap lewat badge" \
+  -m "- ikon kelompok lama dihapus di semua titik" \
+  -m "- flutter analyze: bersih; flutter test: 232/232"
+```
+
+## Commit 5 — feat(scanner): catat manual tanpa foto (UX-4)
 
 ```bash
 git add lib/features/meals/presentation/widgets/manual_food_sheet.dart \
@@ -115,7 +135,7 @@ git commit -m "feat(scanner): catat manual tanpa foto dari pemindai (UX-4)" \
   -m "- flutter analyze: bersih; flutter test: 229/229"
 ```
 
-## Commit 5 — feat(growth): petunjuk tren saat pengukuran < 2 (UX-5)
+## Commit 6 — feat(growth): petunjuk tren saat pengukuran < 2 (UX-5)
 
 ```bash
 git add lib/features/growth/presentation/screens/growth_screen.dart \
@@ -129,7 +149,7 @@ git commit -m "feat(growth): petunjuk tren saat pengukuran di bawah 2 (UX-5)" \
 Catatan: `app_strings.dart` staging di Commit 5 memindahkan seluruh copy batch
 ini — gunakan `git add -p` bila ingin memisah `growthTrendHint` saja.
 
-## Commit 6 — docs(progress): catatan UX-1..UX-5 & rencana commit
+## Commit 7 — docs(progress): catatan UX-1..UX-6 & rencana commit
 
 ```bash
 git add docs/progress.md docs/commit-plan.md

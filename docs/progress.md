@@ -538,3 +538,25 @@ Domain inti terbangun + unit test hijau; nilai tabel & loader `nutrition_rules.j
 - Review ahli gizi `nutrition_rules.json` masih terbuka; scanner end-to-end menunggu deploy `analyze-meal`.
 - Commit BELUM dijalankan (manual oleh pemilik); lihat `docs/commit-plan.md`.
 
+
+## UX-6 — Logo kelompok pangan (UX-2 selesai, sesuai request pemilik, 2026-11-15)
+
+### Dependency baru
+**Tidak ada** di `pubspec.yaml` (hanya menambahkan `assets/logo_kelompok_norm/` ke `assets:`). Normalisasi aset dilakukan satu kali memakai Pillow (offline, bukan bagian aplikasi).
+
+### Aset: normalisasi satu kali (`assets/logo_kelompok/` → `assets/logo_kelompok_norm/`)
+- Semua PNG sumber 512x512, transparan, tetapi bidang kontennya TIDAK seragam (susu 53%x97%, daging 100%x68%, nasi hampir penuh, dst). BoxFit.contain tanpa normalisasi membuat logo terlihat beda ukuran.
+- Normalisasi: crop tiap PNG ke opaque bbox -> skala agar SISI TERPANJANG konten = 392px (76.5% kanvas) -> tempel di tengah kanvas transparan 512x512. Hasil: semua logo punya diameter visual identik; tidak ada yang terpotong/meluber.
+- Originals `assets/logo_kelompok/` TIDAK diubah dan TIDAK dibundel; `assets/logo_kelompok_norm/` (nama = kode resmi PRD 3.7: breast_milk, grains_tubers, legumes_nuts, dairy, flesh, eggs, vit_a_fruit_veg, other_fruit_veg) yang didaftarkan di pubspec.
+
+### UI: widget FoodGroupLogo (satu sumber)
+- `lib/features/meals/presentation/widgets/food_group_logo.dart`: map kode kelompok → asset; `fit: BoxFit.contain`, `filterQuality: high`; ukuran gambar dikontrol parameter `size` (default 34; konten terlihat ±76% = ±26dp); kode tak dikenal -> ikon netral (tanpa crash).
+- Lingkaran semua konsisten `primaryContainer` (mis. checklist 40dp + timeline catatan 40dp + sheet "Catat manual" 26dp + hero ASI eksklusif); status "sudah tercatat" tetap lewat badge centang, tidak pernah hanya warna (PRD 7.2).
+- Ikon kelompok (`foodGroupIcon` di meal_presentation.dart) DIHAPUS: tidak ada lagi ikon generik di samping/gantinya logo di semua titik (log timeline, checklist, composer, sheet ASI/hero, sheet info ASI, kartu eksklusif <6 bulan).
+
+### Verifikasi (2026-11-15)
+- `flutter analyze` → No issues found!
+- `flutter test` → 232/232 passed (3 test baru: semua 8 asset termuat light, dark, dan fallback kode tak dikenal).
+- Layout 360dp @1.3: `layout_scale_test` tetap hijau, Makan hari ini & Riwayat muat.
+- Catatan visual: pemilik belum verifikasi di perangkat (emulator/device belum terhubung); cek visual di lapangan masih diperlukan.
+
