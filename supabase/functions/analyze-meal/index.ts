@@ -6,7 +6,7 @@
 // 3. Cek kuota atomik LEBIH DULU (`consume_ai_quota`, service_role) —
 //    bila gagal berarti `429 quota_daily`; Gemini belum dipanggil.
 // 4. Panggil Gemini dengan response schema (output terstruktur) dan
-//    timeout 25 detik.
+//    timeout 45 detik.
 // 5. Validasi ulang respons di server; keluaran hanya JSON sesuai skema.
 //
 // Aturan keras: tidak mencatat base64 / nama makanan / konten apa pun di log;
@@ -22,9 +22,15 @@ import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-1.5-flash";
+// INVARIAN DEPLOY: jangan pernah mengganti model ke nilai yang tidak ada di
+// daftar models API key project ini. Nilai yang tersedia untuk key sekarang
+// adalah `gemini-3.8-flash` (`gemini-2.5-flash` sudah tidak tersedia untuk
+// pengguna baru). Timeout 45 detik - model 3.x membutuhkan lebih dari 25
+// detik untuk satu foto, sedangkan batas eksekusi Edge Function masih jauh
+// di atas itu.
+const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
 const SCAN_DAILY_LIMIT = Number(Deno.env.get("SCAN_DAILY_LIMIT") ?? "15");
-const GEMINI_TIMEOUT_MS = 25_000;
+const GEMINI_TIMEOUT_MS = 45_000;
 const MAX_IMAGE_BASE64_CHARS = 2_400_000; // ~1.5 MB binary (4/3 overhead)
 const MIN_IMAGE_BYTES = 1_024;
 const GROUP_CODES = [
@@ -141,15 +147,23 @@ Deno.serve(async (req: Request) => {
     { p_user: uid, p_kind: "scan", p_limit: SCAN_DAILY_LIMIT },
   );
   if (quotaError) {
-    safeLog({ request_id: requestId, outcome: "quota_unavailable" });
+    safeLog({
+      request_id: requestId,
+      outcome: "quota_unavailable",
+      model: GEMINI_MODEL,
+    });
     return jsonResponse({ error: "ai_unavailable" }, 502);
   }
   if (!quotaOk) {
-    safeLog({ request_id: requestId, outcome: "quota_daily" });
+    safeLog({
+      request_id: requestId,
+      outcome: "quota_daily",
+      model: GEMINI_MODEL,
+    });
     return jsonResponse({ error: "quota_daily" }, 429);
   }
 
-  // 4) Panggil Gemini (timeout 25 detik)
+  // 4) Panggil Gemini (timeout 45 detik)
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
   try {
@@ -227,6 +241,7 @@ Deno.serve(async (req: Request) => {
         request_id: requestId,
         outcome: "gemini_http_error",
         status: response.status,
+        model: GEMINI_MODEL,
       });
       return jsonResponse({ error: "ai_unavailable" }, 502);
     }
@@ -235,19 +250,31 @@ Deno.serve(async (req: Request) => {
     const envelope = await response.json();
     const text = envelope?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (typeof text !== "string") {
-      safeLog({ request_id: requestId, outcome: "gemini_empty" });
+      safeLog({
+        request_id: requestId,
+        outcome: "gemini_empty",
+        model: GEMINI_MODEL,
+      });
       return jsonResponse({ error: "ai_unavailable" }, 502);
     }
     let parsedJson: unknown;
     try {
       parsedJson = JSON.parse(text);
     } catch (_) {
-      safeLog({ request_id: requestId, outcome: "gemini_bad_json" });
+      safeLog({
+        request_id: requestId,
+        outcome: "gemini_bad_json",
+        model: GEMINI_MODEL,
+      });
       return jsonResponse({ error: "ai_unavailable" }, 502);
     }
     const parsedOutput = responseSchema.safeParse(parsedJson);
     if (!parsedOutput.success) {
-      safeLog({ request_id: requestId, outcome: "gemini_schema_reject" });
+      safeLog({
+        request_id: requestId,
+        outcome: "gemini_schema_reject",
+        model: GEMINI_MODEL,
+      });
       return jsonResponse({ error: "ai_unavailable" }, 502);
     }
 
@@ -263,15 +290,24 @@ Deno.serve(async (req: Request) => {
       outcome: "ok",
       duration_ms: Date.now() - started,
       items: result.items.length,
+      model: GEMINI_MODEL,
     });
     return jsonResponse(result, 200);
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") {
-      safeLog({ request_id: requestId, outcome: "timeout" });
+      safeLog({
+        request_id: requestId,
+        outcome: "timeout",
+        model: GEMINI_MODEL,
+      });
       return jsonResponse({ error: "timeout" }, 504);
     }
     // Perlakukan 504 vs 502 dengan sengaja: timeout adalah 504, lainnya 502.
-    safeLog({ request_id: requestId, outcome: "error" });
+    safeLog({
+      request_id: requestId,
+      outcome: "error",
+      model: GEMINI_MODEL,
+    });
     return jsonResponse({ error: "ai_unavailable" }, 502);
   } finally {
     clearTimeout(timeout);

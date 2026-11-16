@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/features/meals/domain/entities/food_log.dart';
 
@@ -27,20 +25,6 @@ String portionLabel(String portion) => switch (portion) {
       'sedang' => AppStrings.portionMedium,
       'habis' => AppStrings.portionFinished,
       _ => portion,
-    };
-
-/// Ikon kelompok pangan. Selalu dipakai bersama label teks, tidak pernah
-/// menjadi satu-satunya penanda (PRD §7.2).
-IconData foodGroupIcon(String code) => switch (code) {
-      'breast_milk' => Icons.water_drop_rounded,
-      'grains_tubers' => Icons.rice_bowl_rounded,
-      'legumes_nuts' => Icons.grain_rounded,
-      'dairy' => Icons.local_drink_rounded,
-      'flesh' => Icons.set_meal_rounded,
-      'eggs' => Icons.egg_rounded,
-      'vit_a_fruit_veg' => Icons.eco_rounded,
-      'other_fruit_veg' => Icons.apple_rounded,
-      _ => Icons.restaurant_rounded,
     };
 
 /// Urutan tampil checklist: ASI selalu baris pertama (bila relevan), lalu

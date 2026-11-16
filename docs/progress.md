@@ -459,6 +459,25 @@ Logic PRD §3.1–3.8, Dart murni, tanpa Flutter, 100% unit-tested:
 ### Status
 Domain inti terbangun + unit test hijau; nilai tabel & loader `nutrition_rules.json` menunggu file dari pemilik.
 
+## Batch 5.3 — Perbaikan model Gemini & timeout (2026-11-16)
+
+### Temuan
+- Semua panggilan scan ditolak dengan `outcome=gemini_http_error, status=404` untuk model `gemini-2.5-flash`, `gemini-1.5-flash(-latest)`, dan `gemini-2.0-flash`.
+- Listing `v1beta/models` menunjukkan key project ini tidak lagi bisa memakai `gemini-2.5-flash`:
+  "This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash".
+- API key berfungsi; `health` = 200; `listModels` menampilkan `models/gemini-3.8-flash`, `models/gemini-2.5-flash-lite`, dst.
+- Dengan `gemini-3.8-flash` fungsi berjalan tetapi >25 detik (timeout di 25 000 ms); log `timeout` terbaca.
+
+### Perbaikan
+- `GEMINI_TIMEOUT_MS`: 25 000 → **45 000** (aman di bawah limit eksekusi Edge Function; model 3.x butuh waktu lebih untuk satu foto).
+- Default `GEMINI_MODEL`: `gemini-1.5-flash` (usang) → **`gemini-3.8-flash`**; override tetap lewat `SUPABASE_SECRET/GEMINI_MODEL`.
+- Setiap `safeLog` outcome sekarang menyertakan `model: GEMINI_MODEL` — sehingga "tuduhan model salah vs key salah vs kuota habis" bisa dibaca langsung dari log.
+
+### Verifikasi
+- `flutter analyze` → No issues found (kode app tidak berubah).
+- `flutter test` → 232/232 passed.
+- Fungsi tetap perlu di-redeploy manual oleh pemilik setelah merge (secret `GEMINI_MODEL=gemini-3.8-flash` sudah diatur di Dashboard).
+
 ## UX Refactor (UX-1 & UX-2) — Informasi & Riwayat (2026-11-13)
 
 ### Dependency baru
@@ -537,4 +556,26 @@ Domain inti terbangun + unit test hijau; nilai tabel & loader `nutrition_rules.j
 - Emulator/perangkat tidak tersedia saat pengerjaan; verifikasi visual di perangkat (transisi, ilustrasi, kalender, sheet catat manual) belum dilakukan.
 - Review ahli gizi `nutrition_rules.json` masih terbuka; scanner end-to-end menunggu deploy `analyze-meal`.
 - Commit BELUM dijalankan (manual oleh pemilik); lihat `docs/commit-plan.md`.
+
+
+## UX-6 — Logo kelompok pangan (UX-2 selesai, sesuai request pemilik, 2026-11-15)
+
+### Dependency baru
+**Tidak ada** di `pubspec.yaml` (hanya menambahkan `assets/logo_kelompok_norm/` ke `assets:`). Normalisasi aset dilakukan satu kali memakai Pillow (offline, bukan bagian aplikasi).
+
+### Aset: normalisasi satu kali (`assets/logo_kelompok/` → `assets/logo_kelompok_norm/`)
+- Semua PNG sumber 512x512, transparan, tetapi bidang kontennya TIDAK seragam (susu 53%x97%, daging 100%x68%, nasi hampir penuh, dst). BoxFit.contain tanpa normalisasi membuat logo terlihat beda ukuran.
+- Normalisasi: crop tiap PNG ke opaque bbox -> skala agar SISI TERPANJANG konten = 392px (76.5% kanvas) -> tempel di tengah kanvas transparan 512x512. Hasil: semua logo punya diameter visual identik; tidak ada yang terpotong/meluber.
+- Originals `assets/logo_kelompok/` TIDAK diubah dan TIDAK dibundel; `assets/logo_kelompok_norm/` (nama = kode resmi PRD 3.7: breast_milk, grains_tubers, legumes_nuts, dairy, flesh, eggs, vit_a_fruit_veg, other_fruit_veg) yang didaftarkan di pubspec.
+
+### UI: widget FoodGroupLogo (satu sumber)
+- `lib/features/meals/presentation/widgets/food_group_logo.dart`: map kode kelompok → asset; `fit: BoxFit.contain`, `filterQuality: high`; ukuran gambar dikontrol parameter `size` (default 34; konten terlihat ±76% = ±26dp); kode tak dikenal -> ikon netral (tanpa crash).
+- Lingkaran semua konsisten `primaryContainer` (mis. checklist 40dp + timeline catatan 40dp + sheet "Catat manual" 26dp + hero ASI eksklusif); status "sudah tercatat" tetap lewat badge centang, tidak pernah hanya warna (PRD 7.2).
+- Ikon kelompok (`foodGroupIcon` di meal_presentation.dart) DIHAPUS: tidak ada lagi ikon generik di samping/gantinya logo di semua titik (log timeline, checklist, composer, sheet ASI/hero, sheet info ASI, kartu eksklusif <6 bulan).
+
+### Verifikasi (2026-11-15)
+- `flutter analyze` → No issues found!
+- `flutter test` → 232/232 passed (3 test baru: semua 8 asset termuat light, dark, dan fallback kode tak dikenal).
+- Layout 360dp @1.3: `layout_scale_test` tetap hijau, Makan hari ini & Riwayat muat.
+- Catatan visual: pemilik belum verifikasi di perangkat (emulator/device belum terhubung); cek visual di lapangan masih diperlukan.
 

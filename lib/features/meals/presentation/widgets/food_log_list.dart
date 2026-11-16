@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/meals/domain/entities/food_log.dart';
-import 'package:cekgizi/features/meals/presentation/meal_presentation.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/food_group_logo.dart';
 
 /// Daftar catatan makan dengan aksi hapus + urungkan. Dipakai di hari ini dan
 /// riwayat agar perilaku hapus selalu sama.
@@ -76,14 +76,6 @@ class FoodLogRow extends StatelessWidget {
   final FoodLog log;
   final VoidCallback onDelete;
 
-  IconData _leadingIcon() {
-    if (log.groups.length == 1) return foodGroupIcon(log.groups.first);
-    return Icons.restaurant_rounded;
-  }
-
-  bool _isBreastMilk() =>
-      log.groups.length == 1 && log.groups.first == 'breast_milk';
-
   String _time(DateTime dateTime) {
     final local = dateTime.toLocal();
     return '${local.hour.toString().padLeft(2, '0')}.'
@@ -94,7 +86,6 @@ class FoodLogRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
     final textTheme = Theme.of(context).textTheme;
-    final asi = _isBreastMilk();
 
     return Dismissible(
       key: ValueKey('log-${log.id}'),
@@ -114,14 +105,16 @@ class FoodLogRow extends StatelessWidget {
           height: 40,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: asi ? colors.primaryContainer : colors.surfaceVariant,
+              color: colors.primaryContainer,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              _leadingIcon(),
-              size: 20,
-              color: asi ? colors.primary : colors.textSecondary,
-            ),
+            child: log.groups.length == 1
+                ? FoodGroupLogo(code: log.groups.first, size: 34)
+                : Icon(
+                    Icons.restaurant_rounded,
+                    size: 20,
+                    color: colors.textSecondary,
+                  ),
           ),
         ),
         title: Text(

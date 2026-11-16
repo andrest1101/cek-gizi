@@ -7,6 +7,7 @@ import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/meals/domain/services/dietary_diversity.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/food_group_logo.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 import 'package:cekgizi/shared/widgets/tonal_icon_circle.dart';
 
@@ -124,7 +125,7 @@ class PiringInfoSheet extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _InfoBlock(
-                  icon: Icons.water_drop_rounded,
+                  logoCode: 'breast_milk',
                   title: AppStrings.piringInfoAsiTitle,
                   body: AppStrings.piringInfoAsiBody,
                 ),
@@ -185,12 +186,17 @@ class PiringInfoSheet extends ConsumerWidget {
 
 class _InfoBlock extends StatelessWidget {
   const _InfoBlock({
-    required this.icon,
+    this.icon,
+    this.logoCode,
     required this.title,
     required this.body,
-  });
+  }) : assert(
+          (icon == null) != (logoCode == null),
+          'Isi tepat satu: icon atau logoCode.',
+        );
 
-  final IconData icon;
+  final IconData? icon;
+  final String? logoCode;
   final String title;
   final String body;
 
@@ -201,12 +207,23 @@ class _InfoBlock extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TonalIconCircle(
-          icon: icon,
-          iconSemantics: title,
-          size: 40,
-          iconSize: 20,
-        ),
+        if (logoCode != null)
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: colors.primaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: FoodGroupLogo(code: logoCode!, size: 34),
+          )
+        else
+          TonalIconCircle(
+            icon: icon!,
+            iconSemantics: title,
+            size: 40,
+            iconSize: 20,
+          ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(

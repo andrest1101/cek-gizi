@@ -11,6 +11,7 @@ import 'package:cekgizi/features/meals/domain/entities/food_log.dart';
 import 'package:cekgizi/features/meals/domain/services/piring_day.dart';
 import 'package:cekgizi/features/meals/presentation/meal_presentation.dart';
 import 'package:cekgizi/features/meals/presentation/meals_actions.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/food_group_logo.dart';
 
 /// Checklist kelompok pangan hari ini (PRD §6.4).
 ///
@@ -160,14 +161,10 @@ class _GroupChecklistRow extends ConsumerWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: logged ? colors.primary : colors.primaryContainer,
+                    color: colors.primaryContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    foodGroupIcon(code),
-                    size: 20,
-                    color: logged ? colors.onPrimary : colors.primary,
-                  ),
+                  child: FoodGroupLogo(code: code, size: 34),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
