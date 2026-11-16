@@ -459,6 +459,25 @@ Logic PRD §3.1–3.8, Dart murni, tanpa Flutter, 100% unit-tested:
 ### Status
 Domain inti terbangun + unit test hijau; nilai tabel & loader `nutrition_rules.json` menunggu file dari pemilik.
 
+## Batch 5.3 — Perbaikan model Gemini & timeout (2026-11-16)
+
+### Temuan
+- Semua panggilan scan ditolak dengan `outcome=gemini_http_error, status=404` untuk model `gemini-2.5-flash`, `gemini-1.5-flash(-latest)`, dan `gemini-2.0-flash`.
+- Listing `v1beta/models` menunjukkan key project ini tidak lagi bisa memakai `gemini-2.5-flash`:
+  "This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash".
+- API key berfungsi; `health` = 200; `listModels` menampilkan `models/gemini-3.8-flash`, `models/gemini-2.5-flash-lite`, dst.
+- Dengan `gemini-3.8-flash` fungsi berjalan tetapi >25 detik (timeout di 25 000 ms); log `timeout` terbaca.
+
+### Perbaikan
+- `GEMINI_TIMEOUT_MS`: 25 000 → **45 000** (aman di bawah limit eksekusi Edge Function; model 3.x butuh waktu lebih untuk satu foto).
+- Default `GEMINI_MODEL`: `gemini-1.5-flash` (usang) → **`gemini-3.8-flash`**; override tetap lewat `SUPABASE_SECRET/GEMINI_MODEL`.
+- Setiap `safeLog` outcome sekarang menyertakan `model: GEMINI_MODEL` — sehingga "tuduhan model salah vs key salah vs kuota habis" bisa dibaca langsung dari log.
+
+### Verifikasi
+- `flutter analyze` → No issues found (kode app tidak berubah).
+- `flutter test` → 232/232 passed.
+- Fungsi tetap perlu di-redeploy manual oleh pemilik setelah merge (secret `GEMINI_MODEL=gemini-3.8-flash` sudah diatur di Dashboard).
+
 ## UX Refactor (UX-1 & UX-2) — Informasi & Riwayat (2026-11-13)
 
 ### Dependency baru
