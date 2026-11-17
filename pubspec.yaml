@@ -70,6 +70,7 @@ flutter:
     - assets/fonts/
     - assets/reference/
     - assets/rules/
+    - assets/logo/
     - assets/logo_kelompok_norm/
 
   fonts:

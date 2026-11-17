@@ -24,6 +24,7 @@ abstract final class AppStrings {
   static const String actionCancel = 'Batal';
   static const String actionClose = 'Tutup';
   static const String skeletonLoading = 'Sedang memuat';
+  static const String openingTagline = 'Temani tumbuh kembang si kecil';
 
   // â”€â”€ Onboarding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const onboardingSkip = 'Lewati';
