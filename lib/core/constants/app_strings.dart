@@ -1,31 +1,31 @@
-import 'package:cekgizi/core/config/app_config.dart';
+﻿import 'package:cekgizi/core/config/app_config.dart';
 
 /// Semua copy UI terpusat di sini (Bahasa Indonesia, nada hangat dan
-/// tidak menghakimi - PRD §7.6). Widget tidak boleh menulis string bebas.
+/// tidak menghakimi - PRD Â§7.6). Widget tidak boleh menulis string bebas.
 abstract final class AppStrings {
   const AppStrings._();
 
-  /// Disclaimer tetap (PRD §8.5) - wajib tampil di Tentang & onboarding.
+  /// Disclaimer tetap (PRD Â§8.5) - wajib tampil di Tentang & onboarding.
   static const String disclaimer =
       '${AppConfig.appName} adalah alat bantu edukasi dan pemantauan. '
       'Hasilnya bukan diagnosis dan tidak menggantikan pemeriksaan tenaga '
       'kesehatan. Jika anak sakit atau kamu khawatir, hubungi Posyandu, '
       'puskesmas, atau dokter.';
 
-  /// Label tombol coba lagi (PRD §6.9).
+  /// Label tombol coba lagi (PRD Â§6.9).
   static const String retry = 'Coba lagi';
 
-  /// Judul umum kartu galat (PRD §6.9).
+  /// Judul umum kartu galat (PRD Â§6.9).
   static const String errorTitle = 'Ups, terjadi kesalahan';
 
-  // ── Umum ───────────────────────────────────────────────────────
+  // â”€â”€ Umum â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const String actionEdit = 'Ubah';
   static const String actionDelete = 'Hapus';
   static const String actionCancel = 'Batal';
   static const String actionClose = 'Tutup';
   static const String skeletonLoading = 'Sedang memuat';
 
-  // ── Onboarding ─────────────────────────────────────────────────
+  // â”€â”€ Onboarding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const onboardingSkip = 'Lewati';
   static const onboardingNext = 'Selanjutnya';
   static const onboardingStart = 'Mulai';
@@ -44,7 +44,7 @@ abstract final class AppStrings {
   static String onboardingPageSemantics(int page, int total) =>
       'Halaman $page dari $total';
 
-  // ── Consent (PRD §8.3) ─────────────────────────────────────────
+  // â”€â”€ Consent (PRD Â§8.3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const consentTitle = 'Sebelum mulai, baca ini dulu';
   static const consentIntro =
       '${AppConfig.appName} membantu memantau tumbuh kembang dan gizi balita '
@@ -66,7 +66,7 @@ abstract final class AppStrings {
   static const consentError =
       'Persetujuan belum tersimpan. Periksa koneksi internet kamu, lalu coba lagi.';
 
-  // ── Anak (profil) ──────────────────────────────────────────────
+  // â”€â”€ Anak (profil) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const childAddTitle = 'Tambah anak';
   static const childEditTitle = 'Ubah data anak';
   static const childNicknameLabel = 'Nama panggilan';
@@ -98,14 +98,14 @@ abstract final class AppStrings {
       'Ketuk kartu untuk memilih anak yang tampil di Beranda.';
   static const childListLoadError =
       'Gagal memuat data anak. Periksa koneksi internet kamu, lalu coba lagi.';
-  static const childBirthDateHint = 'Usia 0–60 bulan.';
+  static const childBirthDateHint = 'Usia 0â€“60 bulan.';
   static const childNicknameMaxLength = 'Maksimal 30 karakter.';
   static const childSaveError =
       'Gagal menyimpan. Periksa koneksi internet kamu, lalu coba lagi.';
   static const childNotFound = 'Anak tidak ditemukan.';
   static String childAvatarSemantics(String key) => 'Avatar $key';
 
-  // ── Tumbuh ─────────────────────────────────────────────────────
+  // â”€â”€ Tumbuh â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const growthTitle = 'Tumbuh';
   static const growthSubtitle =
       'Pantau berat, tinggi, dan status gizi anak menurut Permenkes 2/2020.';
@@ -127,7 +127,7 @@ abstract final class AppStrings {
   static const growthTrendHint =
       'Belum cukup data untuk melihat tren. Tambah satu ukuran lagi.';
   static const growthLegendBand = 'Rentang wajar';
-  static const growthLegendLimit = 'Batas ±2 SD';
+  static const growthLegendLimit = 'Batas Â±2 SD';
   static const growthLegendMedian = 'Median';
   static const growthLegendChild = 'Anak';
   static const growthLatestWeight = 'Berat terakhir';
@@ -169,19 +169,19 @@ abstract final class AppStrings {
       'Ukur berat dan panjang/tinggi anak untuk melihat grafik dan statusnya.';
   static const growthNoMeasurementsCta = 'Tambah ukuran pertama';
 
-  // ── Validasi ukur (PRD §5.1 skema: 1–30 kg, 35–130 cm, 0–60 bln) ──
+  // â”€â”€ Validasi ukur (PRD Â§5.1 skema: 1â€“30 kg, 35â€“130 cm, 0â€“60 bln) â”€â”€
   static const validationWeightRange = 'Berat harus antara 1 dan 30 kg.';
   static const validationHeightRange = 'Panjang/tinggi harus antara 35 dan 130 cm.';
   static const validationDateFuture = 'Tanggal ukur tidak boleh di masa depan.';
   static const validationDateBeforeBirth =
       'Tanggal ukur tidak boleh sebelum anak lahir.';
   static const validationAgeRange =
-      'Usia saat ukur di luar 0–60 bulan. Remaja tidak bisa dipantau aplikasi ini.';
+      'Usia saat ukur di luar 0â€“60 bulan. Remaja tidak bisa dipantau aplikasi ini.';
   static const validationDuplicateDate =
       'Sudah ada pengukuran pada tanggal ini. Ubah atau hapus dulu yang lama.';
   static const validationRequired = 'Wajib diisi.';
 
-  // ── Status ramah (PRD §3.9 + §3.5) ──────────────────────────────
+  // â”€â”€ Status ramah (PRD Â§3.9 + Â§3.5) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const statusNormalTitle = 'Sesuai umur';
   static const statusNormalBody =
       'Pertumbuhan anak sejalan dengan standar untuk umurnya.';
@@ -214,7 +214,7 @@ abstract final class AppStrings {
   static const statusTrendTracked = 'Tren sesuai. Lanjutkan pemantauan rutin.';
   static const statusAddFirst = 'Tambah ukuran';
 
-  // ── Piring Hari Ini (PRD §3.7, §6.3) ─────────────────────────────
+  // â”€â”€ Piring Hari Ini (PRD Â§3.7, Â§6.3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const piringTitle = 'Piring Hari Ini';
   static const piringEmpty = 'Belum ada catatan makan hari ini.';
   static const piringAnimalProteinMissing = 'Belum ada protein hewani hari ini.';
@@ -241,7 +241,7 @@ abstract final class AppStrings {
           : 'Target hari ini: $target kelompok.';
   static const heroAsiCta = 'Catat ASI';
 
-  // ── Kelompok pangan (PRD §3.7) ─────────────────────────────────
+  // â”€â”€ Kelompok pangan (PRD Â§3.7) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const groupGrainsTubersShort = 'Makanan pokok';
   static const groupLegumesNutsShort = 'Tempe & kacang';
   static const groupDairyShort = 'Susu & olahan';
@@ -264,7 +264,7 @@ abstract final class AppStrings {
   static const groupOtherFruitVeg = 'Buah & sayur lainnya';
   static const groupOtherFruitVegExamples = 'Pisang, apel, kol, buncis';
 
-  /// Label kelompok menurut kode resmi PRD §3.7 (dipakai tips & aksi).
+  /// Label kelompok menurut kode resmi PRD Â§3.7 (dipakai tips & aksi).
   static String groupLabel(String code) => switch (code) {
         'breast_milk' => 'ASI',
         'grains_tubers' => groupGrainsTubers,
@@ -303,7 +303,7 @@ abstract final class AppStrings {
         _ => '',
       };
 
-  // ── Makan (PRD §6.4) ───────────────────────────────────────────
+  // â”€â”€ Makan (PRD Â§6.4) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const makanTitle = 'Makan';
   static const makanSubtitle =
       'Catat apa yang anak makan hari ini. Porsi tidak dinilai.';
@@ -503,7 +503,7 @@ abstract final class AppStrings {
     return '$day, $met dari $total kelompok.$suffix';
   }
 
-  // ── Catat manual (di dalam pemindai) ─────────────────────────────
+  // â”€â”€ Catat manual (di dalam pemindai) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const manualFoodTitle = 'Catat manual';
   static const manualFoodSubtitle =
       'Tulis nama makanannya, lalu pilih kelompoknya.';
@@ -517,7 +517,7 @@ abstract final class AppStrings {
   static const manualFoodEmptyName = 'Tulis nama makanannya dulu.';
   static const manualFoodEmptyGroups = 'Pilih minimal satu kelompok.';
 
-  // ── Scan makanan (PRD §6.4) ───────────────────────────────────────
+  // â”€â”€ Scan makanan (PRD Â§6.4) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const photoScanFab = 'Foto makanan';
   static const photoScanFabSemantics =
       'Foto makanan. Foto dikenali lalu dihapus; tidak disimpan.';
@@ -579,12 +579,92 @@ abstract final class AppStrings {
         _ => 'Layanan sedang sibuk, coba lagi sebentar.',
       };
 
-  // ── Navigasi ───────────────────────────────────────────────────
+  // â”€â”€ Tanya Gizi (PRD Â§6.7) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  static const tanyaEyebrow = 'EDUKASI GIZI UMUM';
+  static const tanyaTitle = 'Tanya Gizi';
+  static const tanyaDisclaimerBanner =
+      'Informasi umum, bukan pengganti tenaga kesehatan.';
+  static String tanyaAssistantTyping() =>
+      '${AppConfig.appName} sedang menjawab.';
+  static const tanyaInputHint = 'Tulis pertanyaanâ€¦';
+  static const tanyaInputSemantics = 'Tulis pertanyaan tentang gizi anak';
+  static const tanyaSendSemantics = 'Kirim pertanyaan';
+  static const tanyaEmptyTitle = 'Tanya apa saja tentang gizi anak';
+  static const tanyaEmptyBody =
+      'Misalnya soal MPASI, anak pilih-pilih makanan, atau porsi makan. '
+      'Jawaban bersifat edukasi umum.';
+  static const tanyaQuickChipsTitle = 'Mulai dari pertanyaan ini';
+  static const tanyaChipMpasi = 'Ide MPASI untuk bayi 1 tahun';
+  static const tanyaChipPickyEater = 'Anak susah makan sayur';
+  static const tanyaChipSnack = 'Camilan sehat untuk anak';
+  static const tanyaChipMilk = 'Berapa banyak susu untuk anak';
+  static const tanyaDeleteHistory = 'Hapus riwayat chat';
+  static const tanyaDeleteConfirmTitle = 'Hapus riwayat chat?';
+  static const tanyaDeleteConfirmBody =
+      'Semua pertanyaan dan jawaban sebelumnya akan dihapus permanen. '
+      'Tindakan ini tidak bisa dibatalkan.';
+  static const tanyaDeleteConfirm = 'Hapus';
+  static const tanyaDeleteCancel = 'Batal';
+  static const tanyaDeleteDone = 'Riwayat chat dihapus.';
+  static const tanyaDeleteError =
+      'Gagal menghapus riwayat. Periksa koneksi internet kamu, lalu coba lagi.';
+  static const tanyaNoChildTitle = 'Belum ada anak';
+  static const tanyaNoChildBody =
+      'Tambahkan profil anak dulu agar jawaban bisa disesuaikan dengan usia '
+      'dan jenis kelamin.';
+  static const tanyaNoChildCta = 'Tambah anak';
+  static const tanyaSyncFailed =
+      'Riwayat belum tersimpan. Periksa koneksi internet kamu.';
+  static const tanyaSyncRetry = 'Simpan lagi';
+  static const tanyaFollowupsTitle = 'Pertanyaan lanjutan';
+  static String tanyaQuotaRemaining(int remaining) =>
+      'Sisa $remaining/${AppConfig.chatDailyLimit} hari ini.';
+  static const tanyaQuotaSemantics = 'Sisa kuota Tanya Gizi hari ini';
+
+  /// Kode dari Edge Function â†’ kalimat ramah (PRD Â§6.9). Tidak ada detail
+  /// teknis yang bocor ke pengguna.
+  static String tanyaError(String code) => switch (code) {
+        'quota_daily' =>
+          'Kuota Tanya Gizi hari ini habis. Kamu masih bisa melihat '
+              'Piring Hari Ini dan Tumbuh.',
+        'timeout' =>
+          'Prosesnya terlalu lama. Periksa koneksi internet kamu, lalu '
+              'coba lagi.',
+        'offline' =>
+          'Tidak ada koneksi internet. Tanya Gizi membutuhkan internet.',
+        'unauthorized' => 'Sesi berakhir. Tutup lalu buka aplikasi lagi.',
+        'invalid_input' => 'Pertanyaan tidak bisa diproses. Coba tulis ulang.',
+        _ => 'Layanan sedang sibuk, coba lagi sebentar.',
+      };
+
+  // Kartu safety (PRD Â§3.8, Â§6.7).
+  static const tanyaSafetyReferTitle = 'Sebaiknya periksakan';
+  static const tanyaSafetyReferBody =
+      'Gejala seperti ini sebaiknya diperiksa langsung oleh tenaga '
+      'kesehatan. Hubungi Posyandu, puskesmas, atau dokter. Ini bukan '
+      'diagnosis.';
+  static const tanyaSafetyReferAck = 'Mengerti';
+  static const tanyaSafetyReferSemantics =
+      'Saran menghubungi tenaga kesehatan';
+  static const tanyaSafetyEmergencyTitle = 'Ini darurat';
+  static const tanyaSafetyEmergencyBody =
+      'Segera bawa anak ke IGD terdekat atau hubungi 112. Jangan menunggu '
+      'dan jangan beri obat sendiri.';
+  static const tanyaSafetyEmergencyCall = 'Hubungi 112';
+  static const tanyaSafetyEmergencyNote =
+      'Atau langsung ke IGD terdekat sekarang juga.';
+  static const tanyaSafetyEmergencySemantics =
+      'Peringatan darurat. Segera ke IGD terdekat atau hubungi 112';
+  static const tanyaCallFailed =
+      'Tidak bisa membuka panggilan. Hubungi 112 secara manual.';
+
+  // â”€â”€ Navigasi â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const navHome = 'Beranda';
   static const navMakan = 'Makan';
   static const navGrowth = 'Tumbuh';
+  static const navTanya = 'Tanya';
 
-  // ── Beranda ────────────────────────────────────────────────────
+  // â”€â”€ Beranda â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const greetingMorning = 'Selamat pagi';
   static const greetingNoon = 'Selamat siang';
   static const greetingEvening = 'Selamat sore';
@@ -598,12 +678,12 @@ abstract final class AppStrings {
   static const homeLoadError =
       'Tidak bisa memuat data. Periksa koneksi internet kamu, lalu coba lagi.';
 
-  // ── Navigasi lain ──────────────────────────────────────────────
+  // â”€â”€ Navigasi lain â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const routeNotFoundTitle = 'Halaman tidak ditemukan';
   static const routeNotFoundBody =
       'Alamat ini tidak ada. Kembali ke Beranda, ya.';
 
-  // ── Kategori resmi (PRD §3.4) ───────────────────────────────────
+  // â”€â”€ Kategori resmi (PRD Â§3.4) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const Map<String, String> officialCategoryHaz = {
     'very_short': 'Sangat pendek',
     'short': 'Pendek',
@@ -626,8 +706,8 @@ abstract final class AppStrings {
   };
 
   /// Indeks antropometri (tampilan detail).
-  static const hazLabel = 'PB/U – TB/U';
+  static const hazLabel = 'PB/U â€“ TB/U';
   static const wazLabel = 'BB/U';
-  static const whzLabel = 'BB/PB – BB/TB';
+  static const whzLabel = 'BB/PB â€“ BB/TB';
   static const statusOutOfRangeShort = 'Di luar rentang wajar';
 }

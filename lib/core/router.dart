@@ -16,6 +16,7 @@ import 'package:cekgizi/features/home/presentation/home_screen.dart';
 import 'package:cekgizi/features/meals/presentation/screens/makan_screen.dart';
 import 'package:cekgizi/features/meals/presentation/screens/scan_screen.dart';
 import 'package:cekgizi/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:cekgizi/features/chat/presentation/screens/tanya_screen.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 
@@ -87,6 +88,15 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: '/growth',
                 name: '/growth',
                 builder: (context, state) => const GrowthScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/tanya',
+                name: '/tanya',
+                builder: (context, state) => const TanyaScreen(),
               ),
             ],
           ),

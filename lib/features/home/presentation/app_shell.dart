@@ -11,8 +11,8 @@ import 'package:cekgizi/core/time/local_dates.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 
-/// Shell navigasi utama (PRD §6.2): 3 destinasi aktif Batch 6
-/// (Beranda, Makan, Tumbuh); destinasi lain menyusul Batch 7–8.
+/// Shell navigasi utama (PRD §6.2): 4 destinasi aktif Batch 7
+/// (Beranda, Makan, Tumbuh, Tanya); destinasi Resep menyusul Batch 8.
 ///
 /// [TodayWatcher] memastikan data "hari ini" tetap benar saat aplikasi
 /// dibuka kembali dari latar atau melewati tengah malam: catatan makan
@@ -104,6 +104,11 @@ class _AppShellState extends ConsumerState<AppShell>
               icon: Icon(Icons.show_chart_rounded),
               selectedIcon: Icon(Icons.show_chart_rounded),
               label: AppStrings.navGrowth,
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.chat_bubble_outline_rounded),
+              selectedIcon: Icon(Icons.chat_bubble_rounded),
+              label: AppStrings.navTanya,
             ),
           ],
         ),
