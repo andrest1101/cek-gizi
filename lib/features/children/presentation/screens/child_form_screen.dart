@@ -6,6 +6,7 @@ import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/utils/date_format.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
@@ -90,13 +91,14 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
     });
     try {
       if (widget.existing == null) {
-        final created =
-            await ref.read(childrenListProvider.notifier).addChild(
-                  nickname: _nicknameController.text,
-                  birthDate: _birthDate,
-                  sex: _sex,
-                  avatarKey: _avatarKey,
-                );
+        final created = await ref
+            .read(childrenListProvider.notifier)
+            .addChild(
+              nickname: _nicknameController.text,
+              birthDate: _birthDate,
+              sex: _sex,
+              avatarKey: _avatarKey,
+            );
         ref.read(selectedChildIdProvider.notifier).select(created.id);
       } else {
         final updated = widget.existing!.copyWith(
@@ -189,45 +191,52 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
               AppSpacing.xxl,
             ),
             children: [
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: AppSurfaces.sunken(
-                    context,
-                    radius: AppRadius.pill,
-                  ),
-                  child: ChildAvatar(
-                    avatarKey: _avatarKey,
-                    size: 88,
-                    semanticLabel: _nicknameController.text.trim().isEmpty
-                        ? AppStrings.childAvatarLabel
-                        : _nicknameController.text.trim(),
-                  ),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.xl),
+                decoration: AppSurfaces.sunken(context, radius: AppRadius.card),
+                child: Column(
+                  children: [
+                    Semantics(
+                      label: AppStrings.childAvatarPreviewSemantics(
+                        _nicknameController.text.trim().isEmpty
+                            ? AppStrings.childAvatarLabel
+                            : _nicknameController.text.trim(),
+                      ),
+                      image: true,
+                      child: ChildAvatar(
+                        avatarKey: _avatarKey,
+                        size: 88,
+                        semanticLabel: _nicknameController.text.trim().isEmpty
+                            ? AppStrings.childAvatarLabel
+                            : _nicknameController.text.trim(),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      AppStrings.childAvatarLabel,
+                      style: AppTextStyles.titleMedium.copyWith(
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      AppStrings.childAvatarHint,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                AppStrings.childAvatarLabel,
-                style: textTheme.labelLarge?.copyWith(
-                  color: colors.textSecondary,
+                AppStrings.childDetailsSectionTitle,
+                style: AppTextStyles.titleMedium.copyWith(
+                  color: colors.textPrimary,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: [
-                  for (final key in AvatarCatalog.icons.keys)
-                    _AvatarOption(
-                      avatarKey: key,
-                      selected: key == _avatarKey,
-                      onTap: _busy
-                          ? null
-                          : () => setState(() => _avatarKey = key),
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.xl),
               TextFormField(
                 controller: _nicknameController,
                 validator: _validateNickname,
@@ -237,7 +246,13 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
                 decoration: const InputDecoration(
                   labelText: AppStrings.childNicknameLabel,
                   hintText: AppStrings.childNicknameHint,
+                  prefixIcon: Icon(Icons.person_outline_rounded),
                 ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _FormSectionHeading(
+                title: AppStrings.childBirthDateLabel,
+                icon: Icons.cake_outlined,
               ),
               const SizedBox(height: AppSpacing.sm),
               InkWell(
@@ -257,19 +272,17 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.xs),
               Text(
                 AppStrings.childBirthDateHint,
-                style: textTheme.labelMedium?.copyWith(
+                style: AppTextStyles.label.copyWith(
                   color: colors.textSecondary,
                 ),
               ),
+              const SizedBox(height: AppSpacing.xs),
               const SizedBox(height: AppSpacing.lg),
-              Text(
-                AppStrings.childSexLabel,
-                style: textTheme.labelLarge?.copyWith(
-                  color: colors.textSecondary,
-                ),
+              _FormSectionHeading(
+                title: AppStrings.childSexLabel,
+                icon: Icons.wc_rounded,
               ),
               const SizedBox(height: AppSpacing.sm),
               SegmentControl<Sex>(
@@ -286,6 +299,33 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
                     label: AppStrings.childSexFemale,
                     semanticLabel: AppStrings.childSexFemale,
                   ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              _FormSectionHeading(
+                title: AppStrings.childAvatarOptionsTitle,
+                icon: Icons.face_retouching_natural_rounded,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                AppStrings.childAvatarHint,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: colors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Wrap(
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.md,
+                children: [
+                  for (final key in AvatarCatalog.icons.keys)
+                    _AvatarOption(
+                      avatarKey: key,
+                      selected: key == _avatarKey,
+                      onTap: _busy
+                          ? null
+                          : () => setState(() => _avatarKey = key),
+                    ),
                 ],
               ),
             ],
@@ -322,8 +362,8 @@ class _AvatarOption extends StatelessWidget {
           customBorder: const CircleBorder(),
           onTap: onTap,
           child: Container(
-            width: 48,
-            height: 48,
+            width: 52,
+            height: 52,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
@@ -337,12 +377,38 @@ class _AvatarOption extends StatelessWidget {
             ),
             child: Icon(
               AvatarCatalog.of(avatarKey),
-              size: 24,
+              size: 26,
               color: selected ? colors.primary : colors.textSecondary,
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _FormSectionHeading extends StatelessWidget {
+  const _FormSectionHeading({required this.title, required this.icon});
+
+  final String title;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: colors.primary),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            title,
+            style: AppTextStyles.titleMedium.copyWith(
+              color: colors.textPrimary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

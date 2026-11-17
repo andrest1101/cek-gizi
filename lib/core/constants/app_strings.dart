@@ -82,6 +82,9 @@ abstract final class AppStrings {
   static const childSexMale = 'Laki-laki';
   static const childSexFemale = 'Perempuan';
   static const childAvatarLabel = 'Avatar';
+  static const childDetailsSectionTitle = 'Data anak';
+  static const childAvatarOptionsTitle = 'Pilih avatar';
+  static const childAvatarHint = 'Gunakan avatar ilustrasi, bukan foto anak.';
   static const childSave = 'Simpan';
   static const childDelete = 'Hapus';
   static const childDeleteTitle = 'Hapus data anak?';
@@ -110,6 +113,8 @@ abstract final class AppStrings {
       'Gagal menyimpan. Periksa koneksi internet kamu, lalu coba lagi.';
   static const childNotFound = 'Anak tidak ditemukan.';
   static String childAvatarSemantics(String key) => 'Avatar $key';
+  static String childAvatarPreviewSemantics(String label) =>
+      'Pratinjau avatar untuk $label';
 
   // â”€â”€ Tumbuh â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const growthTitle = 'Tumbuh';
