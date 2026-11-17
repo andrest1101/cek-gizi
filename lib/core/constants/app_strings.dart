@@ -107,7 +107,7 @@ abstract final class AppStrings {
       'Ketuk kartu untuk memilih anak yang tampil di Beranda.';
   static const childListLoadError =
       'Gagal memuat data anak. Periksa koneksi internet kamu, lalu coba lagi.';
-  static const childBirthDateHint = 'Usia 0â€“60 bulan.';
+  static const childBirthDateHint = 'Usia 0 sampai 60 bulan.';
   static const childNicknameMaxLength = 'Maksimal 30 karakter.';
   static const childSaveError =
       'Gagal menyimpan. Periksa koneksi internet kamu, lalu coba lagi.';
@@ -138,7 +138,7 @@ abstract final class AppStrings {
   static const growthTrendHint =
       'Belum cukup data untuk melihat tren. Tambah satu ukuran lagi.';
   static const growthLegendBand = 'Rentang wajar';
-  static const growthLegendLimit = 'Batas Â±2 SD';
+  static const growthLegendLimit = 'Ambang -2 dan +2 SD';
   static const growthLegendMedian = 'Median';
   static const growthLegendChild = 'Anak';
   static const growthLatestWeight = 'Berat terakhir';
@@ -187,7 +187,7 @@ abstract final class AppStrings {
   static const validationDateBeforeBirth =
       'Tanggal ukur tidak boleh sebelum anak lahir.';
   static const validationAgeRange =
-      'Usia saat ukur di luar 0â€“60 bulan. Remaja tidak bisa dipantau aplikasi ini.';
+      'Usia saat ukur di luar 0 sampai 60 bulan. Remaja tidak bisa dipantau aplikasi ini.';
   static const validationDuplicateDate =
       'Sudah ada pengukuran pada tanggal ini. Ubah atau hapus dulu yang lama.';
   static const validationRequired = 'Wajib diisi.';
@@ -597,7 +597,7 @@ abstract final class AppStrings {
       'Informasi umum, bukan pengganti tenaga kesehatan.';
   static String tanyaAssistantTyping() =>
       '${AppConfig.appName} sedang menjawab.';
-  static const tanyaInputHint = 'Tulis pertanyaanâ€¦';
+  static const tanyaInputHint = 'Tulis pertanyaan...';
   static const tanyaInputSemantics = 'Tulis pertanyaan tentang gizi anak';
   static const tanyaSendSemantics = 'Kirim pertanyaan';
   static const tanyaEmptyTitle = 'Tanya apa saja tentang gizi anak';
@@ -717,8 +717,8 @@ abstract final class AppStrings {
   };
 
   /// Indeks antropometri (tampilan detail).
-  static const hazLabel = 'PB/U â€“ TB/U';
+  static const hazLabel = 'PB/U atau TB/U';
   static const wazLabel = 'BB/U';
-  static const whzLabel = 'BB/PB â€“ BB/TB';
+  static const whzLabel = 'BB/PB atau BB/TB';
   static const statusOutOfRangeShort = 'Di luar rentang wajar';
 }

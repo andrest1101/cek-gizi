@@ -447,18 +447,25 @@ class _LegendItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        swatch,
-        const SizedBox(width: AppSpacing.xs),
-        Text(
-          label,
-          style: AppTextStyles.label.copyWith(
-            color: AppTheme.colorsOf(context).textSecondary,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 210),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          swatch,
+          const SizedBox(width: AppSpacing.xs),
+          Flexible(
+            child: Text(
+              label,
+              softWrap: true,
+              style: AppTextStyles.label.copyWith(
+                color: AppTheme.colorsOf(context).textSecondary,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -516,6 +523,7 @@ class _MeasurementTile extends ConsumerWidget {
                     Text(
                       '${GrowthStatusCopy.formatKgCm(measurement.weightKg)} kg · '
                       '${GrowthStatusCopy.formatKgCm(measurement.lengthHeightCm)} cm',
+                      softWrap: true,
                       style: AppTextStyles.titleMedium.copyWith(
                         color: colors.textPrimary,
                         fontFeatures: const [FontFeature.tabularFigures()],
@@ -525,6 +533,9 @@ class _MeasurementTile extends ConsumerWidget {
                     Text(
                       '${IdDateFormat.full(measurement.measuredOn)} · '
                       '${measurement.ageMonths} ${AppStrings.childAgeMonths}',
+                      softWrap: true,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.bodySmall.copyWith(
                         color: colors.textSecondary,
                       ),
