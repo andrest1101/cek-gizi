@@ -5,6 +5,7 @@ import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/utils/date_format.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
@@ -44,14 +45,14 @@ class GrowthStatusCard extends ConsumerWidget {
       ),
       data: (measurements) {
         if (measurements.isEmpty) {
-          return _EmptyStatus(
-            onAdd: () => showMeasurementSheet(context),
-          );
+          return _EmptyStatus(onAdd: () => showMeasurementSheet(context));
         }
         final latest = GrowthSummary.latestOf(measurements)!;
         final summary = GrowthStatusSummary.worstOf(latest);
         final trend = GrowthSummary.trendOf(measurements);
-        final delta = showMetrics ? GrowthSummary.weightDeltaOf(measurements) : null;
+        final delta = showMetrics
+            ? GrowthSummary.weightDeltaOf(measurements)
+            : null;
 
         return _StatusCard(
           summary: summary,
@@ -77,10 +78,8 @@ class GrowthStatusCard extends ConsumerWidget {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _DetailSheet(
-        nickname: nickname,
-        measurement: measurement,
-      ),
+      builder: (context) =>
+          _DetailSheet(nickname: nickname, measurement: measurement),
     );
   }
 }
@@ -109,7 +108,6 @@ class _StatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
 
     return Container(
       decoration: AppSurfaces.card(context),
@@ -124,7 +122,7 @@ class _StatusCard extends StatelessWidget {
                   header: true,
                   child: Text(
                     AppStrings.statusCardTitle,
-                    style: textTheme.labelLarge?.copyWith(
+                    style: AppTextStyles.label.copyWith(
                       color: colors.textSecondary,
                     ),
                   ),
@@ -132,7 +130,7 @@ class _StatusCard extends StatelessWidget {
               ),
               Text(
                 dateLabel,
-                style: textTheme.labelMedium?.copyWith(
+                style: AppTextStyles.label.copyWith(
                   color: colors.textSecondary,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
@@ -151,14 +149,14 @@ class _StatusCard extends StatelessWidget {
                   children: [
                     Text(
                       summary.title,
-                      style: textTheme.titleMedium?.copyWith(
+                      style: AppTextStyles.titleMedium.copyWith(
                         color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       summary.body,
-                      style: textTheme.bodySmall?.copyWith(
+                      style: AppTextStyles.bodySmall.copyWith(
                         color: colors.textSecondary,
                       ),
                     ),
@@ -192,8 +190,7 @@ class _StatusCard extends StatelessWidget {
                 Expanded(
                   child: MetricTile(
                     label: AppStrings.growthLatestHeight,
-                    value:
-                        GrowthStatusCopy.formatKgCm(latest.lengthHeightCm),
+                    value: GrowthStatusCopy.formatKgCm(latest.lengthHeightCm),
                     unit: 'cm',
                   ),
                 ),
@@ -256,13 +253,13 @@ class _TrendRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     final needsAttention = trend == GrowthTrend.needsAttention;
     final icon = needsAttention
         ? Icons.trending_down_rounded
         : Icons.trending_up_rounded;
-    final color =
-        needsAttention ? colors.statusWatchText : colors.textSecondary;
+    final color = needsAttention
+        ? colors.statusWatchText
+        : colors.textSecondary;
     final copy = needsAttention
         ? AppStrings.statusTrendNeedsAttention
         : AppStrings.statusTrendTracked;
@@ -275,7 +272,7 @@ class _TrendRow extends StatelessWidget {
         Expanded(
           child: Text(
             copy,
-            style: textTheme.bodySmall?.copyWith(color: color),
+            style: AppTextStyles.bodySmall.copyWith(color: color),
           ),
         ),
       ],
@@ -373,7 +370,6 @@ class _DetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
 
     return Container(
       decoration: BoxDecoration(
@@ -405,13 +401,17 @@ class _DetailSheet extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           Text(
             '${AppStrings.statusDetailTitle}: $nickname',
-            style: textTheme.titleMedium?.copyWith(color: colors.textPrimary),
+            style: AppTextStyles.titleMedium.copyWith(
+              color: colors.textPrimary,
+            ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             '${AppStrings.statusDetailDate}: '
             '${IdDateFormat.full(measurement.measuredOn)}',
-            style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: colors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Container(
@@ -422,9 +422,7 @@ class _DetailSheet extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             AppStrings.statusDetailFootnote,
-            style: textTheme.labelMedium?.copyWith(
-              color: colors.textSecondary,
-            ),
+            style: AppTextStyles.label.copyWith(color: colors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.md),
           TextButton(
