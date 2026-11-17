@@ -7,6 +7,7 @@ import 'package:cekgizi/app.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
+import 'package:cekgizi/features/chat/presentation/providers/chat_providers.dart';
 import 'package:cekgizi/features/growth/presentation/providers/growth_providers.dart';
 import 'package:cekgizi/features/meals/domain/entities/food_log.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
@@ -59,6 +60,7 @@ void main() {
             FakeFoodLogRepository(logs),
           ),
           nutritionRulesProvider.overrideWith((ref) => Future.value(fakeNutritionRules())),
+          chatRepositoryProvider.overrideWithValue(FakeChatRepository()),
         ],
         child: const CekGiziApp(),
       ),
@@ -95,6 +97,32 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         expect(historyTile, findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Tanya muat di 360dp @1.3 (${brightness.name})',
+      (tester) async {
+        useSmallScreen(tester, brightness);
+        await pumpApp(
+          tester,
+          await prefsFor({
+            'onboarding_completed': true,
+            'consent_version_accepted': '1',
+          }),
+        );
+        expect(tester.takeException(), isNull);
+
+        await tester.tap(find.text(AppStrings.navTanya));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        await tester.enterText(find.byType(TextField), 'Ide MPASI hari ini?');
+        await tester.pumpAndSettle();
+        await tester.tap(find.byIcon(Icons.send_rounded));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.text('Contoh jawaban dari Tanya Gizi.'), findsOneWidget);
       },
     );
 
