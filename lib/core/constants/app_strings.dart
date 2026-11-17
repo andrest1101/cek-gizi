@@ -39,6 +39,11 @@ abstract final class AppStrings {
       'Pantau tinggi, berat, dan status pertumbuhan menurut Permenkes 2/2020, '
       'dengan bahasa yang tenang dan jelas.';
   static const onboardingTitle3 = 'Pendamping, bukan dokter';
+  static const onboardingEyebrow1 = 'KENALI MAKAN HARIAN';
+  static const onboardingEyebrow2 = 'PANTAU PERTUMBUHAN';
+  static const onboardingEyebrow3 = 'EDUKASI YANG AMAN';
+  static String onboardingStep(int page, int total) =>
+      '${page.toString().padLeft(2, '0')} / ${total.toString().padLeft(2, '0')}';
   static const onboardingBody3 =
       '${AppConfig.appName} memberi edukasi, bukan diagnosis. Untuk kekhawatiran '
       'kesehatan, hubungi Posyandu, puskesmas, atau dokter.';
