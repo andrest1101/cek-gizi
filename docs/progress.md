@@ -579,3 +579,43 @@ Domain inti terbangun + unit test hijau; nilai tabel & loader `nutrition_rules.j
 - Layout 360dp @1.3: `layout_scale_test` tetap hijau, Makan hari ini & Riwayat muat.
 - Catatan visual: pemilik belum verifikasi di perangkat (emulator/device belum terhubung); cek visual di lapangan masih diperlukan.
 
+
+## Batch 7 - Edge Function `ask-nutrition` + Tanya Gizi (2026-11-17)
+
+### Ruang lingkup
+PRD Batch 7: Edge Function `ask-nutrition` (red flag, kuota, Gemini) + layar **Tanya Gizi** (UI chat modern, kartu aman, kuota terlihat, riwayat terhapus) + polish UI/UX mengikuti design system yang ada. **Tanpa dependency baru** (`url_launcher` sudah ada; ilustrasi & animasi buatan sendiri; `CustomPainter`). Tidak ada perubahan skema Supabase (tabel `chat_messages` & `ai_usage` dari Batch 2 dipakai apa adanya, RLS teruji).
+
+### Batch 7.1 - Edge Function `supabase/functions/ask-nutrition/index.ts`
+1. Verifikasi JWT -> 401. Validasi zod: `{ messages (1-10, role user|assistant, content <=4000), context { age_months 0-60, sex male|female } }`, pesan terakhir wajib dari user.
+2. **Red flag TANPA LLM lebih dulu** (PRD section 3.8): kejang/sesak/tersedak/biru -> `safety_flag="emergency"` + jawaban tetap IGD/112; lemas/tidak mau minum/muntah terus/diare/berdarah/bengkak setelah makan/alergi/demam -> `"refer_doctor"`. Red flag tidak memanggil Gemini dan **tidak menghanguskan kuota**.
+3. Kuota atomik `consume_ai_quota('chat', CHAT_DAILY_LIMIT default 30)` SEBELUM Gemini -> 429 quota_daily.
+4. Gemini `GEMINI_MODEL` env (default `gemini-3.8-flash`, INVARIAN deploy sama dgn analyze-meal) dengan response_schema JSON terstruktur; timeout **45 dtk** (deviasi sadar dari PRD 25 dtk, sejalan Batch 5.3). Konteks ke Gemini HANYA `age_months` + `sex` (disisipkan ke system instruction); tidak pernah nama/tanggal lahir.
+5. Validasi ulang respons di server (answer 1-1500 char, safety_flag enum, followups maks 2 x 140 char) -> 502 gemini_schema_reject bila melenceng. Log metadata saja (request_id, outcome, duration_ms, model). `config.toml`: `[functions.ask-nutrition] verify_jwt = true`. `deno check` lulus.
+6. Deviasi sadar dari urutan PRD: red flag tidak memakai kuota (short-circuit sebelum `consume_ai_quota`).
+
+### Batch 7.2 - Domain & Data (`features/chat/`)
+Domain murni: entity `ChatMessage` (+ enum `ChatRole`, `ChatSafetyFlag` dgn mapping db), `AskNutritionResult` (fromJson defensif), `ChatException` (kode PRD), kontrak `ChatRepository`, `ChatUseCases.askQuestion` (validasi usia/jenis kelamin/pesan, jendela 10 pesan kronologis). Data: `ChatMessageModel`, `ChatRepositoryImpl` (list/add/clear via `chat_messages` RLS; invoke Edge Function; `ai_usage` SELECT-sendiri untuk badge kuota - Asia/Jakarta, `null` bila gagal -> badge disembunyikan).
+
+### Batch 7.3 - UI/UX Tanya Gizi (sesuai design system)
+Navigasi ke-4 **Tanya** (`chat_bubble_outline_rounded`/`chat_bubble_rounded`, `/tanya`, IndexStack cabang baru; Resep tetap menyusul Batch 8). Layar: `ScreenHeader` (eyebrow `EDUKASI GIZI UMUM`, judul, tombol hapus riwayat dgn dialog konfirmasi); **banner tetap** "Informasi umum, bukan pengganti tenaga kesehatan" (satu baris, ellipsis); badge kuota `Sisa n/30 hari ini` (tabular figures, disembunyikan bila tidak terbaca); area pesan `ListView(reverse)`: bubble user (`primary`, kanan) / asisten (avatar tonal `spa_rounded`, `surface` + hairline, kiri); **kartu safety** bukan bubble: `refer_doctor` (tonal kuning, ikon+teks, tombol Mengerti) dan `emergency` (tonal merah, ikon+teks, tombol **Hubungi 112** -> `tel:112`, + catatan IGD); indikator "sedang menjawab" 3 titik (hormati disableAnimations); input bar menempel di atas keyboard (disabled saat mengirim, anti double-send); follow-ups dari jawaban terbaru sebagai chip yang langsung bertanya; empty state (`ChatIllustration` CustomPainter token-only + 4 chip pertanyaan cepat yang bisa digulir); kartu error ramah per kode (`quota_daily`, `timeout`, `offline`, `unauthorized`, `ai_unavailable`) dgn **Coba lagi**; banner gagal-sinkronisasi riwayat + **Simpan lagi** (retry persist TANPA memanggil AI ulang, kuota aman). `AppConfig.chatDailyLimit = 30` (hanya tampilan; penegak = server). Copy terpusat di `AppStrings` (suara "kamu", tanpa klaim klinis). Semua status selalu ikon + teks; tap targets >= 48dp; `Semantics` lengkap.
+
+**Perbaikan tata letak penting (a11y 360dp @1.3):** versi awal meninggalkan hanya ~52dp untuk area pesan di 360x640 @1.3 (header rendahan membengkak + banner 2 baris + input 5 baris). Diperbaiki: subtitle dihapus (redundan dgn banner), banner satu baris, input bar dipadatkan, `maxLines` 4. Area pesan kini ~140dp+ dan bisa digulir; semua teks utuh, tidak ada overflow.
+
+### Batch 7.4 - Verifikasi (2026-11-17)
+- `flutter analyze` bersih. `flutter test` **258/258** (baseline 232; +26: `chat_domain_test.dart` 16, `tanya_flow_test.dart` 8, `layout_scale_test.dart` +2).
+- Layout 360dp @1.3 light/dark: Tanya muat, tidak ada overflow.
+- DoD 10.1: gradien 0; `\bColors\.(?!transparent)` di features/shared 0; `GEMINI_API_KEY=<literal>` 0 (hanya `Deno.env.get`); em dash di `.dart` 0 (2 file batch lain yang ikut tersapu dikembalikan).
+- `deno check supabase/functions/ask-nutrition/index.ts` -> exit 0.
+
+### Belum terverifikasi (menunggu pemilik)
+1. **Deploy `ask-nutrition`** via Dashboard (Edge Functions -> New function -> tempel `index.ts` -> Verify JWT = ON -> Deploy). Secret `GEMINI_API_KEY`/`GEMINI_MODEL` sudah ada (gemini-3.8-flash); `CHAT_DAILY_LIMIT` opsional (default 30 di kode).
+2. **Smoke test end-to-end** di perangkat: tanya biasa, kuota, offline, red flag (kejang/demam/diare), emergency kartu 112, hapus riwayat.
+3. **Evaluasi keamanan PRD 9.3(4)**: 30 prompt red flag + 20 prompt di luar topik/diagnosis/dosis; target >= 95% red flag dieskalasi benar; 100% permintaan diagnosis/dosis ditolak. Aku siapkan daftar promptnya (lihat dokumen commit-plan) bila dibutuhkan.
+4. Verifikasi visual 1.3 text scale + light/dark di perangkat (ilustrasi chat, kartu safety, chip pertanyaan).
+
+### Catatan
+- Riwayat chat satu thread global; konteks usia/jenis kelamin diambil dari anak terpilih **saat kirim** (bukan per-thread anak). `child_id` disimpan di baris pesan (boleh null).
+- Follow-up chips tidak disimpan di DB (sesi aktif saja); `safety_flag` dari server disimpan apa adanya di `chat_messages`.
+- `RedFlagChecker` (Dart, Batch 3) dan daftar kata kunci di Edge Function harus tetap selaras; tidak ada kode bersama antar runtime (disengaja).
+- Ilustrasi `ChatIllustration` token-only CustomPainter (`shared/illustrations/`).
+- Commit belum dijalankan (manual oleh pemilik) - lihat `docs/commit-plan.md`.
