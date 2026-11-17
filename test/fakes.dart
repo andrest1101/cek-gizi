@@ -7,6 +7,9 @@ import 'package:cekgizi/features/growth/domain/entities/sd_columns.dart';
 import 'package:cekgizi/features/growth/domain/entities/sex.dart';
 import 'package:cekgizi/features/growth/domain/repositories/anthropometry_reference_tables.dart';
 import 'package:cekgizi/features/growth/domain/repositories/growth_repository.dart';
+import 'package:cekgizi/features/chat/domain/entities/assistant_reply.dart';
+import 'package:cekgizi/features/chat/domain/entities/chat_message.dart';
+import 'package:cekgizi/features/chat/domain/repositories/chat_repository.dart';
 import 'package:cekgizi/features/meals/domain/entities/food_log.dart';
 import 'package:cekgizi/features/meals/domain/repositories/food_log_repository.dart';
 import 'package:cekgizi/features/meals/domain/services/dietary_diversity.dart';
@@ -282,6 +285,101 @@ final class FakeFoodLogRepository implements FoodLogRepository {
   Future<void> deleteLog(String id) async {
     _logs.removeWhere((log) => log.id == id);
   }
+}
+
+/// Fake repository chat IN-MEMORY (tanpa jaringan). [askError] memaksa
+/// kegagalan AskNutrition; [persistError] memaksa kegagalan addMessage;
+/// [usageUsed] mengatur bacaan kuota harian di `ai_usage`.
+final class FakeChatRepository implements ChatRepository {
+  FakeChatRepository({
+    List<ChatMessage>? seed,
+    this.askResult,
+    this.askError,
+    this.persistError = false,
+    this.clearError = false,
+    this.usageUsed = 0,
+  }) : _messages = [...?seed];
+
+  final List<ChatMessage> _messages;
+  AskNutritionResult? askResult;
+  ChatException? askError;
+  bool persistError;
+  bool clearError;
+  int usageUsed;
+  int askCalls = 0;
+  int persistCalls = 0;
+  int _counter = 3000;
+
+  /// Salinan baris yang "tersimpan" di tabel (urutan kronologis).
+  List<ChatMessage> get stored => List.of(_messages);
+
+  @override
+  Future<List<ChatMessage>> listMessages({int limit = 100}) async {
+    return List<ChatMessage>.of(_messages)
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+  }
+
+  @override
+  Future<AskNutritionResult> ask({
+    required List<ChatMessage> messages,
+    required int ageMonths,
+    required String sex,
+  }) async {
+    askCalls++;
+    if (askError != null) throw askError!;
+    return askResult ??
+        const AskNutritionResult(
+          requestId: 'req-test',
+          answer: 'Contoh jawaban dari Tanya Gizi.',
+          safetyFlag: ChatSafetyFlag.none,
+          followups: ['Boleh diulang?', 'Bagaimana dengan susu?'],
+        );
+  }
+
+  @override
+  Future<ChatMessage> addMessage({
+    required ChatRole role,
+    required String content,
+    required ChatSafetyFlag safetyFlag,
+    String? childId,
+  }) async {
+    persistCalls++;
+    if (persistError) throw StateError('persist gagal (test)');
+    final saved = ChatMessage(
+      id: 'chat-${_counter++}',
+      role: role,
+      content: content,
+      safetyFlag: safetyFlag,
+      createdAt: DateTime.now(),
+    );
+    _messages.add(saved);
+    return saved;
+  }
+
+  @override
+  Future<void> clearMessages() async {
+    if (clearError) throw const ChatException('offline');
+    _messages.clear();
+  }
+
+  @override
+  Future<int?> chatUsageToday() async => usageUsed;
+}
+
+ChatMessage fakeChatMessage({
+  String id = 'seed-1',
+  ChatRole role = ChatRole.user,
+  String content = 'Pesan contoh',
+  ChatSafetyFlag flag = ChatSafetyFlag.none,
+  DateTime? createdAt,
+}) {
+  return ChatMessage(
+    id: id,
+    role: role,
+    content: content,
+    safetyFlag: flag,
+    createdAt: createdAt ?? DateTime.now().subtract(const Duration(hours: 1)),
+  );
 }
 
 /// Aturan keragaman PALSU untuk tes (bukan `nutrition_rules.json`).

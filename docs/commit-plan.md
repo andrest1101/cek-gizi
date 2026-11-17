@@ -168,3 +168,76 @@ git commit -m "docs(progress): catatan UX-1..UX-5, verifikasi, dan rencana commi
    - transisi Hari ini/Riwayat tidak patah di 360×640 @1.3 light/dark.
 3. Review ahli gizi `nutrition_rules.json` (`reviewed_by: null`) — masih terbuka.
 4. Deploy `analyze-meal` Edge Function bila ingin uji scan end-to-end.
+
+---
+
+# Rencana Commit - Batch 7 (Tanya Gizi)
+
+> **AI tidak menjalankan commit.** Branch `feature/app4-mvp`; urutan sesuai dependensi.
+> Verifikasi terkini (2026-11-17): `flutter analyze` bersih; `flutter test` **258/258**;
+> DoD 10.1 bersih (gradien 0, `Colors.` mentah 0, `GEMINI_API_KEY` literal 0, em dash .dart 0);
+> `deno check supabase/functions/ask-nutrition/index.ts` exit 0; layout 360dp @1.3 light/dark aman.
+
+## Commit 1 - chore(supabase): edge function ask-nutrition
+
+```powershell
+git add supabase/functions/ask-nutrition/index.ts supabase/functions/ask-nutrition/.gitkeep supabase/config.toml
+git commit -m "chore(supabase): edge function ask-nutrition (PRD Batch 7)" `
+  -m "- JWT verify; zod validation; red flag TANPA LLM (emergency/refer_doctor) tidak memakai kuota" `
+  -m "- consume_ai_quota('chat', 30/hari, Asia/Jakarta) sebelum Gemini; response_schema terstruktur; timeout 45 dtk" `
+  -m "- konteks ke Gemini hanya age_months + sex; log metadata saja; deno check lulus" `
+  -m "- config.toml: [functions.ask-nutrition] verify_jwt = true"
+```
+Catatan: deploy MANUAL via Dashboard (Verify JWT = ON) setelah commit ini.
+
+## Commit 2 - feat(chat): domain & data Tanya Gizi
+
+```powershell
+git add lib/features/chat/domain lib/features/chat/data lib/features/chat/domain/services/red_flag_checker.dart lib/core/config/app_config.dart
+git commit -m "feat(chat): domain & data layer Tanya Gizi" `
+  -m "- entity ChatMessage/AskNutritionResult; ChatRepository + ChatUseCases (validasi, jendela 10 pesan)" `
+  -m "- ChatRepositoryImpl: chat_messages RLS, invoke ask-nutrition, ai_usage select-sendiri (badge kuota)" `
+  -m "- AppConfig.chatDailyLimit = 30 (tampilan saja; penegak server)" `
+  -m "- flutter analyze: bersih; flutter test: 258/258"
+```
+
+## Commit 3 - feat(tanya): layar chat edukasi + kartu safety
+
+```powershell
+git add lib/features/chat/presentation lib/shared/illustrations/chat_illustration.dart lib/core/router.dart lib/features/home/presentation/app_shell.dart lib/core/constants/app_strings.dart
+git commit -m "feat(tanya): layar Tanya Gizi + kartu safety (PRD 6.7)" `
+  -m "- destinasi ke-4 Tanya (/tanya) di shell; banner disclaimer tetap; badge kuota; follow-up chips" `
+  -m "- kartu safety refer_doctor/emergency (ikon+teks); emergency -> tel:112 via url_launcher" `
+  -m "- bubble user/asisten, typing indicator, empty state + ilustrasi CustomPainter + chip pertanyaan" `
+  -m "- error ramah per kode + Coba lagi; sinkronisasi riwayat gagal -> banner + Simpan lagi (tanpa AI ulang)" `
+  -m "- hapus riwayat dgn dialog konfirmasi; copy terpusat AppStrings; a11y 360dp @1.3" `
+  -m "- flutter analyze: bersih; flutter test: 258/258"
+```
+
+## Commit 4 - test(tanya): alur chat, domain, a11y 360dp
+
+```powershell
+git add test/features/chat test/fakes.dart test/features/layout_scale_test.dart
+git commit -m "test(tanya): domain, alur widget, layout 360dp @1.3" `
+  -m "- chat_domain_test: mapping safety_flag/role, fromJson defensif, validasi askQuestion + jendela 10" `
+  -m "- tanya_flow_test: chip kirim, bubble, kartu refer_doctor/emergency, kuota habis + coba lagi," `
+  -m "  hapus riwayat dgn konfirmasi, gagal-simpan + Simpan lagi, tanpa anak -> CTA" `
+  -m "- layout_scale_test: Tanya 360x640 @1.3 light/dark tanpa overflow" `
+  -m "- flutter analyze: bersih; flutter test: 258/258"
+```
+
+## Commit 5 - docs(progress): catatan Batch 7 & rencana commit
+
+```powershell
+git add docs/progress.md docs/commit-plan.md
+git commit -m "docs(progress): catatan Batch 7 (Tanya Gizi)" `
+  -m "- 7.1 edge function, 7.2 domain/data, 7.3 UI/UX (keputusan desain + perbaikan a11y 360dp @1.3)," `
+  -m "  verifikasi 258/258, deno check, belum-terverifikasi (deploy + evaluasi 9.3(4))"
+```
+
+## Setelah commit - belum bisa dilakukan tanpa kamu
+1. Deploy `ask-nutrition` via Dashboard (Verify JWT = ON).
+2. Smoke test di perangkat (tanya biasa, kuota, offline, red flag, emergency 112, hapus riwayat).
+3. Evaluasi keamanan PRD 9.3(4) - target: >= 95% red flag dieskalasi, 100% diagnosis/dosis ditolak.
+   Daftar 50 prompt disiapkan bila kamu minta (disimpan di docs/evaluation-prompts.md).
+4. Verifikasi visual di perangkat (1.3 text scale, light/dark).

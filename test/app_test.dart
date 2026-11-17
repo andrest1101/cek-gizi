@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:cekgizi/app.dart';
+import 'package:cekgizi/core/config/app_config.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
@@ -19,7 +20,7 @@ Future<LocalPrefs> _prefs(Map<String, Object> values) async {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('first launch shows onboarding, Lewati goes to consent', (
+  testWidgets('first launch opens brand intro then onboarding and consent', (
     tester,
   ) async {
     final prefs = await _prefs({});
@@ -29,36 +30,50 @@ void main() {
           localPrefsProvider.overrideWithValue(prefs),
           childRepositoryProvider.overrideWithValue(FakeChildRepository()),
           growthRepositoryProvider.overrideWithValue(FakeGrowthRepository()),
-          permenkesTablesProvider.overrideWith((ref) => Future.value(const FakeAnthropometryTables())),
+          permenkesTablesProvider.overrideWith(
+            (ref) => Future.value(const FakeAnthropometryTables()),
+          ),
           foodLogRepositoryProvider.overrideWithValue(FakeFoodLogRepository()),
-          nutritionRulesProvider.overrideWith((ref) => Future.value(fakeNutritionRules())),
+          nutritionRulesProvider.overrideWith(
+            (ref) => Future.value(fakeNutritionRules()),
+          ),
         ],
         child: const CekGiziApp(),
       ),
     );
+    await tester.pump();
+    expect(find.bySemanticsLabel(AppConfig.appName), findsOneWidget);
+    expect(find.text(AppStrings.onboardingTitle1), findsNothing);
+
     await tester.pumpAndSettle();
 
     expect(find.text(AppStrings.onboardingTitle1), findsOneWidget);
 
     await tester.tap(find.text(AppStrings.onboardingSkip));
+    await tester.pump();
+    expect(find.bySemanticsLabel(AppConfig.appName), findsOneWidget);
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.consentTitle), findsOneWidget);
   });
 
-  testWidgets('Beranda shows empty state when no children yet', (
-    tester,
-  ) async {
-    final prefs =
-        await _prefs({'onboarding_completed': true, 'consent_version_accepted': '1'});
+  testWidgets('Beranda shows empty state when no children yet', (tester) async {
+    final prefs = await _prefs({
+      'onboarding_completed': true,
+      'consent_version_accepted': '1',
+    });
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           localPrefsProvider.overrideWithValue(prefs),
           childRepositoryProvider.overrideWithValue(FakeChildRepository([])),
           growthRepositoryProvider.overrideWithValue(FakeGrowthRepository()),
-          permenkesTablesProvider.overrideWith((ref) => Future.value(const FakeAnthropometryTables())),
+          permenkesTablesProvider.overrideWith(
+            (ref) => Future.value(const FakeAnthropometryTables()),
+          ),
           foodLogRepositoryProvider.overrideWithValue(FakeFoodLogRepository()),
-          nutritionRulesProvider.overrideWith((ref) => Future.value(fakeNutritionRules())),
+          nutritionRulesProvider.overrideWith(
+            (ref) => Future.value(fakeNutritionRules()),
+          ),
         ],
         child: const CekGiziApp(),
       ),
@@ -73,21 +88,29 @@ void main() {
     tester,
   ) async {
     final child = fakeChild();
-    final prefs =
-        await _prefs({'onboarding_completed': true, 'consent_version_accepted': '1'});
+    final prefs = await _prefs({
+      'onboarding_completed': true,
+      'consent_version_accepted': '1',
+    });
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           localPrefsProvider.overrideWithValue(prefs),
-          childRepositoryProvider.overrideWithValue(FakeChildRepository([child])),
+          childRepositoryProvider.overrideWithValue(
+            FakeChildRepository([child]),
+          ),
           growthRepositoryProvider.overrideWithValue(
             FakeGrowthRepository([
               fakeMeasurement(id: 'm1', childId: child.id),
             ]),
           ),
-          permenkesTablesProvider.overrideWith((ref) => Future.value(const FakeAnthropometryTables())),
+          permenkesTablesProvider.overrideWith(
+            (ref) => Future.value(const FakeAnthropometryTables()),
+          ),
           foodLogRepositoryProvider.overrideWithValue(FakeFoodLogRepository()),
-          nutritionRulesProvider.overrideWith((ref) => Future.value(fakeNutritionRules())),
+          nutritionRulesProvider.overrideWith(
+            (ref) => Future.value(fakeNutritionRules()),
+          ),
         ],
         child: const CekGiziApp(),
       ),

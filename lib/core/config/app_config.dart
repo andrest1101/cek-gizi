@@ -15,6 +15,11 @@ abstract final class AppConfig {
   /// Diisi saat Batch 3 (tabel resmi disediakan pemilik proyek).
   static const String permenkesRefVersion = 'permenkes-2-2020';
 
+  /// Batas harian Tanya Gizi yang DITAMPILKAN di UI ("sisa X/30").
+  /// Penegak sesungguhnya adalah `CHAT_DAILY_LIMIT` di Edge Function (PRD
+  /// §5.4/5.5) - selaraskan bila env diubah.
+  static const int chatDailyLimit = 30;
+
   /// Supabase project URL (bukan rahasia).
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',

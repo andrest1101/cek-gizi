@@ -10,3 +10,7 @@ verify_jwt = false
 # blok ini hanya berlaku bila deploy via CLI).
 [functions.analyze-meal]
 verify_jwt = true
+
+# ask-nutrition WAJIB JWT (deploy via Dashboard: Verify JWT = ON di UI).
+[functions.ask-nutrition]
+verify_jwt = true

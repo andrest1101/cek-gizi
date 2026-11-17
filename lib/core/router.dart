@@ -16,6 +16,8 @@ import 'package:cekgizi/features/home/presentation/home_screen.dart';
 import 'package:cekgizi/features/meals/presentation/screens/makan_screen.dart';
 import 'package:cekgizi/features/meals/presentation/screens/scan_screen.dart';
 import 'package:cekgizi/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:cekgizi/features/chat/presentation/screens/tanya_screen.dart';
+import 'package:cekgizi/features/splash/presentation/screens/opening_screen.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 
@@ -23,9 +25,12 @@ final routerProvider = Provider<GoRouter>((ref) {
   final prefs = ref.watch(localPrefsProvider);
 
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/opening',
     redirect: (context, state) {
       final location = state.matchedLocation;
+      // Opening selalu boleh tampil sekali saat aplikasi dimulai. Setelah
+      // animasi, layar mengarahkan ke onboarding/consent/beranda yang sesuai.
+      if (location == '/opening') return null;
       if (!prefs.isOnboardingCompleted && location != '/onboarding') {
         return '/onboarding';
       }
@@ -54,6 +59,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ),
     routes: [
+      GoRoute(
+        path: '/opening',
+        name: '/opening',
+        builder: (context, state) => OpeningScreen(
+          nextLocation: !prefs.isOnboardingCompleted
+              ? '/onboarding'
+              : !prefs.isConsentAccepted
+              ? '/consent'
+              : '/',
+        ),
+      ),
       GoRoute(
         path: '/scan',
         name: '/scan',
@@ -87,6 +103,15 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: '/growth',
                 name: '/growth',
                 builder: (context, state) => const GrowthScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/tanya',
+                name: '/tanya',
+                builder: (context, state) => const TanyaScreen(),
               ),
             ],
           ),
