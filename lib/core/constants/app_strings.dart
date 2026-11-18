@@ -1,4 +1,4 @@
-﻿import 'package:cekgizi/core/config/app_config.dart';
+import 'package:cekgizi/core/config/app_config.dart';
 
 /// Semua copy UI terpusat di sini (Bahasa Indonesia, nada hangat dan
 /// tidak menghakimi - PRD Â§7.6). Widget tidak boleh menulis string bebas.
@@ -721,4 +721,24 @@ abstract final class AppStrings {
   static const wazLabel = 'BB/U';
   static const whzLabel = 'BB/PB atau BB/TB';
   static const statusOutOfRangeShort = 'Di luar rentang wajar';
+
+  // ── Pengaturan & pengingat (PRD §6.8) ──────────────────────────────
+  static const settingsTitle = 'Pengaturan';
+  static const homeSettings = 'Pengaturan';
+  static const settingsRemindersTitle = 'Pengingat';
+  static const settingsReminderFootnote =
+      'Pengingat default mati dan hanya tampil di perangkat ini. '
+      'Kamu bisa mematikannya kapan saja.';
+  static const settingsReminderMonthlyTitle = 'Ukur anak bulanan';
+  static String settingsReminderMonthlyBody(int day) =>
+      'Setiap tanggal $day, pukul 08.00';
+  static const settingsReminderMonthlyDayLabel = 'Tanggal';
+  static const settingsReminderDailyTitle = 'Catat makan harian';
+  static String settingsReminderDailyBody(String time) =>
+      'Setiap hari, pukul $time';
+  static const settingsReminderTimeLabel = 'Pukul';
+  static const settingsReminderPermissionDenied =
+      'Izin notifikasi belum diberikan. Aktifkan dulu di pengaturan HP kamu.';
+  static const settingsReminderSaveError =
+      'Gagal menyimpan pengingat. Coba lagi.';
 }

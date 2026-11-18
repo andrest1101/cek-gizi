@@ -46,8 +46,9 @@ void main() {
       ProviderScope(
         overrides: [
           localPrefsProvider.overrideWithValue(prefs),
-          childRepositoryProvider
-              .overrideWithValue(FakeChildRepository([child])),
+          childRepositoryProvider.overrideWithValue(
+            FakeChildRepository([child]),
+          ),
           growthRepositoryProvider.overrideWithValue(
             FakeGrowthRepository([
               fakeMeasurement(id: 'm1', childId: child.id),
@@ -59,7 +60,9 @@ void main() {
           foodLogRepositoryProvider.overrideWithValue(
             FakeFoodLogRepository(logs),
           ),
-          nutritionRulesProvider.overrideWith((ref) => Future.value(fakeNutritionRules())),
+          nutritionRulesProvider.overrideWith(
+            (ref) => Future.value(fakeNutritionRules()),
+          ),
           chatRepositoryProvider.overrideWithValue(FakeChatRepository()),
         ],
         child: const CekGiziApp(),
@@ -69,104 +72,97 @@ void main() {
   }
 
   for (final brightness in brightnesses) {
-    testWidgets(
-      'Beranda & Tumbuh muat di 360dp @1.3 (${brightness.name})',
-      (tester) async {
-        useSmallScreen(tester, brightness);
-        await pumpApp(
-          tester,
-          await prefsFor({
-            'onboarding_completed': true,
-            'consent_version_accepted': '1',
-          }),
-        );
-        expect(tester.takeException(), isNull);
+    testWidgets('Beranda & Tumbuh muat di 360dp @1.3 (${brightness.name})', (
+      tester,
+    ) async {
+      useSmallScreen(tester, brightness);
+      await pumpApp(
+        tester,
+        await prefsFor({
+          'onboarding_completed': true,
+          'consent_version_accepted': '1',
+        }),
+      );
+      expect(tester.takeException(), isNull);
 
-        await tester.tap(find.text(AppStrings.navGrowth));
+      await tester.tap(find.text(AppStrings.navGrowth));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // Gulir sampai kartu riwayat terlihat (konten tinggi di 360dp @1,3).
+      final historyTile = find.text('8,2 kg · 72,0 cm');
+      await tester.scrollUntilVisible(
+        historyTile,
+        240,
+        scrollable: find.byType(Scrollable).first,
+        maxScrolls: 40,
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(historyTile, findsOneWidget);
+    });
+
+    testWidgets('Tanya muat di 360dp @1.3 (${brightness.name})', (
+      tester,
+    ) async {
+      useSmallScreen(tester, brightness);
+      await pumpApp(
+        tester,
+        await prefsFor({
+          'onboarding_completed': true,
+          'consent_version_accepted': '1',
+        }),
+      );
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.text(AppStrings.navTanya));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      await tester.enterText(find.byType(TextField), 'Ide MPASI hari ini?');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.send_rounded));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Contoh jawaban dari Tanya Gizi.'), findsOneWidget);
+    });
+
+    testWidgets('Onboarding muat di 360dp @1.3 (${brightness.name})', (
+      tester,
+    ) async {
+      useSmallScreen(tester, brightness);
+      await pumpApp(tester, await prefsFor({}));
+      expect(tester.takeException(), isNull);
+      expect(find.text(AppStrings.disclaimer), findsWidgets);
+
+      for (var page = 0; page < 2; page++) {
+        await tester.tap(find.text(AppStrings.onboardingNext));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
+      }
+      expect(find.text(AppStrings.onboardingStart), findsOneWidget);
+      expect(find.text(AppStrings.disclaimer), findsWidgets);
+    });
 
-        // Gulir sampai kartu riwayat terlihat (konten tinggi di 360dp @1,3).
-        final historyTile = find.text('8,2 kg · 72,0 cm');
-        await tester.scrollUntilVisible(
-          historyTile,
-          240,
-          scrollable: find.byType(Scrollable).first,
-          maxScrolls: 40,
-        );
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-        expect(historyTile, findsOneWidget);
-      },
-    );
+    testWidgets('Consent muat di 360dp @1.3 (${brightness.name})', (
+      tester,
+    ) async {
+      useSmallScreen(tester, brightness);
+      await pumpApp(tester, await prefsFor({'onboarding_completed': true}));
+      expect(tester.takeException(), isNull);
+      expect(find.text(AppStrings.consentTitle), findsOneWidget);
 
-    testWidgets(
-      'Tanya muat di 360dp @1.3 (${brightness.name})',
-      (tester) async {
-        useSmallScreen(tester, brightness);
-        await pumpApp(
-          tester,
-          await prefsFor({
-            'onboarding_completed': true,
-            'consent_version_accepted': '1',
-          }),
-        );
-        expect(tester.takeException(), isNull);
-
-        await tester.tap(find.text(AppStrings.navTanya));
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-
-        await tester.enterText(find.byType(TextField), 'Ide MPASI hari ini?');
-        await tester.pumpAndSettle();
-        await tester.tap(find.byIcon(Icons.send_rounded));
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-        expect(find.text('Contoh jawaban dari Tanya Gizi.'), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'Onboarding muat di 360dp @1.3 (${brightness.name})',
-      (tester) async {
-        useSmallScreen(tester, brightness);
-        await pumpApp(tester, await prefsFor({}));
-        expect(tester.takeException(), isNull);
-        expect(find.text(AppStrings.disclaimer), findsWidgets);
-
-        for (var page = 0; page < 2; page++) {
-          await tester.tap(find.text(AppStrings.onboardingNext));
-          await tester.pumpAndSettle();
-          expect(tester.takeException(), isNull);
-        }
-        expect(find.text(AppStrings.onboardingStart), findsOneWidget);
-        expect(find.text(AppStrings.disclaimer), findsWidgets);
-      },
-    );
-
-    testWidgets(
-      'Consent muat di 360dp @1.3 (${brightness.name})',
-      (tester) async {
-        useSmallScreen(tester, brightness);
-        await pumpApp(
-          tester,
-          await prefsFor({'onboarding_completed': true}),
-        );
-        expect(tester.takeException(), isNull);
-        expect(find.text(AppStrings.consentTitle), findsOneWidget);
-
-        // Gulir ke bawah: checkbox + tombol setuju tetap rapi.
-        await tester.scrollUntilVisible(
-          find.text(AppStrings.consentSubmit),
-          240,
-          scrollable: find.byType(Scrollable).first,
-          maxScrolls: 40,
-        );
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-        expect(find.text(AppStrings.consentSubmit), findsOneWidget);
-      },
-    );
+      // Gulir ke bawah: checkbox + tombol setuju tetap rapi.
+      await tester.scrollUntilVisible(
+        find.text(AppStrings.consentSubmit),
+        240,
+        scrollable: find.byType(Scrollable).first,
+        maxScrolls: 40,
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text(AppStrings.consentSubmit), findsOneWidget);
+    });
 
     testWidgets(
       'Makan & tips Beranda muat di 360dp @1.3 (${brightness.name})',
@@ -304,6 +300,34 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         expect(find.text(AppStrings.childSave), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Pengaturan (pengingat) muat di 360dp @1.3 (${brightness.name})',
+      (tester) async {
+        useSmallScreen(tester, brightness);
+        await pumpApp(
+          tester,
+          await prefsFor({
+            'onboarding_completed': true,
+            'consent_version_accepted': '1',
+          }),
+        );
+
+        await tester.tap(find.byTooltip(AppStrings.homeSettings));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.text(AppStrings.settingsRemindersTitle), findsOneWidget);
+        expect(
+          find.text(AppStrings.settingsReminderMonthlyTitle),
+          findsOneWidget,
+        );
+        expect(
+          find.text(AppStrings.settingsReminderDailyTitle),
+          findsOneWidget,
+        );
+        expect(find.text(AppStrings.settingsReminderFootnote), findsOneWidget);
       },
     );
   }

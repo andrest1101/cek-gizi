@@ -159,6 +159,12 @@ class _HomeHeader extends ConsumerWidget {
           onPressed: () => context.push('/children'),
           icon: const Icon(Icons.manage_accounts_rounded, size: 21),
         ),
+        const SizedBox(width: AppSpacing.xs),
+        IconButton.filledTonal(
+          tooltip: AppStrings.homeSettings,
+          onPressed: () => context.push('/settings'),
+          icon: const Icon(Icons.account_circle_rounded, size: 21),
+        ),
       ],
     );
   }
