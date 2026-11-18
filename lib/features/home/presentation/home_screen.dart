@@ -77,17 +77,15 @@ class HomeScreen extends ConsumerWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const ChildSwitcherCard(),
-                      const SizedBox(height: AppSpacing.lg),
+                      // 3 blok berhierarki: fokus hari ini → minggu ini →
+                      // tumbuh ringkas (tips jadi baris di dalamnya).
                       const PiringHeroCard(),
                       if (selectedChild != null) ...[
-                        const SizedBox(height: AppSpacing.lg),
-                        HomeWeekStrip(childId: selectedChild.id),
+                        const SizedBox(height: AppSpacing.sectionGap),
+                        HomeWeekChips(childId: selectedChild.id),
                       ],
-                      const SizedBox(height: AppSpacing.lg),
-                      const PiringTipsCard(),
-                      const SizedBox(height: AppSpacing.lg),
-                      const GrowthStatusCard(),
+                      const SizedBox(height: AppSpacing.sectionGap),
+                      const GrowthStatusCard(footer: PiringTipsCard()),
                     ],
                   );
                 },
@@ -123,28 +121,38 @@ class _HomeHeader extends ConsumerWidget {
       ref.watch(foodLogsProvider(selectedChild.id));
     }
 
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          IdDateFormat.eyebrow(now),
-          style: AppTextStyles.label.copyWith(
-            color: colors.textSecondary,
-            letterSpacing: 0.5,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                IdDateFormat.eyebrow(now),
+                style: AppTextStyles.label.copyWith(
+                  color: colors.textSecondary,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Semantics(
+                header: true,
+                child: Text(
+                  childName == null
+                      ? AppConfig.appName
+                      : AppStrings.homeGreeting(Greeting.of(now), childName),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.titleLarge.copyWith(
+                    color: colors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 2),
-        Semantics(
-          header: true,
-          child: Text(
-            childName == null
-                ? AppConfig.appName
-                : AppStrings.homeGreeting(Greeting.of(now), childName),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.titleLarge.copyWith(color: colors.textPrimary),
-          ),
-        ),
+        if (selectedChild != null) const ChildSwitcherButton(),
       ],
     );
   }

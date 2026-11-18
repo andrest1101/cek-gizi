@@ -9,6 +9,9 @@ import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
+import 'package:cekgizi/features/growth/presentation/growth_summary.dart';
+import 'package:cekgizi/features/growth/presentation/providers/growth_providers.dart';
+import 'package:cekgizi/features/growth/presentation/widgets/status_copy.dart';
 import 'package:cekgizi/features/meals/domain/services/piring_day.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/food_group_logo.dart';
@@ -46,13 +49,13 @@ class PiringHeroCard extends ConsumerWidget {
   }
 }
 
-class _PiringContent extends StatelessWidget {
+class _PiringContent extends ConsumerWidget {
   const _PiringContent({required this.piring});
 
   final PiringDay piring;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colorsOf(context);
     final reached = piring.isTargetReached;
     final animalPresent = piring.animalProteinPresent;
@@ -112,16 +115,12 @@ class _PiringContent extends StatelessWidget {
               color: colors.onHeroSurface,
               text: AppStrings.makanTodayProgress(met, total),
             ),
-          const SizedBox(height: AppSpacing.xs),
-          _StatusLine(
-            icon: animalPresent
-                ? Icons.check_circle_outline_rounded
-                : Icons.info_outline_rounded,
-            color: animalPresent ? colors.onHeroSurface : colors.onHeroAccent,
-            text: animalPresent
-                ? AppStrings.piringAnimalProteinPresent
-                : AppStrings.piringAnimalProteinMissing,
-          ),
+          // Dua ubin metrik berdampingan: protein hewani & tren berat.
+          // Keduanya memakai data yang sudah ada (PiringDay & GrowthSummary).
+          const SizedBox(height: AppSpacing.md),
+          Divider(height: 1, thickness: 1, color: colors.heroTrack),
+          const SizedBox(height: AppSpacing.md),
+          _HeroMetricsRow(piring: piring, animalPresent: animalPresent),
           if (animalPresent) ...[
             const SizedBox(height: AppSpacing.xs),
             Text(
@@ -197,6 +196,123 @@ class _StatusLine extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Dua metrik pendukung di dalam hero: protein hewani dan tren berat.
+/// Fokus angka dominan tetap di ring, ubin ini hanya konteks cepat.
+class _HeroMetricsRow extends ConsumerWidget {
+  const _HeroMetricsRow({required this.piring, required this.animalPresent});
+
+  final PiringDay piring;
+  final bool animalPresent;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = AppTheme.colorsOf(context);
+    final childId = ref.watch(selectedChildProvider).value?.id;
+    final measurementsAsync = childId == null
+        ? null
+        : ref.watch(measurementsProvider(childId));
+    final measurements = measurementsAsync?.value;
+    final delta = (measurements == null || measurements.isEmpty)
+        ? null
+        : GrowthSummary.weightDeltaOf(measurements);
+
+    final trendIcon = delta == null
+        ? Icons.straighten_rounded
+        : (delta >= 0
+            ? Icons.trending_up_rounded
+            : Icons.trending_down_rounded);
+    final trendColor = animalPresent
+        ? colors.onHeroSurface
+        : colors.onHeroAccent;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: _HeroMetric(
+            icon: animalPresent
+                ? Icons.check_circle_outline_rounded
+                : Icons.info_outline_rounded,
+            color: animalPresent ? colors.onHeroSurface : colors.onHeroAccent,
+            label: AppStrings.homeMetricProtein,
+            value: animalPresent
+                ? AppStrings.piringAnimalProteinPresent
+                : AppStrings.piringAnimalProteinMissing,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: _HeroMetric(
+            icon: trendIcon,
+            color: trendColor,
+            label: AppStrings.homeMetricTrend,
+            value: delta == null
+                ? AppStrings.homeMetricNoTrend
+                : GrowthStatusCopy.weightDeltaLabel(delta),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HeroMetric extends StatelessWidget {
+  const _HeroMetric({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return Semantics(
+      container: true,
+      label: '$label. $value',
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: AppTextStyles.label.copyWith(
+                    color: colors.onHeroSurfaceMuted,
+                    fontSize: 10,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: colors.onHeroSurface,
+                    fontSize: 12,
+                    height: 1.25,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

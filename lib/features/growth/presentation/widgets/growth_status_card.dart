@@ -25,11 +25,19 @@ import 'package:cekgizi/shared/widgets/z_score_table.dart';
 /// Kartu status tumbuh (PRD §6.3, §6.5): status terburuk, tanggal, tren,
 /// metrik terakhir (opsional di Beranda), aksi tambah ukuran & detail.
 class GrowthStatusCard extends ConsumerWidget {
-  const GrowthStatusCard({super.key, this.showMetrics = true});
+  const GrowthStatusCard({
+    super.key,
+    this.showMetrics = true,
+    this.footer,
+  });
 
   /// Beranda menampilkan metrik berat/tinggi; layar Tumbuh tidak perlu
   /// karena grafik & riwayat sudah ada di bawahnya.
   final bool showMetrics;
+
+  /// Blok ringkas tambahan di dalam kartu yang sama (Beranda: tips hari ini)
+  /// agar tidak muncul kartu kelima yang setara bobotnya.
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,7 +53,19 @@ class GrowthStatusCard extends ConsumerWidget {
       ),
       data: (measurements) {
         if (measurements.isEmpty) {
-          return _EmptyStatus(onAdd: () => showMeasurementSheet(context));
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _EmptyStatus(onAdd: () => showMeasurementSheet(context)),
+              if (footer != null) ...[
+                Divider(height: 1, color: AppTheme.colorsOf(context).outline),
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.sm),
+                  child: footer,
+                ),
+              ],
+            ],
+          );
         }
         final latest = GrowthSummary.latestOf(measurements)!;
         final summary = GrowthStatusSummary.worstOf(latest);
@@ -61,6 +81,7 @@ class GrowthStatusCard extends ConsumerWidget {
           trend: trend,
           weightDelta: delta,
           showMetrics: showMetrics,
+          footer: footer,
           onDetail: () => _showDetail(context, child.nickname, latest),
           onAdd: () => showMeasurementSheet(context),
         );
@@ -92,6 +113,7 @@ class _StatusCard extends StatelessWidget {
     required this.trend,
     required this.weightDelta,
     required this.showMetrics,
+    this.footer,
     required this.onDetail,
     required this.onAdd,
   });
@@ -102,6 +124,7 @@ class _StatusCard extends StatelessWidget {
   final GrowthTrendResult trend;
   final double? weightDelta;
   final bool showMetrics;
+  final Widget? footer;
   final VoidCallback onDetail;
   final VoidCallback onAdd;
 
@@ -210,6 +233,13 @@ class _StatusCard extends StatelessWidget {
             label: const Text(AppStrings.statusViewDetail),
             iconAlignment: IconAlignment.end,
           ),
+          if (footer != null) ...[
+            Divider(height: 1, color: colors.outline),
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: footer,
+            ),
+          ],
         ],
       ),
     );

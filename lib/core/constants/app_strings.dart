@@ -786,6 +786,9 @@ abstract final class AppStrings {
   static const capturePanelSemantics =
       'Kenali isi piring. Buka kamera untuk memotret makanan anak.';
   static const startupLoading = 'Menyiapkan aplikasi…';
+  static const homeMetricProtein = 'Protein hewani';
+  static const homeMetricTrend = 'Tren berat';
+  static const homeMetricNoTrend = 'Belum ada ukuran';
   static const capturePanelEyebrow = 'FOTO PIRING';
   static const capturePanelStepPhoto = 'Foto piring';
   static const capturePanelStepRecognize = 'Dikenali AI';

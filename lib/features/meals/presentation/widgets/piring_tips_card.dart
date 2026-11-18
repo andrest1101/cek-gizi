@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
-import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
-import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
@@ -92,29 +90,19 @@ class _TipsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      decoration: AppSurfaces.sunken(context, radius: AppRadius.control),
+    // Satu baris ringkas, bukan kartu: tips adalah bimbingan, bukan objek
+    // yang bisa diketuk seluruh permukaannya.
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: colors.accent.withValues(alpha: 0.18),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.lightbulb_outline_rounded,
-              size: 17,
-              color: colors.accent,
-            ),
+          Icon(
+            Icons.lightbulb_outline_rounded,
+            size: 20,
+            color: colors.accent,
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,35 +113,31 @@ class _TipsContent extends StatelessWidget {
                     color: colors.textSecondary,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.8,
-                    fontSize: 11,
+                    fontSize: 10,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  groupLabel,
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: colors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  tip,
+                  '$groupLabel — $tip',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: colors.textSecondary,
+                    color: colors.textPrimary,
+                    fontSize: 12,
+                    height: 1.35,
                   ),
                 ),
                 if (!isReviewed) ...[
-                  const SizedBox(height: AppSpacing.xs),
+                  const SizedBox(height: 2),
                   Text(
                     AppStrings.piringUnreviewedCaption,
                     style: AppTextStyles.label.copyWith(
                       color: colors.textSecondary,
                       fontSize: 10,
-                      height: 1.35,
+                      height: 1.3,
                     ),
                   ),
                 ],
-                const SizedBox(height: AppSpacing.xs),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: TextButton.icon(
@@ -165,7 +149,7 @@ class _TipsContent extends StatelessWidget {
                       ),
                       tapTargetSize: MaterialTapTargetSize.padded,
                     ),
-                    icon: const Icon(Icons.add_rounded, size: 20),
+                    icon: const Icon(Icons.add_rounded, size: 18),
                     label: const Text(AppStrings.tipsAction),
                   ),
                 ),
