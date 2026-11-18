@@ -102,16 +102,23 @@ class PiringRing extends StatelessWidget {
       child: SizedBox(
         width: size,
         height: size,
-        child: CustomPaint(
-          size: Size.square(size),
-          painter: _PiringRingPainter(
-            met: met,
-            codes: codes,
-            metColor: metColor,
-            animalColor: animalColor,
-            trackColor: trackColor,
-            strokeWidth: strokeWidth,
-            gapDegrees: gap,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: 1),
+          duration: AppMotion.of(context, AppMotion.ring),
+          curve: AppMotion.easeOutCubic,
+          builder: (context, progress, child) => CustomPaint(
+            size: Size.square(size),
+            painter: _PiringRingPainter(
+              met: met,
+              codes: codes,
+              metColor: metColor,
+              animalColor: animalColor,
+              trackColor: trackColor,
+              strokeWidth: strokeWidth,
+              gapDegrees: gap,
+              progress: progress,
+            ),
+            child: child,
           ),
           child: showCount
               ? Center(
@@ -150,7 +157,11 @@ class _PiringRingPainter extends CustomPainter {
     required this.trackColor,
     required this.strokeWidth,
     required this.gapDegrees,
+    required this.progress,
   });
+
+  /// 0 → 1 saat ring pertama muncul; 1 = semua busur menyala penuh.
+  final double progress;
 
   final Set<String> met;
   final List<String> codes;
@@ -175,13 +186,30 @@ class _PiringRingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeWidth = strokeWidth;
 
+    // Track digambar untuk semua busur dulu, lalu busur yang terisi menyala
+    // bertahap dari kiri ke kanan. Saat `progress == 1` hasilnya identik
+    // dengan tampilan statis sebelumnya.
     for (var i = 0; i < codes.length; i++) {
-      final code = codes[i];
-      final isMet = met.contains(code);
-      final isAnimal = FoodGroup.animalProteinCodes.contains(code);
-      paint.color = isMet ? (isAnimal ? animalColor : metColor) : trackColor;
       final startAngle = startOffset + i * arc * math.pi / 180;
+      paint.color = trackColor;
       canvas.drawArc(rect, startAngle, sweep * math.pi / 180, false, paint);
+    }
+    final visible = (progress.clamp(0.0, 1.0) * codes.length);
+    for (var i = 0; i < codes.length; i++) {
+      final local = (visible - i).clamp(0.0, 1.0);
+      if (local <= 0) continue;
+      final code = codes[i];
+      if (!met.contains(code)) continue;
+      final isAnimal = FoodGroup.animalProteinCodes.contains(code);
+      paint.color = isAnimal ? animalColor : metColor;
+      final startAngle = startOffset + i * arc * math.pi / 180;
+      canvas.drawArc(
+        rect,
+        startAngle,
+        sweep * local * math.pi / 180,
+        false,
+        paint,
+      );
     }
   }
 
@@ -193,7 +221,8 @@ class _PiringRingPainter extends CustomPainter {
       oldDelegate.animalColor != animalColor ||
       oldDelegate.trackColor != trackColor ||
       oldDelegate.strokeWidth != strokeWidth ||
-      oldDelegate.gapDegrees != gapDegrees;
+      oldDelegate.gapDegrees != gapDegrees ||
+      oldDelegate.progress != progress;
 }
 
 /// Ring progres monokrom untuk ukuran kecil (36–60dp): satu busur

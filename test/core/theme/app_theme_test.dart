@@ -67,6 +67,16 @@ void main() {
       expect(AppColors.light.heroSurface, AppColors.light.primary);
     });
 
+    test('warm chip tokens stay readable in both themes (WCAG AA)', () {
+      for (final colors in [AppColors.light, AppColors.dark]) {
+        expect(
+          _contrast(colors.onAccentContainer, colors.accentContainer),
+          greaterThanOrEqualTo(4.5),
+        );
+        expect(colors.accentContainer, isNot(colors.surface));
+      }
+    });
+
     test('text theme uses PlusJakartaSans and PRD sizes', () {
       final textTheme = AppTheme.light().textTheme;
       expect(textTheme.displaySmall?.fontFamily, AppTextStyles.fontFamily);

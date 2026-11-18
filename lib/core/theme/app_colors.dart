@@ -27,6 +27,8 @@ final class AppColors extends ThemeExtension<AppColors> {
     required this.onPrimary,
     required this.primaryContainer,
     required this.accent,
+    required this.accentContainer,
+    required this.onAccentContainer,
     required this.statusGood,
     required this.statusWatch,
     required this.statusWatchText,
@@ -63,6 +65,13 @@ final class AppColors extends ThemeExtension<AppColors> {
 
   /// Busur protein hewani, sorotan hangat (`#E9893B` / `#F2A55F`).
   final Color accent;
+
+  /// Latar tonal hangat untuk pita/chip "perlu perhatian"
+  /// (`#FBE8D6` / `#3E2A19`). Pasangan teksnya [onAccentContainer].
+  final Color accentContainer;
+
+  /// Teks/ikon di atas [accentContainer] (kontras ≥ 4,5:1 di kedua mode).
+  final Color onAccentContainer;
 
   /// Status normal (`#2E7D32` / `#7BD88F`).
   final Color statusGood;
@@ -106,6 +115,8 @@ final class AppColors extends ThemeExtension<AppColors> {
     onPrimary: Color(0xFFFFFFFF),
     primaryContainer: Color(0xFFD8EBDD),
     accent: Color(0xFFE9893B),
+    accentContainer: Color(0xFFFBE8D6),
+    onAccentContainer: Color(0xFF7A4318),
     statusGood: Color(0xFF2E7D32),
     statusWatch: Color(0xFFF2B84B),
     statusWatchText: Color(0xFF8A5A12),
@@ -129,6 +140,8 @@ final class AppColors extends ThemeExtension<AppColors> {
     onPrimary: Color(0xFF06251A),
     primaryContainer: Color(0xFF1B4A38),
     accent: Color(0xFFF2A55F),
+    accentContainer: Color(0xFF3E2A19),
+    onAccentContainer: Color(0xFFF7C79B),
     statusGood: Color(0xFF7BD88F),
     statusWatch: Color(0xFFF2C14E),
     statusWatchText: Color(0xFFF2C14E),
@@ -153,6 +166,8 @@ final class AppColors extends ThemeExtension<AppColors> {
     Color? onPrimary,
     Color? primaryContainer,
     Color? accent,
+    Color? accentContainer,
+    Color? onAccentContainer,
     Color? statusGood,
     Color? statusWatch,
     Color? statusWatchText,
@@ -175,6 +190,8 @@ final class AppColors extends ThemeExtension<AppColors> {
       onPrimary: onPrimary ?? this.onPrimary,
       primaryContainer: primaryContainer ?? this.primaryContainer,
       accent: accent ?? this.accent,
+      accentContainer: accentContainer ?? this.accentContainer,
+      onAccentContainer: onAccentContainer ?? this.onAccentContainer,
       statusGood: statusGood ?? this.statusGood,
       statusWatch: statusWatch ?? this.statusWatch,
       statusWatchText: statusWatchText ?? this.statusWatchText,
@@ -206,6 +223,16 @@ final class AppColors extends ThemeExtension<AppColors> {
         t,
       )!,
       accent: Color.lerp(accent, other.accent, t)!,
+      accentContainer: Color.lerp(
+        accentContainer,
+        other.accentContainer,
+        t,
+      )!,
+      onAccentContainer: Color.lerp(
+        onAccentContainer,
+        other.onAccentContainer,
+        t,
+      )!,
       statusGood: Color.lerp(statusGood, other.statusGood, t)!,
       statusWatch: Color.lerp(statusWatch, other.statusWatch, t)!,
       statusWatchText: Color.lerp(statusWatchText, other.statusWatchText, t)!,

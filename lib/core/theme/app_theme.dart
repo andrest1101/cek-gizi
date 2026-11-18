@@ -165,6 +165,61 @@ abstract final class AppTheme {
           shape: controlShape,
         ),
       ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: colors.primary,
+          minimumSize: const Size(48, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          textStyle: AppTextStyles.label,
+          shape: controlShape,
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: colors.textSecondary,
+          minimumSize: const Size(48, 48),
+          tapTargetSize: MaterialTapTargetSize.padded,
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: colors.primary,
+        foregroundColor: colors.onPrimary,
+        elevation: 1,
+        focusElevation: 1,
+        hoverElevation: 1,
+        highlightElevation: 2,
+        shape: const StadiumBorder(),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: colors.surfaceVariant,
+        selectedColor: colors.primaryContainer,
+        disabledColor: colors.surfaceVariant,
+        labelStyle: AppTextStyles.label.copyWith(color: colors.textPrimary),
+        secondaryLabelStyle: AppTextStyles.label.copyWith(
+          color: colors.primary,
+        ),
+        side: BorderSide(color: colors.outline, width: 1),
+        shape: controlShape,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: colors.primary,
+        linearTrackColor: colors.surfaceVariant,
+        circularTrackColor: colors.surfaceVariant,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: colors.surface,
+        contentTextStyle: AppTextStyles.bodySmall.copyWith(
+          color: colors.textPrimary,
+        ),
+        actionTextColor: colors.primary,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.control),
+          side: BorderSide(color: colors.outline, width: 1),
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colors.surfaceVariant,
