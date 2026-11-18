@@ -157,11 +157,13 @@ bukan file gambar raster. `PlateViewfinderIllustration` punya dua mode:
 - **Splash / opening** (v2.3): **satu page** — native Android & frame
   pertama Flutter solid `#145C45` (`AppSurfaces.splashSurface`), lalu
   `OpeningScreen` memutar Lottie `assets/animations/cekgizi_opening.json`
-  (1080×1080, 3 detik, latar konstan, **0,65× speed**, terpusat eksplisit).
-  Lottie ∧ `backendReadyProvider` bersamaan: bila animasi selesai lebih dulu,
-  frame terakhir ditahan + progres halus. Reduce-motion dihormati; ada
-  timeout pengaman 20 dtk; tidak ada logo ganda. Launcher icon Android =
-  logo CekGizi (bukan bawaan Flutter).
+  (1080×1080, 3 detik, latar konstan, **0,65× speed**, terpusat eksplisit)
+  **+ suara khas `assets/audio/cek-gizi_audio.wav`** (volume 0,35, sekali,
+  sinkron dengan `forward()`; reduce-motion = bisu). Lottie ∧
+  `backendReadyProvider` bersamaan: bila animasi selesai lebih dulu, frame
+  terakhir ditahan + progres halus. Reduce-motion dihormati; ada timeout
+  pengaman 20 dtk; tidak ada logo ganda. Launcher icon Android = logo
+  CekGizi (bukan bawaan Flutter).
 
 ## 9. Aksesibilitas (PRD §7.7)
 

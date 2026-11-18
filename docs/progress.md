@@ -857,3 +857,30 @@ Font & logo Lottie terlalu kecil: ukuran diubah dari `shortSide × 0.66` (±238d
 - `flutter test` → **294/294 passed**
 - `flutter build apk --debug` → **✓ Built**
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-9 — Efek suara khas logo saat splash (2026-11-18)
+
+### Ruang lingkup
+Memutar audio khusus logo bersamaan dengan Lottie di `OpeningScreen`. Tidak ada perubahan alur/onboarding.
+
+### Dependency baru (disetujui 2026-11-18)
+- **`audioplayers` (^6.6.0)** — satu-satunya audio player yang dipakai (tanpa konfigurasi native tambahan; mendukung WAV). Alasan: memainkan `assets/audio/cek-gizi_audio.wav` bersama animasi; tanpa jaringan; cukup satu instance; tidak ada playback background.
+
+### Perubahan
+1. `assets/audio/cek-gizi_audio.wav` (814 KB, dibuat pemilik/AI — durasi sudah diselaraskan dengan Lottie 0,65×).
+2. `pubspec.yaml`: `assets/audio/` didaftarkan; `audioplayers` ditambahkan.
+3. `OpeningScreen`: saat `onLoaded` (normal path), audio diputar **sekali** pada volume **0,35**, bersamaan dengan `forward()`.
+   - Reduce-motion → **tanpa suara**.
+   - Gagal audio → diabaikan (bisu), splash tetap jalan.
+   - `ReleaseMode.stop`; player dilepas di `dispose()`.
+   - Tidak ada toggle Akun dulu; default **nyala** (sesuai permintaan), bisa ditambahkan nanti bila perlu.
+
+### Catatan ukuran file
+WAV 814 KB menambah ukuran APK (~0,8 MB). Bila ukuran jadi prioritas, sebaiknya dikonversi ke MP3/AAC (~100–150 KB) dengan tool eksternal; kode tidak berubah (cukup ganti aset/`AssetSource`).
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **294/294 passed** (audio dipanggil dalam try/catch, tidak menyentuh tes).
+- `flutter build apk --debug` → **✓ Built**.
+- Perlu tinjauan di perangkat: apakah suara terdengar di cold start, apakah tidak mengejutkan (volume 0,35), dan apakah reduce-motion benar-benar membisukan.
+- Commit belum dijalankan (manual oleh pemilik).
