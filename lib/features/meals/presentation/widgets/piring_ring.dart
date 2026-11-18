@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
-import 'package:cekgizi/core/theme/app_colors.dart';
 import 'package:cekgizi/core/theme/app_motion.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
@@ -27,6 +26,7 @@ class PiringRing extends StatelessWidget {
     this.strokeWidth = 18,
     this.gapDegrees,
     this.showCount = true,
+    this.onHero = false,
     this.semanticsLabel,
   });
 
@@ -47,6 +47,11 @@ class PiringRing extends StatelessWidget {
 
   /// Tampilkan teks "n/8" di tengah.
   final bool showCount;
+
+  /// True bila ring berada di atas permukaan hero hijau tua: busur terisi
+  /// memakai `onHeroSurface`, protein hewani `onHeroAccent`, dan busur kosong
+  /// `heroTrack` agar kontras tetap terbaca.
+  final bool onHero;
 
   final String? semanticsLabel;
 
@@ -83,6 +88,13 @@ class PiringRing extends StatelessWidget {
           size: size,
           segments: codes.length,
         );
+    final metColor = onHero ? colors.onHeroSurface : colors.primary;
+    final animalColor = onHero ? colors.onHeroAccent : colors.accent;
+    final trackColor = onHero ? colors.heroTrack : colors.surfaceVariant;
+    final valueColor = onHero ? colors.onHeroSurface : colors.textPrimary;
+    final valueLabelColor = onHero
+        ? colors.onHeroSurfaceMuted
+        : colors.textSecondary;
 
     return Semantics(
       label: label,
@@ -90,14 +102,23 @@ class PiringRing extends StatelessWidget {
       child: SizedBox(
         width: size,
         height: size,
-        child: CustomPaint(
-          size: Size.square(size),
-          painter: _PiringRingPainter(
-            met: met,
-            codes: codes,
-            colors: colors,
-            strokeWidth: strokeWidth,
-            gapDegrees: gap,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: 1),
+          duration: AppMotion.of(context, AppMotion.ring),
+          curve: AppMotion.easeOutCubic,
+          builder: (context, progress, child) => CustomPaint(
+            size: Size.square(size),
+            painter: _PiringRingPainter(
+              met: met,
+              codes: codes,
+              metColor: metColor,
+              animalColor: animalColor,
+              trackColor: trackColor,
+              strokeWidth: strokeWidth,
+              gapDegrees: gap,
+              progress: progress,
+            ),
+            child: child,
           ),
           child: showCount
               ? Center(
@@ -106,16 +127,15 @@ class PiringRing extends StatelessWidget {
                     children: [
                       Text(
                         '$metCount/${codes.length}',
-                        style: AppTextStyles.heroNumber.copyWith(
-                          fontSize: 40,
+                        style: AppTextStyles.displayMetric.copyWith(
                           height: 1.0,
-                          color: colors.textPrimary,
+                          color: valueColor,
                         ),
                       ),
                       Text(
                         AppStrings.piringGroupsLabel,
                         style: AppTextStyles.label.copyWith(
-                          color: colors.textSecondary,
+                          color: valueLabelColor,
                         ),
                       ),
                     ],
@@ -132,14 +152,22 @@ class _PiringRingPainter extends CustomPainter {
   const _PiringRingPainter({
     required this.met,
     required this.codes,
-    required this.colors,
+    required this.metColor,
+    required this.animalColor,
+    required this.trackColor,
     required this.strokeWidth,
     required this.gapDegrees,
+    required this.progress,
   });
+
+  /// 0 → 1 saat ring pertama muncul; 1 = semua busur menyala penuh.
+  final double progress;
 
   final Set<String> met;
   final List<String> codes;
-  final AppColors colors;
+  final Color metColor;
+  final Color animalColor;
+  final Color trackColor;
   final double strokeWidth;
   final double gapDegrees;
 
@@ -158,15 +186,30 @@ class _PiringRingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeWidth = strokeWidth;
 
+    // Track digambar untuk semua busur dulu, lalu busur yang terisi menyala
+    // bertahap dari kiri ke kanan. Saat `progress == 1` hasilnya identik
+    // dengan tampilan statis sebelumnya.
     for (var i = 0; i < codes.length; i++) {
-      final code = codes[i];
-      final isMet = met.contains(code);
-      final isAnimal = FoodGroup.animalProteinCodes.contains(code);
-      paint.color = isMet
-          ? (isAnimal ? colors.accent : colors.primary)
-          : colors.surfaceVariant;
       final startAngle = startOffset + i * arc * math.pi / 180;
+      paint.color = trackColor;
       canvas.drawArc(rect, startAngle, sweep * math.pi / 180, false, paint);
+    }
+    final visible = (progress.clamp(0.0, 1.0) * codes.length);
+    for (var i = 0; i < codes.length; i++) {
+      final local = (visible - i).clamp(0.0, 1.0);
+      if (local <= 0) continue;
+      final code = codes[i];
+      if (!met.contains(code)) continue;
+      final isAnimal = FoodGroup.animalProteinCodes.contains(code);
+      paint.color = isAnimal ? animalColor : metColor;
+      final startAngle = startOffset + i * arc * math.pi / 180;
+      canvas.drawArc(
+        rect,
+        startAngle,
+        sweep * local * math.pi / 180,
+        false,
+        paint,
+      );
     }
   }
 
@@ -174,9 +217,12 @@ class _PiringRingPainter extends CustomPainter {
   bool shouldRepaint(_PiringRingPainter oldDelegate) =>
       oldDelegate.met != met ||
       oldDelegate.codes != codes ||
-      oldDelegate.colors != colors ||
+      oldDelegate.metColor != metColor ||
+      oldDelegate.animalColor != animalColor ||
+      oldDelegate.trackColor != trackColor ||
       oldDelegate.strokeWidth != strokeWidth ||
-      oldDelegate.gapDegrees != gapDegrees;
+      oldDelegate.gapDegrees != gapDegrees ||
+      oldDelegate.progress != progress;
 }
 
 /// Ring progres monokrom untuk ukuran kecil (36–60dp): satu busur

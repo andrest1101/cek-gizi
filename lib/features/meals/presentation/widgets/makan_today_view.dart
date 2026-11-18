@@ -11,16 +11,19 @@ import 'package:cekgizi/core/time/clock.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/meals/domain/services/piring_day.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/capture_panel.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/catat_makan_sheet.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/food_group_checklist.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/food_group_logo.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/food_log_list.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_info_sheet.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_ring.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/makan_header.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_tour_card.dart';
 import 'package:cekgizi/shared/illustrations/empty_plate_illustration.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/section_header.dart';
+import 'package:cekgizi/shared/widgets/section_reveal.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 
 /// Bagian "Hari ini" di layar Makan: panel progres, checklist kelompok, dan
@@ -49,9 +52,16 @@ class MakanTodayView extends ConsumerWidget {
         AppSpacing.xxxl + AppSpacing.lg,
       ),
       children: [
-        const PiringTourCard(),
+        const MakanHeader(),
+        const SizedBox(height: AppSpacing.lg),
+        if (!isUnderSixMonths) ...[
+          SectionReveal(child: CapturePanel(childId: child.id)),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         if (isUnderSixMonths) ...[
           const _AsiExclusiveCard(),
+          const SizedBox(height: AppSpacing.lg),
+          const PiringTourCard(),
           const SizedBox(height: AppSpacing.lg),
           FoodGroupChecklist(
             childId: child.id,
@@ -60,14 +70,18 @@ class MakanTodayView extends ConsumerWidget {
             codes: const ['breast_milk'],
           ),
         ] else ...[
-          _TodayPanel(
-            piringAsync: piringAsync,
-            onInfo: () => showPiringInfoSheet(
-              context,
-              profile: piringAsync.value?.profile,
+          SectionReveal(
+            child: _TodayPanel(
+              piringAsync: piringAsync,
+              onInfo: () => showPiringInfoSheet(
+                context,
+                profile: piringAsync.value?.profile,
+              ),
             ),
           ),
-          const SizedBox(height: AppSpacing.xxl),
+          const SizedBox(height: AppSpacing.lg),
+          const PiringTourCard(),
+          const SizedBox(height: AppSpacing.xs),
           _ChecklistHeader(
             onInfo: () => showPiringInfoSheet(
               context,
@@ -145,74 +159,110 @@ class _TodayPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: AppSurfaces.card(context),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PiringProgressRing(
-            met: met,
-            total: total,
-            size: 56,
-            strokeWidth: 8,
-            semanticsLabel: AppStrings.piringGroupsMetSemantics(met, total),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  hasLogs
-                      ? AppStrings.makanTodayProgress(met, total)
-                      : AppStrings.makanTodayEmpty,
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: colors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  piring.profile == null
-                      ? AppStrings.piringNoProfile
-                      : AppStrings.piringTargetNote(
-                          piring.profile!.targetGroups,
-                          breastMilkNotCounted:
-                              piring.profile!.countWithoutBreastMilk,
-                        ),
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Row(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              PiringProgressRing(
+                met: met,
+                total: total,
+                size: 60,
+                strokeWidth: 8,
+                semanticsLabel: AppStrings.piringGroupsMetSemantics(met, total),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      animalPresent
-                          ? Icons.check_circle_rounded
-                          : Icons.info_outline_rounded,
-                      size: 18,
-                      color: animalPresent ? colors.primary : colors.accent,
+                    Text(
+                      hasLogs
+                          ? AppStrings.makanTodayProgress(met, total)
+                          : AppStrings.makanTodayEmpty,
+                      style: AppTextStyles.titleMedium.copyWith(
+                        color: colors.textPrimary,
+                      ),
                     ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Expanded(
-                      child: Text(
-                        animalPresent
-                            ? AppStrings.piringAnimalProteinPresent
-                            : AppStrings.piringAnimalProteinMissing,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: colors.textSecondary,
-                        ),
+                    const SizedBox(height: 2),
+                    Text(
+                      piring.profile == null
+                          ? AppStrings.piringNoProfile
+                          : AppStrings.piringTargetNote(
+                              piring.profile!.targetGroups,
+                              breastMilkNotCounted:
+                                  piring.profile!.countWithoutBreastMilk,
+                            ),
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              IconButton(
+                tooltip: AppStrings.piringInfoOpenSemantics,
+                onPressed: onInfo,
+                icon: Icon(
+                  Icons.info_outline_rounded,
+                  color: colors.textSecondary,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: AppSpacing.xs),
-          IconButton(
-            tooltip: AppStrings.piringInfoOpenSemantics,
-            onPressed: onInfo,
-            icon: Icon(Icons.info_outline_rounded, color: colors.textSecondary),
+          const SizedBox(height: AppSpacing.md),
+          Divider(height: 1, thickness: 1, color: colors.outline),
+          const SizedBox(height: AppSpacing.md),
+          // Status selalu ikon + teks + warna; pita tonal hangat menandakan
+          // "belum ada" tanpa menilai anak.
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: animalPresent
+                        ? colors.primaryContainer
+                        : colors.accentContainer,
+                    borderRadius: BorderRadius.circular(AppRadius.card),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        animalPresent
+                            ? Icons.check_circle_rounded
+                            : Icons.info_outline_rounded,
+                        size: 16,
+                        color: animalPresent
+                            ? colors.primary
+                            : colors.onAccentContainer,
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Expanded(
+                        child: Text(
+                          animalPresent
+                              ? AppStrings.piringAnimalProteinPresent
+                              : AppStrings.piringAnimalProteinMissing,
+                          style: AppTextStyles.label.copyWith(
+                            color: animalPresent
+                                ? colors.primary
+                                : colors.onAccentContainer,
+                            fontSize: 11,
+                            height: 1.3,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

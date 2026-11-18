@@ -24,7 +24,11 @@ final _twoItemResult = const MealScanResult(
   isFood: true,
   imageQuality: MealScanImageQuality.ok,
   items: [
-    MealScanItem(name: 'Bubur nasi', groups: ['grains_tubers'], confidence: 0.9),
+    MealScanItem(
+      name: 'Bubur nasi',
+      groups: ['grains_tubers'],
+      confidence: 0.9,
+    ),
     MealScanItem(name: 'Hati ayam', groups: ['flesh'], confidence: 0.8),
   ],
 );
@@ -32,6 +36,13 @@ final _twoItemResult = const MealScanResult(
 Future<LocalPrefs> _prefs(Map<String, Object> values) async {
   SharedPreferences.setMockInitialValues(values);
   return LocalPrefs.load();
+}
+
+/// Panel kamera v2.2 lebih tinggi (ilustrasi + langkah + privasi), jadi CTA
+/// bisa berada di bawah lipatan pada viewport tes. Gulir dulu sebelum mengetuk.
+Future<void> _ensureVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
 }
 
 /// Pump harness yang membuka sheet hasil scan dengan satu tombol.
@@ -54,10 +65,8 @@ class _SheetHarness extends StatelessWidget {
                 isScrollControlled: true,
                 useSafeArea: true,
                 backgroundColor: Colors.transparent,
-                builder: (_) => MealScanResultSheet(
-                  result: result,
-                  childId: childId,
-                ),
+                builder: (_) =>
+                    MealScanResultSheet(result: result, childId: childId),
               ),
               child: const Text('buka-sheet'),
             ),
@@ -83,9 +92,7 @@ Future<void> _pumpHome(
     ProviderScope(
       overrides: [
         localPrefsProvider.overrideWithValue(prefs),
-        childRepositoryProvider.overrideWithValue(
-          FakeChildRepository([child]),
-        ),
+        childRepositoryProvider.overrideWithValue(FakeChildRepository([child])),
         growthRepositoryProvider.overrideWithValue(FakeGrowthRepository()),
         permenkesTablesProvider.overrideWith(
           (ref) => Future.value(const FakeAnthropometryTables()),
@@ -115,13 +122,13 @@ Future<void> _pumpSheet(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        localPrefsProvider.overrideWithValue(await _prefs({
-          'onboarding_completed': true,
-          'consent_version_accepted': '1',
-        })),
-        childRepositoryProvider.overrideWithValue(
-          FakeChildRepository([child]),
+        localPrefsProvider.overrideWithValue(
+          await _prefs({
+            'onboarding_completed': true,
+            'consent_version_accepted': '1',
+          }),
         ),
+        childRepositoryProvider.overrideWithValue(FakeChildRepository([child])),
         growthRepositoryProvider.overrideWithValue(FakeGrowthRepository()),
         permenkesTablesProvider.overrideWith(
           (ref) => Future.value(const FakeAnthropometryTables()),
@@ -142,24 +149,29 @@ Future<void> _pumpSheet(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('FAB "Foto makanan" tersembunyi untuk anak <6 bulan', (
-    tester,
-  ) async {
+  testWidgets('Panel kamera disembunyikan untuk anak <6 bulan', (tester) async {
     final child = fakeChild(
       birthDate: DateTime.now().subtract(const Duration(days: 60)),
     );
     await _pumpHome(tester, child: child);
-    expect(find.text(AppStrings.photoScanFab), findsNothing);
+
+    await tester.tap(find.text(AppStrings.navMakan));
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.capturePanelTitle), findsNothing);
+    expect(find.text(AppStrings.asiExclusiveTitle), findsOneWidget);
   });
 
-  testWidgets('FAB "Foto makanan" tampil dan membuka layar scan', (
-    tester,
-  ) async {
+  testWidgets('Panel kamera di Makan membuka layar scan', (tester) async {
     final child = fakeChild();
     await _pumpHome(tester, child: child);
-    expect(find.text(AppStrings.photoScanFab), findsOneWidget);
 
-    await tester.tap(find.text(AppStrings.photoScanFab));
+    await tester.tap(find.text(AppStrings.navMakan));
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.capturePanelTitle), findsOneWidget);
+
+    await _ensureVisible(tester, find.text(AppStrings.capturePanelCta));
+    await tester.tap(find.text(AppStrings.capturePanelCta));
     await tester.pumpAndSettle();
 
     // Di lingkungan test plugin kamera tidak tersedia → layar fallback.
@@ -173,8 +185,11 @@ void main() {
       final repo = FakeFoodLogRepository();
       await _pumpHome(tester, child: child, repo: repo);
 
-      // Buka pemindai → fallback kamera tampil.
-      await tester.tap(find.text(AppStrings.photoScanFab));
+      // Buka pemindai dari tab Makan → fallback kamera tampil.
+      await tester.tap(find.text(AppStrings.navMakan));
+      await tester.pumpAndSettle();
+      await _ensureVisible(tester, find.text(AppStrings.capturePanelCta));
+      await tester.tap(find.text(AppStrings.capturePanelCta));
       await tester.pumpAndSettle();
       expect(find.text(AppStrings.scanCameraUnavailableTitle), findsOneWidget);
 
@@ -200,7 +215,9 @@ void main() {
         find.byKey(const Key('manual-food-name')),
         'Bubur ayam',
       );
-      await tester.tap(find.byKey(const ValueKey('manual-food-group-grains_tubers')));
+      await tester.tap(
+        find.byKey(const ValueKey('manual-food-group-grains_tubers')),
+      );
       await tester.tap(find.byKey(const ValueKey('manual-food-group-flesh')));
       await tester.pumpAndSettle();
       save = tester.widget<FilledButton>(
@@ -225,12 +242,7 @@ void main() {
   testWidgets('sheet hasil: hapus item lalu simpan tercatat', (tester) async {
     final child = fakeChild();
     final repo = FakeFoodLogRepository();
-    await _pumpSheet(
-      tester,
-      result: _twoItemResult,
-      child: child,
-      repo: repo,
-    );
+    await _pumpSheet(tester, result: _twoItemResult, child: child, repo: repo);
 
     expect(find.text(AppStrings.scanSheetTitle), findsOneWidget);
     await tester.tap(find.byIcon(Icons.delete_outline_rounded).first);
@@ -242,10 +254,7 @@ void main() {
       const Offset(0, -160),
     );
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.text(AppStrings.scanSave),
-      warnIfMissed: false,
-    );
+    await tester.tap(find.text(AppStrings.scanSave), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     expect(find.text(AppStrings.scanSaveError), findsNothing);
@@ -261,12 +270,7 @@ void main() {
   ) async {
     final child = fakeChild();
     final repo = FakeFoodLogRepository();
-    await _pumpSheet(
-      tester,
-      result: _twoItemResult,
-      child: child,
-      repo: repo,
-    );
+    await _pumpSheet(tester, result: _twoItemResult, child: child, repo: repo);
 
     // Item baru tanpa kelompok -> Simpan tetap dinonaktifkan.
     // Gulir ke bawah terlebih dahulu agar kolom tambah item terlihat.
@@ -275,11 +279,11 @@ void main() {
       const Offset(0, -220),
     );
     await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byType(TextField).last,
-      'Pisang',
+    await tester.enterText(find.byType(TextField).last, 'Pisang');
+    await tester.tap(
+      find.text(AppStrings.scanAddItemButton),
+      warnIfMissed: false,
     );
-    await tester.tap(find.text(AppStrings.scanAddItemButton), warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('scan-item-card-2')), findsOneWidget);
     final disabledSave = tester.widget<FilledButton>(
@@ -319,10 +323,7 @@ void main() {
       const Offset(0, -160),
     );
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.text(AppStrings.scanSave),
-      warnIfMissed: false,
-    );
+    await tester.tap(find.text(AppStrings.scanSave), warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(repo.logCount, 1);
     final log = repo.logs(child.id).single;
@@ -330,6 +331,3 @@ void main() {
     expect(pisang.groups, ['other_fruit_veg']);
   });
 }
-
-
-

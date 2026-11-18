@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
+import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
@@ -19,6 +20,7 @@ import 'package:cekgizi/features/meals/domain/entities/meal_scan.dart';
 import 'package:cekgizi/features/meals/presentation/providers/scan_providers.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/manual_food_sheet.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/meal_scan_result_sheet.dart';
+import 'package:cekgizi/shared/illustrations/plate_viewfinder_illustration.dart';
 
 /// Layar scanner makanan (PRD §6.4): viewfinder berbentuk piring.
 ///
@@ -282,18 +284,25 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
                     _FullScreenCamera(controller: controller)
                   else
                     Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const CircularProgressIndicator(),
-                          const SizedBox(height: AppSpacing.md),
-                          Text(
-                            'Menyiapkan kamera…',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: colors.textSecondary,
+                      child: Semantics(
+                        label: AppStrings.scanPreparing,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const PlateViewfinderIllustration(size: 116),
+                            const SizedBox(height: AppSpacing.md),
+                            CircularProgressIndicator(
+                              color: colors.accent,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              AppStrings.scanPreparing,
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: colors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   if (cameraReady) ...[
@@ -381,18 +390,23 @@ class _PlateOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppTheme.colorsOf(context);
-    return IgnorePointer(
-      child: Center(
-        child: Container(
-          width: 280,
-          height: 280,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: colors.onPrimary.withValues(alpha: 0.85),
-              width: 3,
-            ),
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: Center(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final size = constraints.maxWidth < 340
+                  ? constraints.maxWidth - 32
+                  : 288.0;
+              return Semantics(
+                label: AppStrings.scanHint,
+                child: SizedBox(
+                  width: size,
+                  height: size,
+                  child: PlateViewfinderIllustration(size: size, onCamera: true),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -410,12 +424,18 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
     final textTheme = Theme.of(context).textTheme;
-    return Padding(
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.textPrimary.withValues(alpha: 0.3),
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(AppRadius.card),
+        ),
+      ),
       padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xs,
         AppSpacing.sm,
-        AppSpacing.xs,
+        AppSpacing.md,
         AppSpacing.sm,
+        AppSpacing.md,
       ),
       child: Row(
         children: [
@@ -472,12 +492,18 @@ class _BottomBar extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Align(
       alignment: Alignment.bottomCenter,
-      child: Padding(
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.textPrimary.withValues(alpha: 0.34),
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppRadius.card),
+          ),
+        ),
         padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
           AppSpacing.xl,
-          AppSpacing.xxl,
-          AppSpacing.xl,
-          AppSpacing.xxl,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -168,8 +168,7 @@ abstract final class AppStrings {
   static const growthMeasureMode = 'Cara ukur';
   static const growthMeasureModeLying = 'Terlentang';
   static const growthMeasureModeStanding = 'Berdiri';
-  static const growthMeasureModeLyingSemantics =
-      'Diukur terlentang (baring)';
+  static const growthMeasureModeLyingSemantics = 'Diukur terlentang (baring)';
   static const growthMeasureModeStandingSemantics = 'Diukur berdiri';
   static const growthMeasureNote = 'Catatan (opsional)';
   static const growthMeasureSave = 'Simpan pengukuran';
@@ -182,7 +181,8 @@ abstract final class AppStrings {
 
   // â”€â”€ Validasi ukur (PRD Â§5.1 skema: 1â€“30 kg, 35â€“130 cm, 0â€“60 bln) â”€â”€
   static const validationWeightRange = 'Berat harus antara 1 dan 30 kg.';
-  static const validationHeightRange = 'Panjang/tinggi harus antara 35 dan 130 cm.';
+  static const validationHeightRange =
+      'Panjang/tinggi harus antara 35 dan 130 cm.';
   static const validationDateFuture = 'Tanggal ukur tidak boleh di masa depan.';
   static const validationDateBeforeBirth =
       'Tanggal ukur tidak boleh sebelum anak lahir.';
@@ -228,8 +228,10 @@ abstract final class AppStrings {
   // â”€â”€ Piring Hari Ini (PRD Â§3.7, Â§6.3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const piringTitle = 'Piring Hari Ini';
   static const piringEmpty = 'Belum ada catatan makan hari ini.';
-  static const piringAnimalProteinMissing = 'Belum ada protein hewani hari ini.';
-  static const piringAnimalProteinPresent = 'Protein hewani sudah ada hari ini.';
+  static const piringAnimalProteinMissing =
+      'Belum ada protein hewani hari ini.';
+  static const piringAnimalProteinPresent =
+      'Protein hewani sudah ada hari ini.';
   static const piringLegendAnimal = 'Busur oranye menandai protein hewani.';
   static const piringTargetReached = 'Keragaman pangan hari ini tercapai';
   static const piringGroupsLabel = 'kelompok';
@@ -246,10 +248,12 @@ abstract final class AppStrings {
       'diversifikasi pangan bisa dimulai dengan pendampingan bidan atau ahli gizi.';
   static String piringGroupsMetSemantics(int met, int total) =>
       'Keragaman pangan hari ini: $met dari $total kelompok terisi.';
-  static String piringTargetNote(int target, {required bool breastMilkNotCounted}) =>
-      breastMilkNotCounted
-          ? 'Target hari ini: $target kelompok (ASI tidak dihitung).'
-          : 'Target hari ini: $target kelompok.';
+  static String piringTargetNote(
+    int target, {
+    required bool breastMilkNotCounted,
+  }) => breastMilkNotCounted
+      ? 'Target hari ini: $target kelompok (ASI tidak dihitung).'
+      : 'Target hari ini: $target kelompok.';
   static const heroAsiCta = 'Catat ASI';
 
   // â”€â”€ Kelompok pangan (PRD Â§3.7) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -271,48 +275,49 @@ abstract final class AppStrings {
   static const groupEggs = 'Telur';
   static const groupEggsExamples = 'Telur rebus, orak-arik';
   static const groupVitAFruitVeg = 'Buah & sayur vitamin A';
-  static const groupVitAFruitVegExamples = 'Wortel, labu, bayam, pepaya, mangga';
+  static const groupVitAFruitVegExamples =
+      'Wortel, labu, bayam, pepaya, mangga';
   static const groupOtherFruitVeg = 'Buah & sayur lainnya';
   static const groupOtherFruitVegExamples = 'Pisang, apel, kol, buncis';
 
   /// Label kelompok menurut kode resmi PRD Â§3.7 (dipakai tips & aksi).
   static String groupLabel(String code) => switch (code) {
-        'breast_milk' => 'ASI',
-        'grains_tubers' => groupGrainsTubers,
-        'legumes_nuts' => groupLegumesNuts,
-        'dairy' => groupDairy,
-        'flesh' => groupFlesh,
-        'eggs' => groupEggs,
-        'vit_a_fruit_veg' => groupVitAFruitVeg,
-        'other_fruit_veg' => groupOtherFruitVeg,
-        _ => code,
-      };
+    'breast_milk' => 'ASI',
+    'grains_tubers' => groupGrainsTubers,
+    'legumes_nuts' => groupLegumesNuts,
+    'dairy' => groupDairy,
+    'flesh' => groupFlesh,
+    'eggs' => groupEggs,
+    'vit_a_fruit_veg' => groupVitAFruitVeg,
+    'other_fruit_veg' => groupOtherFruitVeg,
+    _ => code,
+  };
 
   /// Label pendek untuk tombol aksi (muat di 360dp).
   static String groupShortLabel(String code) => switch (code) {
-        'breast_milk' => 'ASI',
-        'grains_tubers' => groupGrainsTubersShort,
-        'legumes_nuts' => groupLegumesNutsShort,
-        'dairy' => groupDairyShort,
-        'flesh' => groupFleshShort,
-        'eggs' => groupEggsShort,
-        'vit_a_fruit_veg' => groupVitAFruitVegShort,
-        'other_fruit_veg' => groupOtherFruitVegShort,
-        _ => code,
-      };
+    'breast_milk' => 'ASI',
+    'grains_tubers' => groupGrainsTubersShort,
+    'legumes_nuts' => groupLegumesNutsShort,
+    'dairy' => groupDairyShort,
+    'flesh' => groupFleshShort,
+    'eggs' => groupEggsShort,
+    'vit_a_fruit_veg' => groupVitAFruitVegShort,
+    'other_fruit_veg' => groupOtherFruitVegShort,
+    _ => code,
+  };
 
   /// Contoh makanan untuk satu kelompok (baris bantuan di checklist).
   static String groupExamples(String code) => switch (code) {
-        'breast_milk' => 'Cukup satu tanda untuk hari ini',
-        'grains_tubers' => groupGrainsTubersExamples,
-        'legumes_nuts' => groupLegumesNutsExamples,
-        'dairy' => groupDairyExamples,
-        'flesh' => groupFleshExamples,
-        'eggs' => groupEggsExamples,
-        'vit_a_fruit_veg' => groupVitAFruitVegExamples,
-        'other_fruit_veg' => groupOtherFruitVegExamples,
-        _ => '',
-      };
+    'breast_milk' => 'Cukup satu tanda untuk hari ini',
+    'grains_tubers' => groupGrainsTubersExamples,
+    'legumes_nuts' => groupLegumesNutsExamples,
+    'dairy' => groupDairyExamples,
+    'flesh' => groupFleshExamples,
+    'eggs' => groupEggsExamples,
+    'vit_a_fruit_veg' => groupVitAFruitVegExamples,
+    'other_fruit_veg' => groupOtherFruitVegExamples,
+    _ => '',
+  };
 
   // â”€â”€ Makan (PRD Â§6.4) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const makanTitle = 'Makan';
@@ -352,10 +357,9 @@ abstract final class AppStrings {
     String label,
     String examples,
     bool logged,
-  ) =>
-      logged
-          ? '$label, sudah tercatat. $examples'
-          : '$label, belum tercatat. $examples';
+  ) => logged
+      ? '$label, sudah tercatat. $examples'
+      : '$label, belum tercatat. $examples';
   static String makanChecklistActionSemantics(String label, bool logged) =>
       logged ? 'Hapus catatan $label' : 'Catat $label';
   static String makanChecklistCountSemantics(int met, int total) =>
@@ -370,7 +374,8 @@ abstract final class AppStrings {
       'Pilih waktu makan dan kelompok yang ada di piring.';
   static const catatMakanMealTypeLabel = 'Waktu makan';
   static const catatMakanGroupsLabel = 'Kelompok yang dimakan';
-  static const catatMakanGroupsHint = 'Pilih minimal satu. Boleh lebih dari satu.';
+  static const catatMakanGroupsHint =
+      'Pilih minimal satu. Boleh lebih dari satu.';
   static const catatMakanPortionLabel = 'Porsi (opsional)';
   static const catatMakanPortionHint =
       'Porsi hanya catatan kamu, bukan penilaian.';
@@ -445,10 +450,9 @@ abstract final class AppStrings {
     int met,
     int total,
     bool hasLogs,
-  ) =>
-      hasLogs
-          ? '$day, $met dari $total kelompok. Ketuk untuk melihat catatan.'
-          : '$day, belum ada catatan.';
+  ) => hasLogs
+      ? '$day, $met dari $total kelompok. Ketuk untuk melihat catatan.'
+      : '$day, belum ada catatan.';
   static String makanHistoryDayProgress(int met, int total) =>
       '$met dari $total kelompok';
   static const makanHistoryLegendLogged = 'Ada catatan';
@@ -468,10 +472,9 @@ abstract final class AppStrings {
   static String piringInfoTargetBody(
     int target, {
     required bool breastMilkNotCounted,
-  }) =>
-      breastMilkNotCounted
-          ? 'Target usia ini: minimal $target dari 7 kelompok. ASI tidak dihitung.'
-          : 'Target usia ini: minimal $target dari 8 kelompok.';
+  }) => breastMilkNotCounted
+      ? 'Target usia ini: minimal $target dari 7 kelompok. ASI tidak dihitung.'
+      : 'Target usia ini: minimal $target dari 8 kelompok.';
   static const piringInfoAsiTitle = 'ASI dicatat sekali';
   static const piringInfoAsiBody =
       'Cukup satu tanda untuk hari ini. Kamu tidak perlu menghitung berapa '
@@ -574,21 +577,20 @@ abstract final class AppStrings {
   static const portionMedium = 'Sedang';
   static const portionFinished = 'Habis';
   static String scanSheetError(String code) => switch (code) {
-        'quota_daily' =>
-          'Kuota analisis hari ini habis. Kamu masih bisa mencatat manual.',
-        'image_too_large' =>
-          'Foto terlalu besar. Coba lagi dengan cahaya terang di dekat jendela.',
-        'invalid_image' =>
-          'Foto tidak bisa dipakai. Coba foto ulang dengan cahaya cukup.',
-        'timeout' =>
-          'Prosesnya terlalu lama. Periksa koneksi internet kamu, lalu coba lagi.',
-        'ai_unavailable' => 'Layanan sedang sibuk, coba lagi sebentar.',
-        'offline' =>
-          'Tidak ada koneksi internet. Scan membutuhkan internet; kamu tetap bisa mencatat manual.',
-        'unauthorized' =>
-          'Sesi berakhir. Tutup lalu buka aplikasi lagi.',
-        _ => 'Layanan sedang sibuk, coba lagi sebentar.',
-      };
+    'quota_daily' =>
+      'Kuota analisis hari ini habis. Kamu masih bisa mencatat manual.',
+    'image_too_large' =>
+      'Foto terlalu besar. Coba lagi dengan cahaya terang di dekat jendela.',
+    'invalid_image' =>
+      'Foto tidak bisa dipakai. Coba foto ulang dengan cahaya cukup.',
+    'timeout' =>
+      'Prosesnya terlalu lama. Periksa koneksi internet kamu, lalu coba lagi.',
+    'ai_unavailable' => 'Layanan sedang sibuk, coba lagi sebentar.',
+    'offline' =>
+      'Tidak ada koneksi internet. Scan membutuhkan internet; kamu tetap bisa mencatat manual.',
+    'unauthorized' => 'Sesi berakhir. Tutup lalu buka aplikasi lagi.',
+    _ => 'Layanan sedang sibuk, coba lagi sebentar.',
+  };
 
   // â”€â”€ Tanya Gizi (PRD Â§6.7) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const tanyaEyebrow = 'EDUKASI GIZI UMUM';
@@ -635,18 +637,17 @@ abstract final class AppStrings {
   /// Kode dari Edge Function â†’ kalimat ramah (PRD Â§6.9). Tidak ada detail
   /// teknis yang bocor ke pengguna.
   static String tanyaError(String code) => switch (code) {
-        'quota_daily' =>
-          'Kuota Tanya Gizi hari ini habis. Kamu masih bisa melihat '
-              'Piring Hari Ini dan Tumbuh.',
-        'timeout' =>
-          'Prosesnya terlalu lama. Periksa koneksi internet kamu, lalu '
-              'coba lagi.',
-        'offline' =>
-          'Tidak ada koneksi internet. Tanya Gizi membutuhkan internet.',
-        'unauthorized' => 'Sesi berakhir. Tutup lalu buka aplikasi lagi.',
-        'invalid_input' => 'Pertanyaan tidak bisa diproses. Coba tulis ulang.',
-        _ => 'Layanan sedang sibuk, coba lagi sebentar.',
-      };
+    'quota_daily' =>
+      'Kuota Tanya Gizi hari ini habis. Kamu masih bisa melihat '
+          'Piring Hari Ini dan Tumbuh.',
+    'timeout' =>
+      'Prosesnya terlalu lama. Periksa koneksi internet kamu, lalu '
+          'coba lagi.',
+    'offline' => 'Tidak ada koneksi internet. Tanya Gizi membutuhkan internet.',
+    'unauthorized' => 'Sesi berakhir. Tutup lalu buka aplikasi lagi.',
+    'invalid_input' => 'Pertanyaan tidak bisa diproses. Coba tulis ulang.',
+    _ => 'Layanan sedang sibuk, coba lagi sebentar.',
+  };
 
   // Kartu safety (PRD Â§3.8, Â§6.7).
   static const tanyaSafetyReferTitle = 'Sebaiknya periksakan';
@@ -655,8 +656,7 @@ abstract final class AppStrings {
       'kesehatan. Hubungi Posyandu, puskesmas, atau dokter. Ini bukan '
       'diagnosis.';
   static const tanyaSafetyReferAck = 'Mengerti';
-  static const tanyaSafetyReferSemantics =
-      'Saran menghubungi tenaga kesehatan';
+  static const tanyaSafetyReferSemantics = 'Saran menghubungi tenaga kesehatan';
   static const tanyaSafetyEmergencyTitle = 'Ini darurat';
   static const tanyaSafetyEmergencyBody =
       'Segera bawa anak ke IGD terdekat atau hubungi 112. Jangan menunggu '
@@ -672,8 +672,13 @@ abstract final class AppStrings {
   // â”€â”€ Navigasi â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const navHome = 'Beranda';
   static const navMakan = 'Makan';
+  static const navRecipe = 'Resep';
   static const navGrowth = 'Tumbuh';
-  static const navTanya = 'Tanya';
+  static const navAccount = 'Akun';
+
+  /// Tanya Gizi bukan lagi tab - dibuka dari bubble mengambang.
+  static const tanyaBubbleLabel = 'Tanya gizi';
+  static const tanyaBubbleSemantics = 'Buka Tanya Gizi';
 
   // â”€â”€ Beranda â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const greetingMorning = 'Selamat pagi';
@@ -723,8 +728,6 @@ abstract final class AppStrings {
   static const statusOutOfRangeShort = 'Di luar rentang wajar';
 
   // ── Pengaturan & pengingat (PRD §6.8) ──────────────────────────────
-  static const settingsTitle = 'Pengaturan';
-  static const homeSettings = 'Pengaturan';
   static const settingsRemindersTitle = 'Pengingat';
   static const settingsReminderFootnote =
       'Pengingat default mati dan hanya tampil di perangkat ini. '
@@ -741,4 +744,54 @@ abstract final class AppStrings {
       'Izin notifikasi belum diberikan. Aktifkan dulu di pengaturan HP kamu.';
   static const settingsReminderSaveError =
       'Gagal menyimpan pengingat. Coba lagi.';
+
+  // ── Tanya Gizi — tombol tutup route penuh (dulu tab) ──────────────
+  static const tanyaClose = 'Tutup Tanya Gizi';
+
+  // ── Akun (tab kelima - PRD §6.8, §9.4) ────────────────────────────
+  static const accountEyebrow = 'AKUN';
+  static const accountTitle = 'Akun';
+  static const accountSubtitle = 'Profil anak dan pengingat di perangkat ini.';
+  static const accountChildSection = 'Profil anak';
+  static const accountChildManage = 'Kelola anak';
+  static const accountChildEmptyTitle = 'Belum ada anak';
+  static const accountChildEmptyBody =
+      'Tambahkan profil anak agar ringkasan dan pengingat bisa dipakai.';
+  static const accountChildEmptyCta = 'Tambah anak';
+  static const accountLocalNote =
+      'Data anak dan pengingat disimpan di perangkat ini. Kunci dan akun '
+      'akan hadir di pembaruan berikutnya.';
+  static const accountDisclaimerTitle = 'Tentang aplikasi';
+  static const accountDisclaimerBody =
+      'Alat bantu edukasi dan pemantauan gizi, bukan alat diagnosis. '
+      'Selalu konsultasikan tumbuh kembang anak ke tenaga kesehatan.';
+
+  // ── Resep (PRD §6.6) — katalog menunggu data tinjauan ahli gizi ────
+  static const recipesEyebrow = 'RESEP';
+  static const recipesTitle = 'Resep';
+  static const recipesSubtitle = 'Ide masakan rumahan sesuai usia anak.';
+  static const recipesPendingTitle = 'Katalog resep sedang disiapkan';
+  static const recipesPendingBody =
+      'Setiap resep ditinjau ahli gizi dan bidan lebih dulu agar porsi serta '
+      'bahannya sesuai usia anak. Kami tidak menampilkan resep sebelum '
+      'tinjauan itu selesai.';
+  static const recipesPendingNote =
+      'Sementara itu, kamu bisa mencatat makan anak di tab Makan.';
+
+  // ── Pemindai di tab Makan (PRD §6.4) ──────────────────────────────
+  static const capturePanelTitle = 'Kenali isi piring';
+  static const capturePanelBody =
+      'Foto piring anak, lalu periksa sendiri hasilnya sebelum disimpan.';
+  static const capturePanelCta = photoScanFab;
+  static const capturePanelSemantics =
+      'Kenali isi piring. Buka kamera untuk memotret makanan anak.';
+  static const startupLoading = 'Menyiapkan aplikasi…';
+  static const capturePanelEyebrow = 'FOTO PIRING';
+  static const capturePanelStepPhoto = 'Foto piring';
+  static const capturePanelStepRecognize = 'Dikenali AI';
+  static const capturePanelStepReview = 'Kamu periksa';
+  static const capturePanelPrivacy =
+      'Foto dihapus setelah dikenali. Tidak disimpan.';
+  static const capturePanelManualCta = 'Catat tanpa foto';
+  static const scanPreparing = 'Menyiapkan kamera…';
 }

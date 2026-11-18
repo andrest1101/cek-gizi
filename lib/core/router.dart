@@ -6,6 +6,7 @@ import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
+import 'package:cekgizi/features/account/presentation/screens/account_screen.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/children/presentation/screens/child_form_screen.dart';
 import 'package:cekgizi/features/children/presentation/screens/children_screen.dart';
@@ -16,7 +17,7 @@ import 'package:cekgizi/features/home/presentation/home_screen.dart';
 import 'package:cekgizi/features/meals/presentation/screens/makan_screen.dart';
 import 'package:cekgizi/features/meals/presentation/screens/scan_screen.dart';
 import 'package:cekgizi/features/onboarding/presentation/screens/onboarding_screen.dart';
-import 'package:cekgizi/features/settings/presentation/screens/settings_screen.dart';
+import 'package:cekgizi/features/recipes/presentation/screens/recipes_screen.dart';
 import 'package:cekgizi/features/chat/presentation/screens/tanya_screen.dart';
 import 'package:cekgizi/features/splash/presentation/screens/opening_screen.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
@@ -76,6 +77,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: '/scan',
         builder: (context, state) => const ScanScreen(),
       ),
+      // Tanya Gizi: layar penuh, dibuka dari bubble (bukan tab shell).
+      GoRoute(
+        path: '/tanya',
+        name: '/tanya',
+        builder: (context, state) => const TanyaScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -101,6 +108,15 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: '/recipes',
+                name: '/recipes',
+                builder: (context, state) => const RecipesScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: '/growth',
                 name: '/growth',
                 builder: (context, state) => const GrowthScreen(),
@@ -110,9 +126,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/tanya',
-                name: '/tanya',
-                builder: (context, state) => const TanyaScreen(),
+                path: '/account',
+                name: '/account',
+                builder: (context, state) => const AccountScreen(),
               ),
             ],
           ),
@@ -127,11 +143,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/consent',
         name: '/consent',
         builder: (context, state) => ConsentScreen(prefs: prefs),
-      ),
-      GoRoute(
-        path: '/settings',
-        name: '/settings',
-        builder: (context, state) => const SettingsScreen(),
       ),
       GoRoute(
         path: '/children',

@@ -16,6 +16,7 @@ import 'package:cekgizi/features/meals/presentation/providers/meals_providers.da
 import 'package:cekgizi/features/meals/presentation/widgets/food_log_list.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/month_calendar.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_ring.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/makan_header.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/week_strip.dart';
 import 'package:cekgizi/shared/illustrations/empty_plate_illustration.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
@@ -71,7 +72,11 @@ class MakanHistoryView extends ConsumerWidget {
         AppSpacing.screenPadding,
         AppSpacing.xxxl + AppSpacing.lg,
       ),
-      children: [body],
+      children: [
+        const MakanHeader(),
+        const SizedBox(height: AppSpacing.lg),
+        body,
+      ],
     );
   }
 }

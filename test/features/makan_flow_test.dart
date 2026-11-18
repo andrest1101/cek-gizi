@@ -71,9 +71,10 @@ Future<void> _pumpApp(
   required ChildProfile child,
   List<FoodLog> logs = const [],
 }) async {
-  SharedPreferences.setMockInitialValues(
-    {'onboarding_completed': true, 'consent_version_accepted': '1'},
-  );
+  SharedPreferences.setMockInitialValues({
+    'onboarding_completed': true,
+    'consent_version_accepted': '1',
+  });
   final prefs = await LocalPrefs.load();
 
   await tester.pumpWidget(
@@ -158,27 +159,28 @@ void main() {
     },
   );
 
-  testWidgets('aksi Urungkan pada snackbar menghapus catatan yang baru dibuat', (
-    tester,
-  ) async {
-    final child = fakeChild();
-    await _pumpApp(tester, child: child);
+  testWidgets(
+    'aksi Urungkan pada snackbar menghapus catatan yang baru dibuat',
+    (tester) async {
+      final child = fakeChild();
+      await _pumpApp(tester, child: child);
 
-    await tester.tap(find.text(AppStrings.navMakan));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text(AppStrings.navMakan));
+      await tester.pumpAndSettle();
 
-    await _scrollTo(tester, find.text(AppStrings.groupGrainsTubersShort));
-    await tester.tap(find.text(AppStrings.groupGrainsTubersShort));
-    await tester.pumpAndSettle();
-    // Urutkan dulu ke atas supaya diary kosong bisa diverifikasi.
-    expect(find.text(AppStrings.makanUndoAction), findsOneWidget);
-    await tester.tap(find.text(AppStrings.makanUndoAction));
-    await tester.pumpAndSettle();
+      await _scrollTo(tester, find.text(AppStrings.groupGrainsTubersShort));
+      await tester.tap(find.text(AppStrings.groupGrainsTubersShort));
+      await tester.pumpAndSettle();
+      // Urutkan dulu ke atas supaya diary kosong bisa diverifikasi.
+      expect(find.text(AppStrings.makanUndoAction), findsOneWidget);
+      await tester.tap(find.text(AppStrings.makanUndoAction));
+      await tester.pumpAndSettle();
 
-    // Tidak ada catatan tersisa.
-    await _scrollTo(tester, find.text(AppStrings.makanDiaryEmpty));
-    expect(find.text(AppStrings.makanDiaryEmpty), findsOneWidget);
-  });
+      // Tidak ada catatan tersisa.
+      await _scrollTo(tester, find.text(AppStrings.makanDiaryEmpty));
+      expect(find.text(AppStrings.makanDiaryEmpty), findsOneWidget);
+    },
+  );
 
   testWidgets('ASI: tombol Catat/Hapus ASI bekerja eksplisit', (tester) async {
     final child = fakeChild();
@@ -233,7 +235,9 @@ void main() {
     expect(find.text(AppStrings.makanAsiActionLog), findsOneWidget);
   });
 
-  testWidgets('tips hari ini tampil saat kelompok belum tercapai', (tester) async {
+  testWidgets('tips hari ini tampil saat kelompok belum tercapai', (
+    tester,
+  ) async {
     final child = fakeChild();
     await _pumpApp(
       tester,
@@ -276,6 +280,8 @@ void main() {
 
       await tester.tap(find.text(AppStrings.navMakan));
       await tester.pumpAndSettle();
+      // Panel kamera berada di atas panel ringkasan - gulir dulu.
+      await _scrollTo(tester, find.text(AppStrings.makanTodayProgress(1, 8)));
       expect(find.text(AppStrings.makanTodayProgress(1, 8)), findsOneWidget);
 
       await _scrollTo(tester, find.text(AppStrings.groupGrainsTubersShort));
@@ -301,54 +307,60 @@ void main() {
     },
   );
 
-  testWidgets('riwayat: catatan kemarin tampil dan tidak menomori target hari ini', (
-    tester,
-  ) async {
-    final child = fakeChild();
-    final yesterday = DateTime.now().subtract(const Duration(days: 1));
-    await _pumpApp(
-      tester,
-      child: child,
-      logs: [
-        fakeFoodLog(
-          id: 'yesterday-1',
-          childId: child.id,
-          eatenAt: yesterday,
-          groups: const ['eggs'],
-          items: const [
-            FoodLogItem(name: 'Telur dadar kemarin', groups: ['eggs']),
-          ],
+  testWidgets(
+    'riwayat: catatan kemarin tampil dan tidak menomori target hari ini',
+    (tester) async {
+      final child = fakeChild();
+      final yesterday = DateTime.now().subtract(const Duration(days: 1));
+      await _pumpApp(
+        tester,
+        child: child,
+        logs: [
+          fakeFoodLog(
+            id: 'yesterday-1',
+            childId: child.id,
+            eatenAt: yesterday,
+            groups: const ['eggs'],
+            items: const [
+              FoodLogItem(name: 'Telur dadar kemarin', groups: ['eggs']),
+            ],
+          ),
+        ],
+      );
+
+      await tester.tap(find.text(AppStrings.navMakan));
+      await tester.pumpAndSettle();
+
+      // Hari ini tetap kosong; catatan kemarin tidak masuk hitungan.
+      await _scrollTo(tester, find.text(AppStrings.makanTodayEmpty));
+      expect(find.text(AppStrings.makanTodayEmpty), findsOneWidget);
+      expect(find.text('0/8'), findsOneWidget);
+      // Item kemarin belum dibangun di bagian Hari ini.
+      expect(find.text('Telur dadar kemarin'), findsNothing);
+
+      // Buka Riwayat dan pilih kemarin di strip 7 hari.
+      // Segment berada di dalam daftar - gulir kembali ke atas dulu.
+      await _scrollTo(tester, find.text(AppStrings.makanSectionHistory));
+      await tester.tap(find.text(AppStrings.makanSectionHistory));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(AppStrings.makanHistoryDaysWithLogs(1, 30)),
+        findsOneWidget,
+      );
+      final yesterdayFinder = find.byKey(
+        ValueKey(
+          'week-day-${yesterday.year}-${yesterday.month}-${yesterday.day}',
         ),
-      ],
-    );
-
-    await tester.tap(find.text(AppStrings.navMakan));
-    await tester.pumpAndSettle();
-
-    // Hari ini tetap kosong; catatan kemarin tidak masuk hitungan.
-    expect(find.text(AppStrings.makanTodayEmpty), findsOneWidget);
-    expect(find.text('0/8'), findsOneWidget);
-    // Item kemarin belum dibangun di bagian Hari ini.
-    expect(find.text('Telur dadar kemarin'), findsNothing);
-
-    // Buka Riwayat dan pilih kemarin di strip 7 hari.
-    await tester.tap(find.text(AppStrings.makanSectionHistory));
-    await tester.pumpAndSettle();
-    expect(
-      find.text(AppStrings.makanHistoryDaysWithLogs(1, 30)),
-      findsOneWidget,
-    );
-    final yesterdayFinder = find.byKey(
-      ValueKey('week-day-${yesterday.year}-${yesterday.month}-${yesterday.day}'),
-    );
-    await tester.ensureVisible(yesterdayFinder);
-    await tester.pumpAndSettle();
-    await tester.tap(yesterdayFinder);
-    await tester.pumpAndSettle();
-    expect(find.text('Telur dadar kemarin'), findsOneWidget);
-    // Kemarin ditandai sebagai hari di luar hari ini.
-    expect(find.text(AppStrings.makanYesterday), findsWidgets);
-  });
+      );
+      await tester.ensureVisible(yesterdayFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(yesterdayFinder);
+      await tester.pumpAndSettle();
+      expect(find.text('Telur dadar kemarin'), findsOneWidget);
+      // Kemarin ditandai sebagai hari di luar hari ini.
+      expect(find.text(AppStrings.makanYesterday), findsWidgets);
+    },
+  );
 
   testWidgets('usia 24–59 bulan: semesta 7 kelompok & ASI jadi sekunder', (
     tester,
@@ -356,13 +368,7 @@ void main() {
     final child = fakeChild(
       birthDate: DateTime.now().subtract(const Duration(days: 900)),
     );
-    const groups = [
-      'grains_tubers',
-      'legumes_nuts',
-      'dairy',
-      'flesh',
-      'eggs',
-    ];
+    const groups = ['grains_tubers', 'legumes_nuts', 'dairy', 'flesh', 'eggs'];
     await _pumpApp(
       tester,
       child: child,
@@ -381,6 +387,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Semesta target 7 (tanpa ASI), bukan 8.
+    await _scrollTo(tester, find.text(AppStrings.makanTodayProgress(5, 7)));
     expect(find.text(AppStrings.makanTodayProgress(5, 7)), findsOneWidget);
     await _scrollTo(tester, find.text(AppStrings.makanAsiSecondaryNote));
     expect(find.text(AppStrings.makanAsiSecondaryNote), findsOneWidget);
@@ -399,13 +406,7 @@ void main() {
     tester,
   ) async {
     final child = fakeChild();
-    const groups = [
-      'grains_tubers',
-      'legumes_nuts',
-      'dairy',
-      'flesh',
-      'eggs',
-    ];
+    const groups = ['grains_tubers', 'legumes_nuts', 'dairy', 'flesh', 'eggs'];
     await _pumpApp(
       tester,
       child: child,
@@ -516,13 +517,17 @@ void main() {
     await tester.tap(find.text(AppStrings.navMakan));
     await tester.pumpAndSettle();
 
+    // Tur kini berada di bawah panel ringkasan, bukan di paling atas.
+    await _scrollTo(tester, find.text(AppStrings.piringTourTitle));
     expect(find.text(AppStrings.piringTourTitle), findsOneWidget);
     await tester.tap(find.text(AppStrings.piringTourDismiss));
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.piringTourTitle), findsNothing);
   });
 
-  testWidgets('beranda: strip 7 hari menautkan ke riwayat Makan', (tester) async {
+  testWidgets('beranda: strip 7 hari menautkan ke riwayat Makan', (
+    tester,
+  ) async {
     final child = fakeChild();
     await _pumpApp(
       tester,
@@ -545,6 +550,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(AppStrings.makanHistorySummaryTitle), findsOneWidget);
-    expect(find.text(AppStrings.makanHistoryDaysWithLogs(1, 30)), findsOneWidget);
+    expect(
+      find.text(AppStrings.makanHistoryDaysWithLogs(1, 30)),
+      findsOneWidget,
+    );
   });
 }
