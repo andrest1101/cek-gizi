@@ -115,7 +115,7 @@ void main() {
       );
       expect(tester.takeException(), isNull);
 
-      await tester.tap(find.text(AppStrings.navTanya));
+      await tester.tap(find.text(AppStrings.tanyaBubbleLabel));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
@@ -281,7 +281,13 @@ void main() {
           }),
         );
 
-        await tester.tap(find.byTooltip(AppStrings.homeManageChild));
+        // Kelola anak kini dibuka dari tab Akun (header Beranda tidak lagi
+        // menyimpan tombol ini).
+        await tester.tap(find.text(AppStrings.navAccount));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        await tester.tap(find.text(AppStrings.accountChildManage));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         expect(find.text(AppStrings.childListTitle), findsOneWidget);
@@ -303,32 +309,48 @@ void main() {
       },
     );
 
-    testWidgets(
-      'Pengaturan (pengingat) muat di 360dp @1.3 (${brightness.name})',
-      (tester) async {
-        useSmallScreen(tester, brightness);
-        await pumpApp(
-          tester,
-          await prefsFor({
-            'onboarding_completed': true,
-            'consent_version_accepted': '1',
-          }),
-        );
+    testWidgets('Akun (profil + pengingat) & Resep muat di 360dp @1.3 '
+        '(${brightness.name})', (tester) async {
+      useSmallScreen(tester, brightness);
+      await pumpApp(
+        tester,
+        await prefsFor({
+          'onboarding_completed': true,
+          'consent_version_accepted': '1',
+        }),
+      );
 
-        await tester.tap(find.byTooltip(AppStrings.homeSettings));
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-        expect(find.text(AppStrings.settingsRemindersTitle), findsOneWidget);
-        expect(
-          find.text(AppStrings.settingsReminderMonthlyTitle),
-          findsOneWidget,
-        );
-        expect(
-          find.text(AppStrings.settingsReminderDailyTitle),
-          findsOneWidget,
-        );
-        expect(find.text(AppStrings.settingsReminderFootnote), findsOneWidget);
-      },
-    );
+      await tester.tap(find.text(AppStrings.navAccount));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text(AppStrings.accountChildSection), findsOneWidget);
+      expect(find.text(AppStrings.settingsRemindersTitle), findsOneWidget);
+      expect(
+        find.text(AppStrings.settingsReminderMonthlyTitle),
+        findsOneWidget,
+      );
+      expect(find.text(AppStrings.settingsReminderDailyTitle), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text(AppStrings.settingsReminderFootnote),
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const Key('account-list')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+        maxScrolls: 40,
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text(AppStrings.settingsReminderFootnote), findsOneWidget);
+
+      // Tab Resep: empty state jujur (katalog belum dirilis).
+      await tester.tap(find.text(AppStrings.navRecipe));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text(AppStrings.recipesPendingTitle), findsOneWidget);
+    });
   }
 }

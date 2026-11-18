@@ -22,9 +22,10 @@ Future<void> _pumpApp(
   required ChildProfile child,
   required FakeChatRepository chatRepo,
 }) async {
-  SharedPreferences.setMockInitialValues(
-    {'onboarding_completed': true, 'consent_version_accepted': '1'},
-  );
+  SharedPreferences.setMockInitialValues({
+    'onboarding_completed': true,
+    'consent_version_accepted': '1',
+  });
   final prefs = await LocalPrefs.load();
 
   await tester.pumpWidget(
@@ -49,23 +50,37 @@ Future<void> _pumpApp(
 }
 
 Future<void> _openTanya(WidgetTester tester) async {
-  await tester.tap(find.text(AppStrings.navTanya));
+  await tester.tap(find.text(AppStrings.tanyaBubbleLabel));
   await tester.pumpAndSettle();
 }
 
 /// Chip pertanyaan berada di bawah fold saat viewport pendek - gulir dulu.
+///
+/// `scrollUntilVisible` berhenti begitu widget *terbangun* (masuk cache
+/// extent), padahal masih bisa berada di bawah viewport dan tertutup bilah
+/// input. Karena itu posisi chip diverifikasi terhadap rect viewport.
 Future<void> _scrollToChip(WidgetTester tester, String chipText) async {
   final list = find.descendant(
     of: find.byKey(const Key('tanya-empty-list')),
     matching: find.byType(Scrollable),
   );
-  await tester.scrollUntilVisible(
-    find.text(chipText),
-    160,
-    scrollable: list,
-    maxScrolls: 20,
-  );
-  await tester.tap(find.text(chipText));
+  final viewport = tester.getRect(list);
+  final chip = find.text(chipText);
+
+  // Kembali ke puncak dulu supaya arah gulir selalu konsisten.
+  await tester.drag(list, const Offset(0, 2000));
+  await tester.pumpAndSettle();
+
+  for (var i = 0; i < 20; i++) {
+    if (tester.any(chip)) {
+      final rect = tester.getRect(chip);
+      if (rect.top >= viewport.top && rect.bottom <= viewport.bottom) break;
+    }
+    await tester.drag(list, const Offset(0, -80));
+    await tester.pumpAndSettle();
+  }
+
+  await tester.tap(chip);
   await tester.pumpAndSettle();
 }
 
@@ -81,10 +96,7 @@ void main() {
     await _openTanya(tester);
 
     expect(find.text(AppStrings.tanyaEmptyTitle), findsOneWidget);
-    expect(
-      find.text(AppStrings.tanyaQuotaRemaining(27)),
-      findsOneWidget,
-    );
+    expect(find.text(AppStrings.tanyaQuotaRemaining(27)), findsOneWidget);
 
     await _scrollToChip(tester, AppStrings.tanyaChipMpasi);
     await tester.pumpAndSettle();
@@ -98,9 +110,7 @@ void main() {
     expect(find.text('Bagaimana dengan susu?'), findsOneWidget);
   });
 
-  testWidgets('Tanya: menulis pertanyaan manual lalu mengirim', (
-    tester,
-  ) async {
+  testWidgets('Tanya: menulis pertanyaan manual lalu mengirim', (tester) async {
     final child = fakeChild();
     final chatRepo = FakeChatRepository();
     await _pumpApp(tester, child: child, chatRepo: chatRepo);
@@ -258,9 +268,10 @@ void main() {
   testWidgets('Tanya: tanpa anak, input disembunyikan dan CTA tampil', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues(
-      {'onboarding_completed': true, 'consent_version_accepted': '1'},
-    );
+    SharedPreferences.setMockInitialValues({
+      'onboarding_completed': true,
+      'consent_version_accepted': '1',
+    });
     final prefs = await LocalPrefs.load();
     final chatRepo = FakeChatRepository();
 
