@@ -763,3 +763,36 @@ Kepala Makan (tanggal, judul, ganti anak, segmen Hari ini/Riwayat) disematkan di
 - `flutter test` → **293/293 passed**.
 - Perilaku: kepala hilang dari layar saat menggulir (identik dengan Beranda).
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-4 — Beranda & Tumbuh: 3 blok berhierarki (2026-11-18)
+
+### Ruang lingkup
+Perbaikan struktur & presentasi sesuai pemetaan UX-4. **Tidak ada aturan gizi, angka, atau resep baru** — semua nilai tetap berasal dari domain (`PiringDay`, `GrowthSummary`, `GrowthStatusCopy`).
+
+### Beranda
+1. `PiringHeroCard`: hero tetap satu per layar (ring + angka dominan), kini ditambah **2 ubin metrik berdampingan** di dalam permukaan yang sama, dipisah hairline: protein hewani (ikon+teks, pindah dari status line) dan tren berat (`GrowthSummary.weightDeltaOf`; "Belum ada ukuran" bila kosong).
+2. Identitas anak pindah ke header sebagai `ChildSwitcherButton` — `ChildSwitcherCard` tidak dipakai lagi di Beranda.
+3. `HomeWeekChips` (baru): strip 7 hari jadi **pil horizontal** yang bisa digeser; `WeekStrip` grid tetap dipakai di Riwayat Makan. `openWeekHistory()` diekstrak agar kedua pintu memakai satu logika.
+4. `PiringTipsCard`: bukan kartu/sunken lagi — jadi satu baris ringkas (maks 2 baris + aksi inline) yang ditempatkan sebagai `footer` di dalam `GrowthStatusCard`. Hasilnya 3 blok: **Fokus hari ini → Minggu ini → Tumbuh ringkas**.
+
+### Tumbuh
+1. `ZScoreSummaryStrip` (baru): tiga ubin (Tinggi, Berat, BB/TB) memuat z-score + status ikon/teks/warna, **sekaligus pemilih indeks grafik** — menggantikan `SegmentControl` terpisah.
+2. `GrowthChartCard` jadi **full-bleed** (menyentuh tepi layar; hairline atas/bawah, tanpa kartu melayang). Blok lain dibungkus padding 20dp.
+3. Riwayat pengukuran jadi **accordion kustom** (`Semantics(expanded:)`, `AnimatedSize`, hormati `AppMotion.of`): ringkasan + status selalu terlihat, z-score & aksi edit/hapus dibuka saat diketuk. `ExpansionTile` tidak dipakai karena memicu assert semantics pada Flutter 3.32.8.
+
+### Perubahan tes
+- `makan_flow_test`: `_berandaScrollable` mengambil `Scrollable` pertama karena Beranda kini punya daftar vertikal + strip horizontal; tes riwayat menggulir ke segmen sebelum mengetuk.
+- `growth_flow_test`: gulir ke grafik/ubin/riwayat sebelum berinteraksi karena konten lebih tinggi.
+- `layout_scale_test`: tinggi chip minggu dinaikkan (88dp) agar aman 360dp @1,3.
+- `test/features/ux4_layout_test.dart` (baru, 2 tes): struktur 3 blok Beranda & perilaku accordion Tumbuh.
+
+### Dependency baru
+**Tidak ada.**
+
+### Verifikasi (2026-11-18)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **295/295 passed** (baseline 293; +2 tes UX-4).
+- `flutter build apk --debug` → **✓ Built**.
+- DoD §10.1: gradien 0; `Colors.*` (selain `transparent`) di `lib/features` + `lib/shared` = 0.
+- Layout 360dp @1.3 light + dark: Beranda & Tumbuh tanpa overflow.
+- Commit belum dijalankan (manual oleh pemilik).

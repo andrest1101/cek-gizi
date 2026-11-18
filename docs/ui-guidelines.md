@@ -137,9 +137,11 @@ bukan file gambar raster. `PlateViewfinderIllustration` punya dua mode:
 
 ## 8. Pola per layar
 
-- **Beranda**: sapaan + anak aktif, lalu `PiringHeroCard` (hero hijau,
-  satu angka dominan 40dp), status protein hewani, tips, ringkasan tumbuh.
-  Header tidak menyimpan aksi (kelola anak & pengaturan pindah ke Akun).
+- **Beranda** (v2.3): sapaan + `ChildSwitcherButton` di header, lalu **3 blok**:
+  (1) `PiringHeroCard` — hero hijau, satu angka dominan 40dp + dua ubin metrik
+  (protein hewani & tren berat) dipisah hairline; (2) `HomeWeekChips` — pil
+  horizontal yang bisa digeser; (3) `GrowthStatusCard` dengan tips sebagai
+  satu baris di dalamnya. Header tidak menyimpan aksi kelola/pengaturan.
 - **Makan**: header (tanggal + judul + ganti anak + segmen Hari
   ini/Riwayat) **ikut menggulir** di dalam daftar — tidak disematkan di atas
   layar. Lalu `CapturePanel` (viewfinder + 3 langkah + privasi + CTA + pintu
@@ -147,7 +149,9 @@ bukan file gambar raster. `PlateViewfinderIllustration` punya dua mode:
   catatan hari ini. Pita protein hewani memakai `accentContainer` bila belum
   ada, `primaryContainer` bila sudah ada — selalu ikon + teks.
 - **Resep**: empty state jujur sampai `recipes.json` tersedia.
-- **Tumbuh**: input pengukuran + grafik pita SD + tabel z-score.
+- **Tumbuh** (v2.3): ringkasan `ZScoreSummaryStrip` (3 ubin, sekaligus
+  pemilih indeks) → grafik pita SD **full-bleed** → riwayat berbentuk
+  accordion (ringkasan selalu tampil, z-score & aksi dibuka saat diketuk).
 - **Akun**: profil anak (kelola anak), pengingat lokal, catatan privasi.
 - **Tanya**: banner disclaimer tetap, area pesan, input bar, chip cepat.
 
