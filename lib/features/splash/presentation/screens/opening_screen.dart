@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -43,6 +44,7 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen>
   static const Duration _fallbackDelay = Duration(seconds: 20);
 
   late final AnimationController _controller;
+  AudioPlayer? _player;
   bool _animationDone = false;
   bool _backendDone = false;
   bool _navigated = false;
@@ -64,7 +66,18 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen>
   void dispose() {
     _fallback?.cancel();
     _controller.dispose();
+    unawaited(_disposePlayer());
     super.dispose();
+  }
+
+  Future<void> _disposePlayer() async {
+    final player = _player;
+    _player = null;
+    try {
+      await player?.dispose();
+    } catch (_) {
+      // abaikan - pemain audio gagal dilepas bukan alasan app crash
+    }
   }
 
   void _startOpening() {
@@ -118,6 +131,21 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen>
     _maybeGo();
   }
 
+  /// Suara khas logo — diputar bersamaan dengan animasi Lottie.
+  /// Reduce-motion tidak memutar suara; kegagalan audio diabaikan (bisu).
+  Future<void> _playLogoSound(bool reduceMotion) async {
+    if (reduceMotion) return;
+    try {
+      final player = AudioPlayer();
+      _player = player;
+      await player.setReleaseMode(ReleaseMode.stop);
+      await player.setVolume(0.35);
+      await player.play(AssetSource('audio/cek-gizi_audio.wav'));
+    } catch (_) {
+      // bisu - splash tetap berjalan
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
@@ -159,6 +187,7 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen>
                           _animationDone = true;
                           _maybeGo();
                         } else {
+                          unawaited(_playLogoSound(reduceMotion));
                           unawaited(_play());
                         }
                       },
