@@ -8,6 +8,7 @@ import 'package:cekgizi/core/theme/app_motion.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/meals/presentation/providers/makan_section.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/tanya_bubble.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/makan_history_view.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/makan_today_view.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
@@ -23,6 +24,7 @@ class MakanScreen extends ConsumerWidget {
     final child = ref.watch(selectedChildProvider).value;
 
     return Scaffold(
+      floatingActionButton: const TanyaBubble(),
       body: SafeArea(
         child: child == null ? const _NoChild() : _MakanBody(child: child),
       ),

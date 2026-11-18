@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import 'package:cekgizi/core/time/clock.dart';
 import 'package:cekgizi/core/time/local_dates.dart';
-import 'package:cekgizi/features/chat/presentation/widgets/tanya_bubble.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/home/presentation/widgets/app_nav_bar.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
@@ -81,7 +80,6 @@ class _AppShellState extends ConsumerState<AppShell>
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.navigationShell,
-      floatingActionButton: const TanyaBubble(),
       bottomNavigationBar: AppNavBar(
         currentIndex: widget.navigationShell.currentIndex,
         onSelected: (index) => widget.navigationShell.goBranch(

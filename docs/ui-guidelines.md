@@ -107,7 +107,9 @@ Kedalaman berasal dari perbedaan tone 1 langkah + hairline, bukan shadow.
 - `AppNavBar` kustom: permukaan `surface`, tanpa garis atas, pil tonal
   (`primaryContainer`) di destinasi aktif, ikon 19dp, label selalu tampil.
 - Tanya Gizi **bukan tab**. Pintunya `TanyaBubble` — pil berlabel
-  "Tanya gizi" di kanan bawah, mengambang di semua tab. Tanya adalah route
+  "Tanya gizi" **di kanan bawah tiap tab** (`floatingActionButton` di Scaffold
+  tiap tab, bukan di shell) — sehingga semua modal bottom sheet otomatis
+  menutupinya. Tanya adalah route
   penuh dengan tombol tutup eksplisit.
 - Kamera **bukan FAB global**. Pintunya `CapturePanel` di tab Makan (usia
   ≥ 6 bulan), membuka `/scan`.
