@@ -98,15 +98,30 @@ void main() {
     await tester.tap(find.text(AppStrings.navGrowth));
     await tester.pumpAndSettle();
 
+    // Ringkasan z-score + grafik kini berada lebih jauh di bawah lipatan.
+    final growthList = find.byKey(const Key('growth-list'));
+    final growthScroll = find.descendant(
+      of: growthList,
+      matching: find.byType(Scrollable),
+    );
+    await tester.drag(growthList, const Offset(0, -300));
+    await tester.pumpAndSettle();
     expect(find.text(AppStrings.growthChartTitle), findsOneWidget);
 
-    // Ganti indeks grafik ke Berat/Umur.
-    await tester.tap(find.text(AppStrings.growthTabWeightShort));
+    // Ganti indeks grafik ke Berat/Umur lewat ubin ringkasan (di atas grafik).
+    final weightTile = find.text(AppStrings.growthTabWeightShort);
+    await tester.scrollUntilVisible(
+      weightTile,
+      -120,
+      scrollable: growthScroll,
+    );
     await tester.pumpAndSettle();
-    expect(find.text(AppStrings.growthTabWeightShort), findsOneWidget);
+    await tester.tap(weightTile);
+    await tester.pumpAndSettle();
+    expect(weightTile, findsOneWidget);
 
     // Scroll daftar ke riwayat (tile berada di bawah lipatan 600dp).
-    await tester.drag(find.byType(ListView), const Offset(0, -600));
+    await tester.drag(growthList, const Offset(0, -600));
     await tester.pumpAndSettle();
     expect(find.text('8,2 kg · 72,0 cm'), findsOneWidget);
   });
