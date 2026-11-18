@@ -11,6 +11,7 @@ import 'package:cekgizi/core/time/clock.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/meals/domain/services/piring_day.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
+import 'package:cekgizi/features/meals/presentation/widgets/capture_panel.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/catat_makan_sheet.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/food_group_checklist.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/food_group_logo.dart';
@@ -49,6 +50,10 @@ class MakanTodayView extends ConsumerWidget {
         AppSpacing.xxxl + AppSpacing.lg,
       ),
       children: [
+        if (!isUnderSixMonths) ...[
+          const CapturePanel(),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         const PiringTourCard(),
         if (isUnderSixMonths) ...[
           const _AsiExclusiveCard(),

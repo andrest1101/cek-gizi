@@ -13,11 +13,16 @@ class Skeleton extends StatelessWidget {
     this.width,
     this.height = 16,
     this.radius = AppRadius.control,
+    this.color,
   });
 
   final double? width;
   final double height;
   final double radius;
+
+  /// Warna blok; default `surfaceVariant`. Di atas permukaan hero pakai
+  /// `heroTrack` agar tetap terbaca.
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +32,7 @@ class Skeleton extends StatelessWidget {
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: colors.surfaceVariant,
+          color: color ?? colors.surfaceVariant,
           borderRadius: BorderRadius.circular(radius),
         ),
       ),

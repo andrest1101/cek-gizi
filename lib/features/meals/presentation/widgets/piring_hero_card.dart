@@ -15,11 +15,11 @@ import 'package:cekgizi/features/meals/presentation/widgets/food_group_logo.dart
 import 'package:cekgizi/features/meals/presentation/widgets/piring_ring.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 
-/// Kartu hero "Piring Hari Ini" di Beranda (PRD §6.3) - satu-satunya
-/// permukaan solid berwarna (`primaryContainer`, §7.1).
+/// Kartu hero "Piring Hari Ini" di Beranda (PRD §6.3).
 ///
-/// Susunan: eyebrow + badge → ring besar dengan jumlah di tengah →
-/// satu kalimat status + catatan target usia → CTA utama ke Makan.
+/// Satu-satunya permukaan solid berwarna di layar ini: hijau tua dengan teks
+/// `onHeroSurface`. Susunan: eyebrow → ring besar dengan angka dominan →
+/// status protein hewani → catatan target → CTA utama ke Makan.
 /// Usia <6 bulan menampilkan versi ASI eksklusif (tanpa ring).
 class PiringHeroCard extends ConsumerWidget {
   const PiringHeroCard({super.key});
@@ -74,41 +74,42 @@ class _PiringContent extends StatelessWidget {
             child: Text(
               AppStrings.piringTitle.toUpperCase(),
               style: AppTextStyles.label.copyWith(
-                color: colors.primary,
+                color: colors.onHeroSurfaceMuted,
                 letterSpacing: 1.2,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.md),
           Center(
             child: PiringRing(
               met: piring.countedGroups,
               codes: piring.targetCodes,
-              size: 196,
-              strokeWidth: 18,
+              size: 188,
+              strokeWidth: 16,
+              onHero: true,
               semanticsLabel: AppStrings.piringGroupsMetSemantics(met, total),
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
           if (piring.logs.isEmpty)
             _StatusLine(
               icon: Icons.restaurant_rounded,
-              color: colors.textSecondary,
+              color: colors.onHeroSurfaceMuted,
               text: AppStrings.piringEmpty,
               muted: true,
             )
           else if (reached)
             _StatusLine(
               icon: Icons.check_circle_rounded,
-              color: colors.primary,
+              color: colors.onHeroSurface,
               text: AppStrings.piringTargetReached,
               bold: true,
             )
           else
             _StatusLine(
               icon: Icons.donut_small_rounded,
-              color: colors.primary,
+              color: colors.onHeroSurface,
               text: AppStrings.makanTodayProgress(met, total),
             ),
           const SizedBox(height: AppSpacing.xs),
@@ -116,7 +117,7 @@ class _PiringContent extends StatelessWidget {
             icon: animalPresent
                 ? Icons.check_circle_outline_rounded
                 : Icons.info_outline_rounded,
-            color: animalPresent ? colors.primary : colors.accent,
+            color: animalPresent ? colors.onHeroSurface : colors.onHeroAccent,
             text: animalPresent
                 ? AppStrings.piringAnimalProteinPresent
                 : AppStrings.piringAnimalProteinMissing,
@@ -125,9 +126,8 @@ class _PiringContent extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Text(
               AppStrings.piringLegendAnimal,
-              textAlign: TextAlign.center,
               style: AppTextStyles.label.copyWith(
-                color: colors.textSecondary,
+                color: colors.onHeroSurfaceMuted,
                 fontSize: 11,
                 height: 1.3,
               ),
@@ -142,9 +142,8 @@ class _PiringContent extends StatelessWidget {
                     breastMilkNotCounted:
                         piring.profile!.countWithoutBreastMilk,
                   ),
-            textAlign: TextAlign.center,
             style: AppTextStyles.label.copyWith(
-              color: colors.textSecondary,
+              color: colors.onHeroSurfaceMuted,
               fontSize: 11,
               height: 1.3,
             ),
@@ -152,6 +151,10 @@ class _PiringContent extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           FilledButton.icon(
             onPressed: () => context.go('/makan'),
+            style: FilledButton.styleFrom(
+              backgroundColor: colors.onHeroSurface,
+              foregroundColor: colors.heroSurface,
+            ),
             icon: const Icon(Icons.add_rounded),
             label: const Text(AppStrings.piringCta),
           ),
@@ -180,16 +183,15 @@ class _StatusLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 18, color: color),
         const SizedBox(width: AppSpacing.xs),
-        Flexible(
+        Expanded(
           child: Text(
             text,
-            textAlign: TextAlign.center,
             style: AppTextStyles.bodySmall.copyWith(
-              color: muted ? colors.textSecondary : colors.textPrimary,
+              color: muted ? colors.onHeroSurfaceMuted : colors.onHeroSurface,
               fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
             ),
           ),
@@ -204,24 +206,30 @@ class _PiringSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: AppSurfaces.hero(
         context,
         radius: AppRadius.card + AppSpacing.xs,
       ),
-      child: const Column(
+      child: Column(
         children: [
           Align(
             alignment: Alignment.centerLeft,
-            child: Skeleton(width: 140, height: 12),
+            child: Skeleton(width: 140, height: 12, color: colors.heroTrack),
           ),
-          SizedBox(height: AppSpacing.lg),
-          Skeleton(width: 190, height: 190, radius: 95),
-          SizedBox(height: AppSpacing.md),
-          Skeleton(width: 220, height: 16),
-          SizedBox(height: AppSpacing.md),
-          Skeleton(height: 48),
+          const SizedBox(height: AppSpacing.lg),
+          Skeleton(
+            width: 188,
+            height: 188,
+            radius: 94,
+            color: colors.heroTrack,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Skeleton(width: 220, height: 16, color: colors.heroTrack),
+          const SizedBox(height: AppSpacing.md),
+          Skeleton(height: 48, color: colors.heroTrack),
         ],
       ),
     );
@@ -244,15 +252,21 @@ class _PiringError extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(Icons.cloud_off_rounded, color: colors.primary),
+          Icon(Icons.cloud_off_rounded, color: colors.onHeroSurface),
           const SizedBox(height: AppSpacing.sm),
           Text(
             AppStrings.makanLoadError,
             textAlign: TextAlign.center,
-            style: AppTextStyles.bodySmall.copyWith(color: colors.primary),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: colors.onHeroSurface,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          TextButton(onPressed: onRetry, child: const Text(AppStrings.retry)),
+          TextButton(
+            onPressed: onRetry,
+            style: TextButton.styleFrom(foregroundColor: colors.onHeroSurface),
+            child: const Text(AppStrings.retry),
+          ),
         ],
       ),
     );
@@ -280,7 +294,7 @@ class _AsiExclusiveHero extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: colors.primaryContainer,
+                  color: colors.onHeroSurface,
                   shape: BoxShape.circle,
                 ),
                 child: const FoodGroupLogo(code: 'breast_milk', size: 40),
@@ -292,7 +306,7 @@ class _AsiExclusiveHero extends StatelessWidget {
                   child: Text(
                     AppStrings.asiExclusiveTitle,
                     style: AppTextStyles.titleMedium.copyWith(
-                      color: colors.primary,
+                      color: colors.onHeroSurface,
                     ),
                   ),
                 ),
@@ -302,11 +316,17 @@ class _AsiExclusiveHero extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             AppStrings.asiExclusiveBody,
-            style: AppTextStyles.bodySmall.copyWith(color: colors.primary),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: colors.onHeroSurfaceMuted,
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           FilledButton.icon(
             onPressed: () => context.go('/makan'),
+            style: FilledButton.styleFrom(
+              backgroundColor: colors.onHeroSurface,
+              foregroundColor: colors.heroSurface,
+            ),
             icon: const Icon(Icons.water_drop_outlined),
             label: const Text(AppStrings.heroAsiCta),
           ),

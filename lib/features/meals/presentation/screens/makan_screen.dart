@@ -12,7 +12,6 @@ import 'package:cekgizi/features/children/presentation/providers/children_provid
 import 'package:cekgizi/features/meals/presentation/providers/makan_section.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/makan_history_view.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/makan_today_view.dart';
-import 'package:cekgizi/features/meals/presentation/widgets/photo_scan_fab.dart';
 import 'package:cekgizi/shared/widgets/child_switcher.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/screen_header.dart';
@@ -29,7 +28,6 @@ class MakanScreen extends ConsumerWidget {
     final child = ref.watch(selectedChildProvider).value;
 
     return Scaffold(
-      floatingActionButton: const PhotoScanFab(),
       body: SafeArea(
         child: child == null ? const _NoChild() : _MakanBody(child: child),
       ),
@@ -111,10 +109,8 @@ class _MakanBody extends ConsumerWidget {
         Expanded(
           child: AnimatedSwitcher(
             duration: AppMotion.of(context, AppMotion.normal),
-            transitionBuilder: (child, animation) => FadeTransition(
-              opacity: animation,
-              child: child,
-            ),
+            transitionBuilder: (child, animation) =>
+                FadeTransition(opacity: animation, child: child),
             child: section == MakanSection.today
                 ? MakanTodayView(
                     key: const ValueKey('makan-today'),

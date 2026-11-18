@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
-import 'package:cekgizi/core/theme/app_colors.dart';
 import 'package:cekgizi/core/theme/app_motion.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
@@ -27,6 +26,7 @@ class PiringRing extends StatelessWidget {
     this.strokeWidth = 18,
     this.gapDegrees,
     this.showCount = true,
+    this.onHero = false,
     this.semanticsLabel,
   });
 
@@ -47,6 +47,11 @@ class PiringRing extends StatelessWidget {
 
   /// Tampilkan teks "n/8" di tengah.
   final bool showCount;
+
+  /// True bila ring berada di atas permukaan hero hijau tua: busur terisi
+  /// memakai `onHeroSurface`, protein hewani `onHeroAccent`, dan busur kosong
+  /// `heroTrack` agar kontras tetap terbaca.
+  final bool onHero;
 
   final String? semanticsLabel;
 
@@ -83,6 +88,13 @@ class PiringRing extends StatelessWidget {
           size: size,
           segments: codes.length,
         );
+    final metColor = onHero ? colors.onHeroSurface : colors.primary;
+    final animalColor = onHero ? colors.onHeroAccent : colors.accent;
+    final trackColor = onHero ? colors.heroTrack : colors.surfaceVariant;
+    final valueColor = onHero ? colors.onHeroSurface : colors.textPrimary;
+    final valueLabelColor = onHero
+        ? colors.onHeroSurfaceMuted
+        : colors.textSecondary;
 
     return Semantics(
       label: label,
@@ -95,7 +107,9 @@ class PiringRing extends StatelessWidget {
           painter: _PiringRingPainter(
             met: met,
             codes: codes,
-            colors: colors,
+            metColor: metColor,
+            animalColor: animalColor,
+            trackColor: trackColor,
             strokeWidth: strokeWidth,
             gapDegrees: gap,
           ),
@@ -106,16 +120,15 @@ class PiringRing extends StatelessWidget {
                     children: [
                       Text(
                         '$metCount/${codes.length}',
-                        style: AppTextStyles.heroNumber.copyWith(
-                          fontSize: 40,
+                        style: AppTextStyles.displayMetric.copyWith(
                           height: 1.0,
-                          color: colors.textPrimary,
+                          color: valueColor,
                         ),
                       ),
                       Text(
                         AppStrings.piringGroupsLabel,
                         style: AppTextStyles.label.copyWith(
-                          color: colors.textSecondary,
+                          color: valueLabelColor,
                         ),
                       ),
                     ],
@@ -132,14 +145,18 @@ class _PiringRingPainter extends CustomPainter {
   const _PiringRingPainter({
     required this.met,
     required this.codes,
-    required this.colors,
+    required this.metColor,
+    required this.animalColor,
+    required this.trackColor,
     required this.strokeWidth,
     required this.gapDegrees,
   });
 
   final Set<String> met;
   final List<String> codes;
-  final AppColors colors;
+  final Color metColor;
+  final Color animalColor;
+  final Color trackColor;
   final double strokeWidth;
   final double gapDegrees;
 
@@ -162,9 +179,7 @@ class _PiringRingPainter extends CustomPainter {
       final code = codes[i];
       final isMet = met.contains(code);
       final isAnimal = FoodGroup.animalProteinCodes.contains(code);
-      paint.color = isMet
-          ? (isAnimal ? colors.accent : colors.primary)
-          : colors.surfaceVariant;
+      paint.color = isMet ? (isAnimal ? animalColor : metColor) : trackColor;
       final startAngle = startOffset + i * arc * math.pi / 180;
       canvas.drawArc(rect, startAngle, sweep * math.pi / 180, false, paint);
     }
@@ -174,7 +189,9 @@ class _PiringRingPainter extends CustomPainter {
   bool shouldRepaint(_PiringRingPainter oldDelegate) =>
       oldDelegate.met != met ||
       oldDelegate.codes != codes ||
-      oldDelegate.colors != colors ||
+      oldDelegate.metColor != metColor ||
+      oldDelegate.animalColor != animalColor ||
+      oldDelegate.trackColor != trackColor ||
       oldDelegate.strokeWidth != strokeWidth ||
       oldDelegate.gapDegrees != gapDegrees;
 }
