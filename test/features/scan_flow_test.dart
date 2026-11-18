@@ -38,6 +38,13 @@ Future<LocalPrefs> _prefs(Map<String, Object> values) async {
   return LocalPrefs.load();
 }
 
+/// Panel kamera v2.2 lebih tinggi (ilustrasi + langkah + privasi), jadi CTA
+/// bisa berada di bawah lipatan pada viewport tes. Gulir dulu sebelum mengetuk.
+Future<void> _ensureVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+}
+
 /// Pump harness yang membuka sheet hasil scan dengan satu tombol.
 class _SheetHarness extends StatelessWidget {
   const _SheetHarness({required this.result, required this.childId});
@@ -163,6 +170,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.capturePanelTitle), findsOneWidget);
 
+    await _ensureVisible(tester, find.text(AppStrings.capturePanelCta));
     await tester.tap(find.text(AppStrings.capturePanelCta));
     await tester.pumpAndSettle();
 
@@ -180,6 +188,7 @@ void main() {
       // Buka pemindai dari tab Makan → fallback kamera tampil.
       await tester.tap(find.text(AppStrings.navMakan));
       await tester.pumpAndSettle();
+      await _ensureVisible(tester, find.text(AppStrings.capturePanelCta));
       await tester.tap(find.text(AppStrings.capturePanelCta));
       await tester.pumpAndSettle();
       expect(find.text(AppStrings.scanCameraUnavailableTitle), findsOneWidget);

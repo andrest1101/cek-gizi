@@ -339,6 +339,8 @@ void main() {
       expect(find.text('Telur dadar kemarin'), findsNothing);
 
       // Buka Riwayat dan pilih kemarin di strip 7 hari.
+      // Segment berada di dalam daftar - gulir kembali ke atas dulu.
+      await _scrollTo(tester, find.text(AppStrings.makanSectionHistory));
       await tester.tap(find.text(AppStrings.makanSectionHistory));
       await tester.pumpAndSettle();
       expect(
@@ -515,6 +517,8 @@ void main() {
     await tester.tap(find.text(AppStrings.navMakan));
     await tester.pumpAndSettle();
 
+    // Tur kini berada di bawah panel ringkasan, bukan di paling atas.
+    await _scrollTo(tester, find.text(AppStrings.piringTourTitle));
     expect(find.text(AppStrings.piringTourTitle), findsOneWidget);
     await tester.tap(find.text(AppStrings.piringTourDismiss));
     await tester.pumpAndSettle();
