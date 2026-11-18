@@ -918,3 +918,13 @@ Isi ubin sebelumnya menempel ke atas dengan ruang kosong di bawah (kolom `start`
 - `flutter test` → **294/294 passed**
 - Commit belum dijalankan (manual oleh pemilik).
 
+## UX-4d — Teks status z-score boleh dua baris (2026-11-18)
+
+Di layar sempit (360dp @1,3) teks kategori resmi terpotong ("Berat bada..."). Status ubin kini: `maxLines: 2`, `softWrap`, `textAlign: center`, `fontSize 10,5`, `height 1.15` — teks resmi `officialCategoryXxx` dipakai apa adanya (bukan data karangan). `IntrinsicHeight` menyesuaikan tinggi ubin; tidak ada string baru.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **294/294 passed**
+- `flutter build apk --debug` → **✓ Built**
+- Commit belum dijalankan (manual oleh pemilik).
+

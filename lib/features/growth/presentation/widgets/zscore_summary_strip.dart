@@ -156,12 +156,14 @@ class _ZTile extends StatelessWidget {
                       Flexible(
                         child: Text(
                           status,
-                          maxLines: 1,
+                          maxLines: 2,
+                          softWrap: true,
+                          textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.label.copyWith(
                             color: iconColor,
-                            fontSize: 11,
-                            height: 1.2,
+                            fontSize: 10.5,
+                            height: 1.15,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
