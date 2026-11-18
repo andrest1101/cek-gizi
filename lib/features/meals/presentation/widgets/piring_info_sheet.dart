@@ -54,14 +54,11 @@ class PiringInfoSheet extends ConsumerWidget {
             AppSpacing.xl,
             AppSpacing.lg,
           ),
-          constraints: BoxConstraints(maxHeight: media.size.height * 0.9),
-          child: SingleChildScrollView(
-            key: const Key('piring-info-sheet'),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(child: _DragHandle()),
+          constraints: BoxConstraints(maxHeight: media.size.height * 0.78),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(child: _DragHandle()),
                 const SizedBox(height: AppSpacing.md),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,6 +103,13 @@ class PiringInfoSheet extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
+                Expanded(
+                  child: SingleChildScrollView(
+                    key: const Key('piring-info-sheet'),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                 _InfoBlock(
                   icon: Icons.today_rounded,
                   title: AppStrings.piringInfoResetTitle,
@@ -166,7 +170,11 @@ class PiringInfoSheet extends ConsumerWidget {
                     ),
                   ),
                 ],
-                const SizedBox(height: AppSpacing.lg),
+                ],
+              ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
@@ -174,8 +182,7 @@ class PiringInfoSheet extends ConsumerWidget {
                     child: const Text(AppStrings.piringInfoClose),
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),

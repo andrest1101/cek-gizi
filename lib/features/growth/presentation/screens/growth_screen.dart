@@ -21,6 +21,7 @@ import 'package:cekgizi/features/growth/presentation/widgets/growth_chart.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/growth_status_card.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/status_copy.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/zscore_summary_strip.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/tanya_bubble.dart';
 import 'package:cekgizi/shared/widgets/child_switcher.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
@@ -46,6 +47,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
     final child = ref.watch(selectedChildProvider).value;
 
     return Scaffold(
+      floatingActionButton: const TanyaBubble(),
       body: SafeArea(
         child: child == null
             ? const _NoChild()

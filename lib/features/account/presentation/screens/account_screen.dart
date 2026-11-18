@@ -11,6 +11,7 @@ import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/time/clock.dart';
 import 'package:cekgizi/features/account/presentation/widgets/reminder_settings_section.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/tanya_bubble.dart';
 import 'package:cekgizi/shared/widgets/child_avatar.dart';
 import 'package:cekgizi/shared/widgets/screen_header.dart';
 
@@ -29,6 +30,7 @@ class AccountScreen extends ConsumerWidget {
     final now = ref.watch(clockProvider)();
 
     return Scaffold(
+      floatingActionButton: const TanyaBubble(),
       body: SafeArea(
         child: ListView(
           key: const Key('account-list'),

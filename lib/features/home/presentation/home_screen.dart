@@ -17,6 +17,7 @@ import 'package:cekgizi/features/growth/presentation/widgets/growth_status_card.
 import 'package:cekgizi/features/meals/presentation/widgets/piring_hero_card.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/piring_tips_card.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/week_strip.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/tanya_bubble.dart';
 import 'package:cekgizi/shared/illustrations/seedling_illustration.dart';
 import 'package:cekgizi/shared/widgets/child_switcher.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
@@ -36,6 +37,7 @@ class HomeScreen extends ConsumerWidget {
     final childrenAsync = ref.watch(childrenListProvider);
 
     return Scaffold(
+      floatingActionButton: const TanyaBubble(),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () => _refresh(ref),

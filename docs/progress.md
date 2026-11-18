@@ -893,3 +893,18 @@ Ilustrasi `PlateViewfinderIllustration` dipertimbangkan terlalu mirip wajah (dua
 - `flutter analyze` → **No issues found!**
 - `flutter test` → **294/294 passed**
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-10 — Bubble Tanya di tab & sheet "Cara kerja" lebih rendah (2026-11-18)
+
+### A. Bubble "Tanya gizi" pindah dari shell ke tiap tab
+Sebelumnya bubble `TanyaBubble` adalah `floatingActionButton` di `AppShell`, sehingga urutannya bisa menutupi tombol Tutup pada sheet. Sekarang bubble ada di **masing-masing Scaffold tab** (Beranda, Makan, Resep, Tumbuh, Akun) — semua modal bottom sheet akan otomatis menutupinya lengkap dengan scrim.
+
+### B. "Cara kerja Piring Hari Ini" tidak lagi memanjang ke atas
+- `maxHeight` sheet: 0,9 → **0,78** tinggi layar.
+- Isi sheet jadi `Column`: handle + header + **`Expanded(SingleChildScrollView)`** + tombol **Tutup** di luar area scroll.
+- Tombol Tutup selalu terlihat tanpa scroll; handle tetap ada untuk drag-to-dismiss.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **294/294 passed**
+- Commit belum dijalankan (manual oleh pemilik).
