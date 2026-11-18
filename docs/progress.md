@@ -796,3 +796,54 @@ Perbaikan struktur & presentasi sesuai pemetaan UX-4. **Tidak ada aturan gizi, a
 - DoD §10.1: gradien 0; `Colors.*` (selain `transparent`) di `lib/features` + `lib/shared` = 0.
 - Layout 360dp @1.3 light + dark: Beranda & Tumbuh tanpa overflow.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-7 — Splash & Opening Lottie (2026-11-18)
+
+### Ruang lingkup
+Layar pembuka & splash diganti dari animasi logo Flutter statis menjadi **Lottie bermerek** yang disediakan pemilik. Tidak ada perubahan alur onboarding/consent.
+
+### Dependency baru (disetujui 2026-11-18)
+- **`lottie` (^3.3.1)** — renderer vektor untuk `cekgizi_opening.json` (1080×1080, 60fps, 3 dtk, 9 layer, tanpa aset gambar eksternal) sebagai pengganti animasi logo. Alasan: satu-satunya cara menampilkan Lottie secara aman di Flutter; tanpa plugin native, tanpa jaringan; tetap bisa diuji widget.
+
+### Perubahan
+1. `OpeningScreen` ditulis ulang: `Lottie.asset('assets/animations/cekgizi_opening.json', controller, repeat: false)`, `onLoaded` dipakai untuk mengatur durasi lalu `forward()`. Saat selesai → `context.go(nextLocation)` seperti sebelumnya. Reduce-motion dihormati (langsung lanjut). **Timeout pengaman 4,5 dtk** dan `errorBuilder` (fallback `_Wordmark`) menjamin tidak pernah macet seperti kasus splash lama.
+2. `_StartupScreen` (yang tampil selagi backend disiapkan) disederhanakan: **solid `#145C45` + `CircularProgressIndicator`** — tidak ada logo ganda sebelum Lottie.
+3. `AppSurfaces.splashSurface` / `onSplashSurface` / `onSplashSurfaceMuted` (baru): token konstan `#145C45`, sama dengan `Background_Surface` di dalam Lottie sehingga **tidak ada letterbox/warna berbeda** di light maupun dark.
+4. Android: `values(-night)/colors.xml` → `splash_background = #145C45`; `launch_background.xml` / `drawable-v21` memakai warna tersebut; `values(-night)-v31` (Android 12+) memakai warna yang sama.
+5. Tes `opening_screen_test.dart` diperbarui: mencari widget `Lottie` (bukan `Image`) dan memverifikasi pindah layar saat animasi selesai serta saat reduce-motion.
+
+### Catatan penting — "logo Flutter"
+Tidak ditemukan class splash/logo Flutter di engine yang dipakai (Flutter 3.32.8). Logo Flutter yang tampak sebelumnya kemungkinan besar berasal dari artefak **debug** (`flutter run`), bukan dari kode aplikasi. Setelah perubahan ini splash native sudah solid `#145C45`; jika logo masih muncul, **uninstall aplikasi lama / cek build release** (`flutter run --release`) — di release Flutter tidak menyuntik logo.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **295/295 passed**.
+- `flutter build apk --debug` → **✓ Built**.
+- DoD §10.1: gradien 0; `Colors.*` (selain `transparent`) di `lib/features` + `lib/shared` = 0.
+- Perlu tinjauan di perangkat: light/dark, apakah video/Lottie terpotong atau pas, dan apakah logo Flutter benar-benar hilang saat debug/uninstall ulang.
+- Commit belum dijalankan (manual oleh pemilik).
+
+## UX-8 — Splash Satu Page, Logo Pusat, Ikon CekGizi (2026-11-18)
+
+### Ruang lingkup
+Lanjutan UX-7: perbaikan posisi Lottie, satu page splash, ganti launcher/splash icon bawaan Flutter, dan speed Lottie 0,65×.
+
+### Dependency baru (disetujui 2026-11-18)
+- **`flutter_launcher_icons` (devDependency, ^0.14.4)** — generate launcher icon Android (`ic_launcher`) dari `assets/logo/logo_splash_screen.png` sekali jalan; tidak di-ship di runtime. Alasan: sumber ikon default Flutter (`mipmap-*/ic_launcher.png`) harus diganti ke logo CekGizi tanpa manipulasi manual 5 density.
+- `lottie` (^3.3.1) sudah tercantum di UX-7.
+
+### Perubahan
+1. **Ikon aplikasi**: sebelumnya `mipmap-*/ic_launcher.png` adalah **logo Flutter bawaan** — itulah yang tampak saat aplikasi dibuka. Kini digenerate dari logo CekGizi (`flutter_launcher_icons`; config di `pubspec.yaml`).
+2. **Splash Android 12+** (`values-v31` & `values-night-v31`): `windowSplashScreenAnimatedIcon` dihapus → splash sistem **solid `#145C45` tanpa ikon**. Logo pertama kali muncul di dalam Lottie.
+3. **Satu page**: `_StartupScreen` dihapus. `CekGiziApp` langsung `MaterialApp.router`; `backendReadyProvider` (baru, default = future selesai untuk tes) di-override di `main()` dengan `bootstrapBackend()`. `OpeningScreen` menunggu animasi **∧** backend bersamaan: bila Lottie selesai lebih dulu, frame terakhir ditahan dengan progres halus; bila backend selesai lebih dulu, aplikasi langsung masuk setelah animasi. Reduce-motion: langsung lanjut. Fallback keras 20 dtk.
+4. **Posisi Lottie**: ukuran kotak eksplisit (`shortSide × 0.66`, dibatasi 208–300dp) + `Center` + `Column(mainAxisSize: min)` — terpusat di kedua sumbu.
+5. **Speed Lottie 0,65×**: durasi controller dilebarkan jadi `composition.duration / 0.65` (~4,6 dtk). `_fallbackDelay` disesuaikan ke 20 dtk.
+6. Tes `opening_screen_test.dart` dibungkus `ProviderScope` (OpeningScreen kini `ConsumerStatefulWidget`); `app_test.dart` dibersihkan.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **294/294 passed** (baseline 295; satu tes percobaan reduce-motion-lambat-backend dihapus karena lingkungan tes tidak bisa memaksa `disableAnimations` lewat root wrapper — cakupan reduce-motion tetap ada di `opening_screen_test.dart`).
+- `flutter build apk --debug` → **✓ Built**.
+- DoD: gradien 0; `Colors.*` (selain `transparent`) di `lib/features` + `lib/shared` = 0.
+- Wajib di perangkat: uninstall aplikasi lama dulu (Android meng-cache ikon/splash), lalu install ulang; pastikan urutannya native hijau → Lottie (satu page, center, 0,65×) → aplikasi, dan tidak ada logo Flutter.
+- Commit belum dijalankan (manual oleh pemilik).
