@@ -138,7 +138,7 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen>
                 constraints.maxWidth,
                 constraints.maxHeight,
               );
-              final size = (shortSide * 0.66).clamp(208.0, 300.0);
+              final size = (shortSide * 0.80).clamp(220.0, 330.0);
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,

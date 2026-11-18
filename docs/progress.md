@@ -847,3 +847,13 @@ Lanjutan UX-7: perbaikan posisi Lottie, satu page splash, ganti launcher/splash 
 - DoD: gradien 0; `Colors.*` (selain `transparent`) di `lib/features` + `lib/shared` = 0.
 - Wajib di perangkat: uninstall aplikasi lama dulu (Android meng-cache ikon/splash), lalu install ulang; pastikan urutannya native hijau → Lottie (satu page, center, 0,65×) → aplikasi, dan tidak ada logo Flutter.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-8b — Ukuran Lottie diperbesar (2026-11-18)
+
+Font & logo Lottie terlalu kecil: ukuran diubah dari `shortSide × 0.66` (±238dp di 360dp) menjadi **`shortSide × 0.80`** (±288dp; dibatasi 220–330dp). Satu page splash, posisi center, ∧ backend, x0.65 — tidak berubah.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **294/294 passed**
+- `flutter build apk --debug` → **✓ Built**
+- Commit belum dijalankan (manual oleh pemilik).
