@@ -1,121 +1,63 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
+import 'package:cekgizi/core/bootstrap/backend_ready_provider.dart';
 import 'package:cekgizi/core/config/app_config.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
-import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
-import 'package:cekgizi/core/theme/app_theme.dart';
+import 'package:cekgizi/core/theme/app_surfaces.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 
-/// Lightweight branded opening shown after app initialization.
+/// Satu-satunya layar pra-aplikasi: Lottie CekGizi sebagai page loading.
 ///
-/// Backend and preferences are initialized before Flutter mounts (dengan
-/// batas waktu), so this screen is intentionally a short transition rather
-/// than a network loader. Ada pengaman: bila animasi tidak pernah selesai
-/// (mis. ticker dijeda oleh sistem), layar tetap melanjutkan setelah
-/// [_fallbackDelay] agar aplikasi tidak pernah berhenti di logo.
-class OpeningScreen extends StatefulWidget {
+/// Alur: native splash (solid #145C45) → Lottie (satu page) → aplikasi.
+/// Backend berjalan di latar; layar ini menampilkan animasi selagi backend
+/// disiapkan. Bila Lottie selesai lebih dulu, layar menahan frame terakhir
+/// dengan progres halus sampai backend siap; bila backend selesai lebih dulu,
+/// aplikasi langsung masuk begitu animasi kelar.
+///
+/// Lottie diubah ke **0,65× speed** (bukan 0,5× = terlalu pelan, bukan 1,0× =
+/// sedang tayang terlalu cepat). Reduce-motion dihormati, dan ada batas keras
+/// [_fallbackDelay] agar aplikasi tidak pernah berhenti di sini.
+class OpeningScreen extends ConsumerStatefulWidget {
   const OpeningScreen({super.key, required this.nextLocation});
 
   final String nextLocation;
 
   @override
-  State<OpeningScreen> createState() => _OpeningScreenState();
+  ConsumerState<OpeningScreen> createState() => _OpeningScreenState();
 }
 
-class _OpeningScreenState extends State<OpeningScreen>
+class _OpeningScreenState extends ConsumerState<OpeningScreen>
     with SingleTickerProviderStateMixin {
-  static const Duration _animationDuration = Duration(milliseconds: 1250);
+  /// Kecepatan animasi 0,65× (frame asli 60fps → terasa lebih tenang).
+  static const double _speed = 0.65;
 
-  /// Batas keras sebelum dipaksa lanjut. Lebih longgar dari durasi animasi
-  /// supaya tidak memotong gerak normal, tetapi tetap jauh di bawah ambang
-  /// "terasa macet".
-  static const Duration _fallbackDelay = Duration(milliseconds: 1900);
+  /// Batas keras total; lebih longgar dari durasi backend terburuk
+  /// (lihat `startup_guard.dart`) supaya tidak pernah macet.
+  static const Duration _fallbackDelay = Duration(seconds: 20);
 
   late final AnimationController _controller;
-  late final Animation<double> _logoOpacity;
-  late final Animation<double> _logoScale;
-  late final Animation<double> _titleOpacity;
-  late final Animation<Offset> _titleOffset;
-  late final Animation<double> _taglineOpacity;
-  late final Animation<Offset> _taglineOffset;
-  bool _openingStarted = false;
+  bool _animationDone = false;
+  bool _backendDone = false;
   bool _navigated = false;
   Timer? _fallback;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: _animationDuration);
-    _logoOpacity = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0, 0.42, curve: Curves.easeOutCubic),
-    );
-    _logoScale = Tween<double>(begin: 0.88, end: 1).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0, 0.62, curve: Curves.easeOutCubic),
-      ),
-    );
-    _titleOpacity = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.36, 0.72, curve: Curves.easeOut),
-    );
-    _titleOffset = Tween<Offset>(begin: const Offset(0, 0.22), end: Offset.zero)
-        .animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: const Interval(0.36, 0.78, curve: Curves.easeOutCubic),
-          ),
-        );
-    _taglineOpacity = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.62, 0.96, curve: Curves.easeOut),
-    );
-    _taglineOffset =
-        Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: const Interval(0.62, 1, curve: Curves.easeOutCubic),
-          ),
-        );
-    // Tunggu frame pertama dulu: MediaQuery & GoRouter siap dipakai, dan
-    // pengguna melihat logo seketika.
+    _controller = AnimationController(vsync: this);
+    ref
+        .read(backendReadyProvider)
+        .then((_) => _noteBackendDone())
+        .catchError((_) => _noteBackendDone());
+    // Tunggu frame pertama agar MediaQuery & GoRouter siap.
     WidgetsBinding.instance.addPostFrameCallback((_) => _startOpening());
-  }
-
-  void _startOpening() {
-    if (!mounted || _openingStarted) return;
-    _openingStarted = true;
-    _fallback = Timer(_fallbackDelay, _goNext);
-
-    if (MediaQuery.disableAnimationsOf(context)) {
-      _controller.value = 1;
-      _goNext();
-      return;
-    }
-    unawaited(_playAnimation());
-  }
-
-  /// `forward()` bisa berakhir dengan `TickerCanceled` bila layar dilepas
-  /// sebelum animasi selesai - itu bukan galat yang perlu ditampilkan.
-  Future<void> _playAnimation() async {
-    try {
-      await _controller.forward();
-    } catch (_) {
-      // Diabaikan: pengaman [_fallback] / dispose yang menangani.
-    }
-    _goNext();
-  }
-
-  void _goNext() {
-    if (!mounted || _navigated) return;
-    _navigated = true;
-    _fallback?.cancel();
-    _fallback = null;
-    context.go(widget.nextLocation);
   }
 
   @override
@@ -125,95 +67,119 @@ class _OpeningScreenState extends State<OpeningScreen>
     super.dispose();
   }
 
+  void _startOpening() {
+    if (!mounted) return;
+    _fallback = Timer(_fallbackDelay, _finishAnyway);
+
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller.value = 1;
+      _animationDone = true;
+      _maybeGo();
+      return;
+    }
+    // Durasi belum diketahui sampai onLoaded; forward dipanggil dari sana.
+  }
+
+  void _noteBackendDone() {
+    if (!mounted) return;
+    _backendDone = true;
+    _maybeGo();
+  }
+
+  void _maybeGo() {
+    if (_navigated || !_animationDone || !_backendDone) return;
+    _goNext();
+  }
+
+  void _finishAnyway() {
+    if (_navigated || !mounted) return;
+    _goNext();
+  }
+
+  void _goNext() {
+    if (_navigated || !mounted) return;
+    _navigated = true;
+    _fallback?.cancel();
+    _fallback = null;
+    context.go(widget.nextLocation);
+  }
+
+  Duration _scaled(Duration original) =>
+      Duration(milliseconds: (original.inMilliseconds / _speed).round());
+
+  Future<void> _play() async {
+    try {
+      await _controller.forward();
+    } catch (_) {
+      // Ticker bisa dibatalkan sistem (app masuk latar) - diabaikan.
+    }
+    if (!mounted) return;
+    _animationDone = true;
+    _maybeGo();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colors = AppTheme.colorsOf(context);
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final logo = Image.asset(
-      'assets/logo/logo_splash_screen.png',
-      width: 176,
-      height: 176,
-      // Batasi bitmap yang di-decode: aset 176dp tidak perlu resolusi penuh.
-      cacheWidth: 352,
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.high,
-      semanticLabel: '${AppConfig.appName} — logo',
-    );
-
-    final title = Text(
-      AppConfig.appName,
-      textAlign: TextAlign.center,
-      style: AppTextStyles.titleLarge.copyWith(
-        fontSize: 29,
-        height: 1.2,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.8,
-        color: colors.textPrimary,
-      ),
-    );
-
-    final tagline = Text(
-      AppStrings.openingTagline,
-      textAlign: TextAlign.center,
-      style: AppTextStyles.bodySmall.copyWith(
-        fontSize: 14,
-        height: 1.5,
-        fontWeight: FontWeight.w500,
-        letterSpacing: 0.15,
-        color: colors.textSecondary,
-      ),
-    );
+    final waitingForBackend = _animationDone && !_backendDone;
 
     return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
+      backgroundColor: AppSurfaces.splashSurface,
+      body: Semantics(
+        label: waitingForBackend
+            ? '${AppConfig.appName} — ${AppStrings.startupLoading}'
+            : AppConfig.appName,
+        liveRegion: true,
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.screenPadding,
-            ),
-            child: Semantics(
-              label: AppConfig.appName,
-              liveRegion: true,
-              child: Column(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Logo eksplisit berukuran square, terpusat di kedua sumbu.
+              final shortSide = math.min(
+                constraints.maxWidth,
+                constraints.maxHeight,
+              );
+              final size = (shortSide * 0.66).clamp(208.0, 300.0);
+              return Column(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (reduceMotion)
-                    logo
-                  else
-                    FadeTransition(
-                      opacity: _logoOpacity,
-                      child: ScaleTransition(scale: _logoScale, child: logo),
+                  SizedBox(
+                    width: size,
+                    height: size,
+                    child: Lottie.asset(
+                      'assets/animations/cekgizi_opening.json',
+                      controller: _controller,
+                      repeat: false,
+                      fit: BoxFit.contain,
+                      onLoaded: (composition) {
+                        if (!mounted || _navigated) return;
+                        _controller.duration = _scaled(composition.duration);
+                        if (reduceMotion) {
+                          _controller.value = 1;
+                          _animationDone = true;
+                          _maybeGo();
+                        } else {
+                          unawaited(_play());
+                        }
+                      },
+                      errorBuilder: (context, error, stackTrace) =>
+                          const _Wordmark(),
                     ),
-                  const SizedBox(height: AppSpacing.lg),
-                  if (reduceMotion)
-                    title
-                  else
-                    FadeTransition(
-                      opacity: _titleOpacity,
-                      child: SlideTransition(
-                        position: _titleOffset,
-                        child: _StaggeredWord(
-                          word: AppConfig.appName,
-                          controller: _controller,
-                          style: title.style!,
-                        ),
+                  ),
+                  if (waitingForBackend) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppSurfaces.onSplashSurfaceMuted,
                       ),
                     ),
-                  const SizedBox(height: AppSpacing.xs),
-                  if (reduceMotion)
-                    tagline
-                  else
-                    FadeTransition(
-                      opacity: _taglineOpacity,
-                      child: SlideTransition(
-                        position: _taglineOffset,
-                        child: tagline,
-                      ),
-                    ),
+                  ],
                 ],
-              ),
-            ),
+              );
+            },
           ),
         ),
       ),
@@ -221,74 +187,20 @@ class _OpeningScreenState extends State<OpeningScreen>
   }
 }
 
-/// Reveals the brand name character by character with a short, tightly spaced
-/// stagger so it reads as one intentional title rather than a typewriter.
-class _StaggeredWord extends StatelessWidget {
-  const _StaggeredWord({
-    required this.word,
-    required this.controller,
-    required this.style,
-  });
-
-  final String word;
-  final AnimationController controller;
-  final TextStyle style;
+/// Fallback statis: hanya tampil bila aset Lottie gagal dimuat.
+class _Wordmark extends StatelessWidget {
+  const _Wordmark();
 
   @override
   Widget build(BuildContext context) {
-    final characters = word.characters.toList(growable: false);
-    return Semantics(
-      label: word,
-      child: ExcludeSemantics(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var index = 0; index < characters.length; index++)
-              _StaggeredCharacter(
-                character: characters[index],
-                index: index,
-                count: characters.length,
-                controller: controller,
-                style: style,
-              ),
-          ],
+    return Center(
+      child: Text(
+        AppConfig.appName,
+        textAlign: TextAlign.center,
+        style: AppTextStyles.titleLarge.copyWith(
+          color: AppSurfaces.onSplashSurface,
+          letterSpacing: -0.5,
         ),
-      ),
-    );
-  }
-}
-
-class _StaggeredCharacter extends StatelessWidget {
-  const _StaggeredCharacter({
-    required this.character,
-    required this.index,
-    required this.count,
-    required this.controller,
-    required this.style,
-  });
-
-  final String character;
-  final int index;
-  final int count;
-  final AnimationController controller;
-  final TextStyle style;
-
-  @override
-  Widget build(BuildContext context) {
-    final start = 0.40 + (index / count) * 0.20;
-    final end = (start + 0.22).clamp(0.0, 1.0);
-    final animation = CurvedAnimation(
-      parent: controller,
-      curve: Interval(start, end, curve: Curves.easeOutCubic),
-    );
-    return FadeTransition(
-      opacity: animation,
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 0.18),
-          end: Offset.zero,
-        ).animate(animation),
-        child: Text(character, style: style),
       ),
     );
   }

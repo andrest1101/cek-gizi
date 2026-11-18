@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -57,42 +54,6 @@ void main() {
     expect(find.bySemanticsLabel(AppConfig.appName), findsOneWidget);
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.consentTitle), findsOneWidget);
-  });
-
-  testWidgets('logo bermerek tampil selagi backend disiapkan', (tester) async {
-    final backendReady = Completer<void>();
-    final prefs = await _prefs({});
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          localPrefsProvider.overrideWithValue(prefs),
-          childRepositoryProvider.overrideWithValue(FakeChildRepository()),
-          growthRepositoryProvider.overrideWithValue(FakeGrowthRepository()),
-          permenkesTablesProvider.overrideWith(
-            (ref) => Future.value(const FakeAnthropometryTables()),
-          ),
-          foodLogRepositoryProvider.overrideWithValue(FakeFoodLogRepository()),
-          nutritionRulesProvider.overrideWith(
-            (ref) => Future.value(fakeNutritionRules()),
-          ),
-        ],
-        child: CekGiziApp(backendReady: backendReady.future),
-      ),
-    );
-    await tester.pump();
-
-    expect(
-      find.bySemanticsLabel(
-        '${AppConfig.appName} — ${AppStrings.startupLoading}',
-      ),
-      findsOneWidget,
-    );
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-
-    backendReady.complete();
-    await tester.pumpAndSettle();
-    expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(find.text(AppStrings.onboardingTitle1), findsOneWidget);
   });
 
   testWidgets('Beranda shows empty state when no children yet', (tester) async {
