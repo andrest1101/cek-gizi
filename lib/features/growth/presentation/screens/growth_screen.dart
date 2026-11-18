@@ -326,9 +326,9 @@ class _ChartEmpty extends StatelessWidget {
           Text(
             AppStrings.growthNoMeasurementsBody,
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: colors.textSecondary),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: colors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -354,9 +354,9 @@ class _ChartError extends StatelessWidget {
           Text(
             AppStrings.growthReferenceError,
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: colors.textSecondary),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: colors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           TextButton(onPressed: onRetry, child: const Text(AppStrings.retry)),

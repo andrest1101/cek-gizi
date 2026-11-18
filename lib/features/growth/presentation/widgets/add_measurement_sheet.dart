@@ -6,6 +6,7 @@ import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/utils/date_format.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
@@ -147,10 +148,8 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
       Navigator.of(context).pop();
       await showDialog<void>(
         context: context,
-        builder: (context) => _ResultDialog(
-          childName: child.nickname,
-          measurement: measurement,
-        ),
+        builder: (context) =>
+            _ResultDialog(childName: child.nickname, measurement: measurement),
       );
     } on DuplicateMeasurementException {
       setState(() => _error = AppStrings.validationDuplicateDate);
@@ -167,7 +166,6 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
     return Padding(
@@ -210,7 +208,7 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
                     _isEdit
                         ? AppStrings.growthEditTitle
                         : AppStrings.growthAddMeasurement,
-                    style: textTheme.titleMedium?.copyWith(
+                    style: AppTextStyles.titleMedium.copyWith(
                       color: colors.textPrimary,
                     ),
                   ),
@@ -220,7 +218,7 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
                   _isEdit
                       ? AppStrings.growthDateLocked
                       : AppStrings.growthSheetHint,
-                  style: textTheme.bodySmall?.copyWith(
+                  style: AppTextStyles.bodySmall.copyWith(
                     color: colors.textSecondary,
                   ),
                 ),
@@ -242,7 +240,7 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
                     ),
                     child: Text(
                       IdDateFormat.full(_measuredOn),
-                      style: textTheme.bodyLarge?.copyWith(
+                      style: AppTextStyles.body.copyWith(
                         color: colors.textPrimary,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
@@ -278,7 +276,7 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   AppStrings.growthMeasureMode,
-                  style: textTheme.labelLarge?.copyWith(
+                  style: AppTextStyles.label.copyWith(
                     color: colors.textSecondary,
                   ),
                 ),
@@ -290,8 +288,7 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
                     SegmentOption(
                       value: MeasureMode.lying,
                       label: AppStrings.growthMeasureModeLying,
-                      semanticLabel:
-                          AppStrings.growthMeasureModeLyingSemantics,
+                      semanticLabel: AppStrings.growthMeasureModeLyingSemantics,
                     ),
                     SegmentOption(
                       value: MeasureMode.standing,
@@ -331,7 +328,7 @@ class _MeasurementSheetState extends ConsumerState<_MeasurementSheet> {
                         Expanded(
                           child: Text(
                             _error!,
-                            style: textTheme.bodySmall?.copyWith(
+                            style: AppTextStyles.bodySmall.copyWith(
                               color: colors.statusAlert,
                             ),
                           ),
@@ -370,7 +367,6 @@ class _ResultDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
 
     return AlertDialog(
       title: Text('${AppStrings.growthMeasureSaved}: $childName'),
@@ -387,9 +383,7 @@ class _ResultDialog extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Text(
               AppStrings.statusDetailFootnote,
-              style: textTheme.labelMedium?.copyWith(
-                color: colors.textSecondary,
-              ),
+              style: AppTextStyles.label.copyWith(color: colors.textSecondary),
             ),
           ],
         ),

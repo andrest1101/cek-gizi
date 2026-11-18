@@ -123,7 +123,6 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     final isEdit = widget.existing != null;
 
     return Scaffold(
@@ -156,7 +155,7 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
                   Expanded(
                     child: Text(
                       _error!,
-                      style: textTheme.bodySmall?.copyWith(
+                      style: AppTextStyles.bodySmall.copyWith(
                         color: colors.statusAlert,
                       ),
                     ),
@@ -265,7 +264,7 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
                   ),
                   child: Text(
                     IdDateFormat.full(_birthDate),
-                    style: textTheme.bodyLarge?.copyWith(
+                    style: AppTextStyles.body.copyWith(
                       color: colors.textPrimary,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
