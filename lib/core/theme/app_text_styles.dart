@@ -9,6 +9,17 @@ abstract final class AppTextStyles {
 
   static const String fontFamily = 'PlusJakartaSans';
 
+  /// Angka metrik dominan - satu per layar, mis. "3/5" di tengah ring hero
+  /// (40/44, w700, tabular figures). Lebih besar dari [heroNumber] agar tiap
+  /// layar punya satu titik fokus angka.
+  static const TextStyle displayMetric = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 40,
+    height: 44 / 40,
+    fontWeight: FontWeight.w700,
+    fontFeatures: [FontFeature.tabularFigures()],
+  );
+
   /// Angka besar: hero "4/8", berat 7,4 kg (28/34, w700, tabular figures).
   static const TextStyle heroNumber = TextStyle(
     fontFamily: fontFamily,
@@ -73,6 +84,15 @@ abstract final class AppTextStyles {
     fontFamily: fontFamily,
     fontSize: 13,
     height: 16 / 13,
+    fontWeight: FontWeight.w500,
+  );
+
+  /// Label tab navigasi (11,5/14, w500). Kecil namun tetap tumbuh mengikuti
+  /// text scale, supaya 5 tab muat di 360dp pada 1,3.
+  static const TextStyle navLabel = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 11.5,
+    height: 14 / 11.5,
     fontWeight: FontWeight.w500,
   );
 }

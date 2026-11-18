@@ -9,8 +9,8 @@ import 'package:cekgizi/core/theme/app_theme.dart';
 /// bukan gradien:
 /// - `card`: permukaan utama (light putih + garis rambut, dark tone naik).
 /// - `sunken`: blok di dalam kartu (lebih gelap dari kartu di kedua mode).
-/// - `hero`: sorotan lembut (mis. kartu anak terpilih) memakai
-///   `primaryContainer` yang dicadangkan PRD §7.1.
+/// - `hero`: permukaan solid dominan (hijau tua) - satu per layar, dengan
+///   teks `onHeroSurface*` agar kontras ≥ 4,5:1 di light maupun dark.
 abstract final class AppSurfaces {
   const AppSurfaces._();
 
@@ -41,15 +41,18 @@ abstract final class AppSurfaces {
     );
   }
 
-  /// Sorotan lembut `primaryContainer` (tanpa garis, tanpa gradien).
+  /// Permukaan hero dominan (satu per layar): hijau tua di light, hijau
+  /// tone naik + hairline di dark. Teks di atasnya WAJIB memakai
+  /// `onHeroSurface` / `onHeroSurfaceMuted` / `onHeroAccent`.
   static BoxDecoration hero(
     BuildContext context, {
     double radius = AppRadius.card,
   }) {
     final colors = AppTheme.colorsOf(context);
     return BoxDecoration(
-      color: colors.primaryContainer,
+      color: colors.heroSurface,
       borderRadius: BorderRadius.circular(radius),
+      border: Border.all(color: colors.heroEdge, width: 1),
     );
   }
 

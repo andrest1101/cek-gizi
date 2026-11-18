@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:cekgizi/core/theme/app_colors.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
@@ -5,6 +7,22 @@ import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+/// Kontras relatif WCAG 2.1 dari dua warna opaque.
+double _contrast(Color a, Color b) {
+  double channel(double value) => value <= 0.04045
+      ? value / 12.92
+      : math.pow((value + 0.055) / 1.055, 2.4).toDouble();
+  double luminance(Color color) =>
+      0.2126 * channel(color.r) +
+      0.7152 * channel(color.g) +
+      0.0722 * channel(color.b);
+  final la = luminance(a);
+  final lb = luminance(b);
+  final hi = la > lb ? la : lb;
+  final lo = la > lb ? lb : la;
+  return (hi + 0.05) / (lo + 0.05);
+}
 
 void main() {
   group('AppTheme', () {
@@ -27,6 +45,28 @@ void main() {
       expect(theme.brightness, Brightness.dark);
     });
 
+    test('hero tokens stay readable in both themes (WCAG AA)', () {
+      for (final colors in [AppColors.light, AppColors.dark]) {
+        expect(colors.heroSurface, isNot(colors.background));
+        expect(
+          _contrast(colors.onHeroSurface, colors.heroSurface),
+          greaterThanOrEqualTo(4.5),
+        );
+        expect(
+          _contrast(colors.onHeroSurfaceMuted, colors.heroSurface),
+          greaterThanOrEqualTo(4.5),
+        );
+        expect(
+          _contrast(colors.onHeroAccent, colors.heroSurface),
+          greaterThanOrEqualTo(4.5),
+        );
+      }
+    });
+
+    test('light hero uses the deep primary green', () {
+      expect(AppColors.light.heroSurface, AppColors.light.primary);
+    });
+
     test('text theme uses PlusJakartaSans and PRD sizes', () {
       final textTheme = AppTheme.light().textTheme;
       expect(textTheme.displaySmall?.fontFamily, AppTextStyles.fontFamily);
@@ -41,7 +81,9 @@ void main() {
 
   group('AppColors extension', () {
     test('copyWith overrides only requested tokens', () {
-      final updated = AppColors.light.copyWith(primary: const Color(0xFF000000));
+      final updated = AppColors.light.copyWith(
+        primary: const Color(0xFF000000),
+      );
       expect(updated.primary, const Color(0xFF000000));
       expect(updated.background, AppColors.light.background);
       expect(updated.accent, AppColors.light.accent);
@@ -49,8 +91,10 @@ void main() {
 
     test('lerp returns midpoint colors', () {
       final lerped = AppColors.light.lerp(AppColors.dark, 0.5);
-      expect(lerped.background,
-          Color.lerp(AppColors.light.background, AppColors.dark.background, 0.5));
+      expect(
+        lerped.background,
+        Color.lerp(AppColors.light.background, AppColors.dark.background, 0.5),
+      );
     });
 
     test('status colors are distinct from surface', () {
