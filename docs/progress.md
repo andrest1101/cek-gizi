@@ -908,3 +908,23 @@ Sebelumnya bubble `TanyaBubble` adalah `floatingActionButton` di `AppShell`, seh
 - `flutter analyze` → **No issues found!**
 - `flutter test` → **294/294 passed**
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-4c — Ringkasan z-score di Tumbuh diperbaiki (2026-11-18)
+
+Isi ubin sebelumnya menempel ke atas dengan ruang kosong di bawah (kolom `start` + `SizedBox(height: 112)` + divider kaku). Diubah menjadi: **tanpa tinggi tetap** — `IntrinsicHeight` menghitung tinggi ubin mengikuti isi; isi di-`Column(mainAxisAlignment: center)`; angka z diperbesar ke `heroNumber`; label & status rata tengah; divider dihapus, diganti ubin rounded dengan margin 2px (terpilih `primaryContainer` + hairline `primary`).
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **294/294 passed**
+- Commit belum dijalankan (manual oleh pemilik).
+
+## UX-4d — Teks status z-score boleh dua baris (2026-11-18)
+
+Di layar sempit (360dp @1,3) teks kategori resmi terpotong ("Berat bada..."). Status ubin kini: `maxLines: 2`, `softWrap`, `textAlign: center`, `fontSize 10,5`, `height 1.15` — teks resmi `officialCategoryXxx` dipakai apa adanya (bukan data karangan). `IntrinsicHeight` menyesuaikan tinggi ubin; tidak ada string baru.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **294/294 passed**
+- `flutter build apk --debug` → **✓ Built**
+- Commit belum dijalankan (manual oleh pemilik).
+
