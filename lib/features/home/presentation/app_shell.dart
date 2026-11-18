@@ -4,15 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:cekgizi/core/constants/app_strings.dart';
-import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/time/clock.dart';
 import 'package:cekgizi/core/time/local_dates.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/tanya_bubble.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
+import 'package:cekgizi/features/home/presentation/widgets/app_nav_bar.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 
-/// Shell navigasi utama (PRD §6.2): 4 destinasi aktif Batch 7
-/// (Beranda, Makan, Tumbuh, Tanya); destinasi Resep menyusul Batch 8.
+/// Shell navigasi utama (PRD §6.2, v2.1): 5 destinasi
+/// (Beranda, Makan, Resep, Tumbuh, Akun).
+///
+/// Tanya Gizi tidak lagi berupa tab - dibuka lewat [TanyaBubble] yang
+/// mengambang di atas bilah navigasi.
 ///
 /// [TodayWatcher] memastikan data "hari ini" tetap benar saat aplikasi
 /// dibuka kembali dari latar atau melewati tengah malam: catatan makan
@@ -76,41 +79,14 @@ class _AppShellState extends ConsumerState<AppShell>
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppTheme.colorsOf(context);
     return Scaffold(
       body: widget.navigationShell,
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: colors.outline, width: 1)),
-        ),
-        child: NavigationBar(
-          selectedIndex: widget.navigationShell.currentIndex,
-          onDestinationSelected: (index) => widget.navigationShell.goBranch(
-            index,
-            initialLocation: index == widget.navigationShell.currentIndex,
-          ),
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home_rounded),
-              label: AppStrings.navHome,
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.restaurant_outlined),
-              selectedIcon: Icon(Icons.restaurant_rounded),
-              label: AppStrings.navMakan,
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.show_chart_rounded),
-              selectedIcon: Icon(Icons.show_chart_rounded),
-              label: AppStrings.navGrowth,
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.chat_bubble_outline_rounded),
-              selectedIcon: Icon(Icons.chat_bubble_rounded),
-              label: AppStrings.navTanya,
-            ),
-          ],
+      floatingActionButton: const TanyaBubble(),
+      bottomNavigationBar: AppNavBar(
+        currentIndex: widget.navigationShell.currentIndex,
+        onSelected: (index) => widget.navigationShell.goBranch(
+          index,
+          initialLocation: index == widget.navigationShell.currentIndex,
         ),
       ),
     );

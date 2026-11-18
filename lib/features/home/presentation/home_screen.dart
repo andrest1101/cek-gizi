@@ -22,10 +22,12 @@ import 'package:cekgizi/shared/widgets/child_switcher.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
-import 'package:cekgizi/features/meals/presentation/widgets/photo_scan_fab.dart';
 
-/// Beranda (PRD §6.3, cakupan Batch 4): sapaan, anak aktif, status tumbuh.
-/// Kartu Piring Hari Ini & tips menyusul di Batch 6.
+/// Beranda (PRD §6.3, v2.1): sapaan + anak aktif + ringkasan hari ini.
+///
+/// Header sengaja hanya berisi sapaan: aksi "Kelola anak" pindah ke sheet
+/// ganti anak & tab Akun, "Pengaturan" pindah ke tab Akun, dan kamera pindah
+/// ke tab Makan. Satu layar = satu aksi utama (di sini: ringkasan).
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -34,7 +36,6 @@ class HomeScreen extends ConsumerWidget {
     final childrenAsync = ref.watch(childrenListProvider);
 
     return Scaffold(
-      floatingActionButton: const PhotoScanFab(),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () => _refresh(ref),
@@ -122,48 +123,27 @@ class _HomeHeader extends ConsumerWidget {
       ref.watch(foodLogsProvider(selectedChild.id));
     }
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                IdDateFormat.eyebrow(now),
-                style: AppTextStyles.label.copyWith(
-                  color: colors.textSecondary,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Semantics(
-                header: true,
-                child: Text(
-                  childName == null
-                      ? AppConfig.appName
-                      : AppStrings.homeGreeting(Greeting.of(now), childName),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.titleLarge.copyWith(
-                    color: colors.textPrimary,
-                  ),
-                ),
-              ),
-            ],
+        Text(
+          IdDateFormat.eyebrow(now),
+          style: AppTextStyles.label.copyWith(
+            color: colors.textSecondary,
+            letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(width: AppSpacing.sm),
-        IconButton.filledTonal(
-          tooltip: AppStrings.homeManageChild,
-          onPressed: () => context.push('/children'),
-          icon: const Icon(Icons.manage_accounts_rounded, size: 21),
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        IconButton.filledTonal(
-          tooltip: AppStrings.homeSettings,
-          onPressed: () => context.push('/settings'),
-          icon: const Icon(Icons.account_circle_rounded, size: 21),
+        const SizedBox(height: 2),
+        Semantics(
+          header: true,
+          child: Text(
+            childName == null
+                ? AppConfig.appName
+                : AppStrings.homeGreeting(Greeting.of(now), childName),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.titleLarge.copyWith(color: colors.textPrimary),
+          ),
         ),
       ],
     );

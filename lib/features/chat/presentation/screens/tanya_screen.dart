@@ -149,8 +149,11 @@ class _TanyaScreenState extends ConsumerState<TanyaScreen> {
               child: ScreenHeader(
                 eyebrow: AppStrings.tanyaEyebrow,
                 title: AppStrings.tanyaTitle,
-                trailing: hasMessages
-                    ? IconButton(
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (hasMessages)
+                      IconButton(
                         tooltip: AppStrings.tanyaDeleteHistory,
                         onPressed: _confirmClear,
                         icon: Icon(
@@ -158,8 +161,19 @@ class _TanyaScreenState extends ConsumerState<TanyaScreen> {
                           color: colors.textSecondary,
                         ),
                         // Semantics: tooltip jadi label otomatis.
-                      )
-                    : null,
+                      ),
+                    // Tanya adalah route penuh (bukan tab) - sediakan jalan
+                    // pulang yang jelas, bukan hanya gestur sistem.
+                    IconButton(
+                      tooltip: AppStrings.tanyaClose,
+                      onPressed: () => context.pop(),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             _DisclaimerBanner(),
