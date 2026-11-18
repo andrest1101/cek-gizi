@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/meals/domain/entities/food_log.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
@@ -67,11 +68,7 @@ class FoodLogList extends ConsumerWidget {
 
 /// Satu baris catatan: ikon kelompok, nama item, jam, dan tombol hapus.
 class FoodLogRow extends StatelessWidget {
-  const FoodLogRow({
-    super.key,
-    required this.log,
-    required this.onDelete,
-  });
+  const FoodLogRow({super.key, required this.log, required this.onDelete});
 
   final FoodLog log;
   final VoidCallback onDelete;
@@ -85,7 +82,6 @@ class FoodLogRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
 
     return Dismissible(
       key: ValueKey('log-${log.id}'),
@@ -121,11 +117,11 @@ class FoodLogRow extends StatelessWidget {
           log.items.map((item) => item.name).join(', '),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: textTheme.bodyMedium?.copyWith(color: colors.textPrimary),
+          style: AppTextStyles.body.copyWith(color: colors.textPrimary),
         ),
         subtitle: Text(
           _time(log.eatenAt),
-          style: textTheme.labelMedium?.copyWith(
+          style: AppTextStyles.label.copyWith(
             color: colors.textSecondary,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
@@ -133,10 +129,7 @@ class FoodLogRow extends StatelessWidget {
         trailing: IconButton(
           tooltip: AppStrings.makanDeleteLog,
           onPressed: onDelete,
-          icon: Icon(
-            Icons.delete_outline_rounded,
-            color: colors.textSecondary,
-          ),
+          icon: Icon(Icons.delete_outline_rounded, color: colors.textSecondary),
         ),
       ),
     );

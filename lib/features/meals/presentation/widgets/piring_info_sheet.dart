@@ -5,6 +5,7 @@ import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/meals/domain/services/dietary_diversity.dart';
 import 'package:cekgizi/features/meals/presentation/widgets/food_group_logo.dart';
@@ -35,7 +36,6 @@ class PiringInfoSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     final rulesAsync = ref.watch(nutritionRulesProvider);
     final media = MediaQuery.of(context);
     final reviewed = rulesAsync.value?.isReviewed;
@@ -88,7 +88,7 @@ class PiringInfoSheet extends ConsumerWidget {
                             header: true,
                             child: Text(
                               AppStrings.piringInfoTitle,
-                              style: textTheme.titleMedium?.copyWith(
+                              style: AppTextStyles.titleMedium.copyWith(
                                 color: colors.textPrimary,
                               ),
                             ),
@@ -96,7 +96,7 @@ class PiringInfoSheet extends ConsumerWidget {
                           const SizedBox(height: 2),
                           Text(
                             AppStrings.piringInfoIntro,
-                            style: textTheme.bodySmall?.copyWith(
+                            style: AppTextStyles.bodySmall.copyWith(
                               color: colors.textSecondary,
                             ),
                           ),
@@ -119,8 +119,7 @@ class PiringInfoSheet extends ConsumerWidget {
                       ? AppStrings.piringNoProfile
                       : AppStrings.piringInfoTargetBody(
                           profile!.targetGroups,
-                          breastMilkNotCounted:
-                              profile!.countWithoutBreastMilk,
+                          breastMilkNotCounted: profile!.countWithoutBreastMilk,
                         ),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -158,7 +157,7 @@ class PiringInfoSheet extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             AppStrings.piringUnreviewedCaption,
-                            style: textTheme.bodySmall?.copyWith(
+                            style: AppTextStyles.bodySmall.copyWith(
                               color: colors.textSecondary,
                             ),
                           ),
@@ -191,9 +190,9 @@ class _InfoBlock extends StatelessWidget {
     required this.title,
     required this.body,
   }) : assert(
-          (icon == null) != (logoCode == null),
-          'Isi tepat satu: icon atau logoCode.',
-        );
+         (icon == null) != (logoCode == null),
+         'Isi tepat satu: icon atau logoCode.',
+       );
 
   final IconData? icon;
   final String? logoCode;
@@ -203,7 +202,6 @@ class _InfoBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -231,14 +229,14 @@ class _InfoBlock extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: textTheme.titleMedium?.copyWith(
+                style: AppTextStyles.titleMedium.copyWith(
                   color: colors.textPrimary,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 body,
-                style: textTheme.bodySmall?.copyWith(
+                style: AppTextStyles.bodySmall.copyWith(
                   color: colors.textSecondary,
                 ),
               ),

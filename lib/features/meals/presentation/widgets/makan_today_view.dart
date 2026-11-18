@@ -5,6 +5,7 @@ import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/time/clock.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
@@ -94,9 +95,9 @@ class MakanTodayView extends ConsumerWidget {
         const SizedBox(height: AppSpacing.xs),
         Text(
           AppStrings.makanTimelineHint,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppTheme.colorsOf(context).textSecondary,
-              ),
+          style: AppTextStyles.bodySmall.copyWith(
+            color: AppTheme.colorsOf(context).textSecondary,
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
         logsAsync.when(
@@ -106,7 +107,10 @@ class MakanTodayView extends ConsumerWidget {
             onRetry: () => ref.invalidate(foodLogsProvider(child.id)),
           ),
           data: (logs) {
-            final todays = PiringDayEvaluator.logsOn(logs, now).reversed.toList();
+            final todays = PiringDayEvaluator.logsOn(
+              logs,
+              now,
+            ).reversed.toList();
             if (todays.isEmpty) return const _DiaryEmpty();
             return FoodLogList(logs: todays, childId: child.id);
           },
@@ -126,7 +130,6 @@ class _TodayPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     final piring = piringAsync.value;
 
     if (piring == null) {
@@ -161,7 +164,7 @@ class _TodayPanel extends StatelessWidget {
                   hasLogs
                       ? AppStrings.makanTodayProgress(met, total)
                       : AppStrings.makanTodayEmpty,
-                  style: textTheme.titleMedium?.copyWith(
+                  style: AppTextStyles.titleMedium.copyWith(
                     color: colors.textPrimary,
                   ),
                 ),
@@ -174,7 +177,7 @@ class _TodayPanel extends StatelessWidget {
                           breastMilkNotCounted:
                               piring.profile!.countWithoutBreastMilk,
                         ),
-                  style: textTheme.bodySmall?.copyWith(
+                  style: AppTextStyles.bodySmall.copyWith(
                     color: colors.textSecondary,
                   ),
                 ),
@@ -195,7 +198,7 @@ class _TodayPanel extends StatelessWidget {
                         animalPresent
                             ? AppStrings.piringAnimalProteinPresent
                             : AppStrings.piringAnimalProteinMissing,
-                        style: textTheme.bodySmall?.copyWith(
+                        style: AppTextStyles.bodySmall.copyWith(
                           color: colors.textSecondary,
                         ),
                       ),
@@ -209,10 +212,7 @@ class _TodayPanel extends StatelessWidget {
           IconButton(
             tooltip: AppStrings.piringInfoOpenSemantics,
             onPressed: onInfo,
-            icon: Icon(
-              Icons.info_outline_rounded,
-              color: colors.textSecondary,
-            ),
+            icon: Icon(Icons.info_outline_rounded, color: colors.textSecondary),
           ),
         ],
       ),
@@ -257,7 +257,6 @@ class _ChecklistHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -269,7 +268,7 @@ class _ChecklistHeader extends StatelessWidget {
                 header: true,
                 child: Text(
                   AppStrings.makanGridTitle,
-                  style: textTheme.titleMedium?.copyWith(
+                  style: AppTextStyles.titleMedium.copyWith(
                     color: colors.textPrimary,
                   ),
                 ),
@@ -277,7 +276,7 @@ class _ChecklistHeader extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               Text(
                 AppStrings.makanGridHint,
-                style: textTheme.bodySmall?.copyWith(
+                style: AppTextStyles.bodySmall.copyWith(
                   color: colors.textSecondary,
                 ),
               ),
@@ -305,7 +304,6 @@ class _ComposerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     return Container(
       decoration: AppSurfaces.sunken(context),
       child: InkWell(
@@ -318,10 +316,7 @@ class _ComposerButton extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.restaurant_menu_rounded,
-                color: colors.primary,
-              ),
+              Icon(Icons.restaurant_menu_rounded, color: colors.primary),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -329,7 +324,7 @@ class _ComposerButton extends StatelessWidget {
                   children: [
                     Text(
                       AppStrings.makanComposerCta,
-                      style: textTheme.titleMedium?.copyWith(
+                      style: AppTextStyles.titleMedium.copyWith(
                         color: colors.textPrimary,
                       ),
                     ),
@@ -337,7 +332,7 @@ class _ComposerButton extends StatelessWidget {
                       AppStrings.makanComposerHint,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodySmall?.copyWith(
+                      style: AppTextStyles.bodySmall.copyWith(
                         color: colors.textSecondary,
                       ),
                     ),
@@ -360,7 +355,6 @@ class _AsiExclusiveCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: AppSurfaces.card(context),
@@ -383,14 +377,14 @@ class _AsiExclusiveCard extends StatelessWidget {
               children: [
                 Text(
                   AppStrings.asiExclusiveTitle,
-                  style: textTheme.titleMedium?.copyWith(
+                  style: AppTextStyles.titleMedium.copyWith(
                     color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   AppStrings.asiExclusiveBody,
-                  style: textTheme.bodySmall?.copyWith(
+                  style: AppTextStyles.bodySmall.copyWith(
                     color: colors.textSecondary,
                   ),
                 ),
@@ -447,7 +441,6 @@ class _DiaryEmpty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: AppSurfaces.sunken(context),
@@ -458,7 +451,7 @@ class _DiaryEmpty extends StatelessWidget {
           Text(
             AppStrings.makanDiaryEmpty,
             textAlign: TextAlign.center,
-            style: textTheme.bodySmall?.copyWith(
+            style: AppTextStyles.bodySmall.copyWith(
               color: colors.textSecondary,
             ),
           ),

@@ -6,6 +6,7 @@ import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/meals/domain/services/piring_day.dart';
@@ -53,7 +54,6 @@ class _PiringContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     final reached = piring.isTargetReached;
     final animalPresent = piring.animalProteinPresent;
     final noProfile = piring.profile == null;
@@ -62,8 +62,10 @@ class _PiringContent extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration:
-          AppSurfaces.hero(context, radius: AppRadius.card + AppSpacing.xs),
+      decoration: AppSurfaces.hero(
+        context,
+        radius: AppRadius.card + AppSpacing.xs,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -71,7 +73,7 @@ class _PiringContent extends StatelessWidget {
             header: true,
             child: Text(
               AppStrings.piringTitle.toUpperCase(),
-              style: textTheme.labelMedium?.copyWith(
+              style: AppTextStyles.label.copyWith(
                 color: colors.primary,
                 letterSpacing: 1.2,
                 fontWeight: FontWeight.w700,
@@ -124,7 +126,7 @@ class _PiringContent extends StatelessWidget {
             Text(
               AppStrings.piringLegendAnimal,
               textAlign: TextAlign.center,
-              style: textTheme.labelMedium?.copyWith(
+              style: AppTextStyles.label.copyWith(
                 color: colors.textSecondary,
                 fontSize: 11,
                 height: 1.3,
@@ -141,7 +143,7 @@ class _PiringContent extends StatelessWidget {
                         piring.profile!.countWithoutBreastMilk,
                   ),
             textAlign: TextAlign.center,
-            style: textTheme.labelMedium?.copyWith(
+            style: AppTextStyles.label.copyWith(
               color: colors.textSecondary,
               fontSize: 11,
               height: 1.3,
@@ -176,7 +178,6 @@ class _StatusLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final colors = AppTheme.colorsOf(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -187,7 +188,7 @@ class _StatusLine extends StatelessWidget {
           child: Text(
             text,
             textAlign: TextAlign.center,
-            style: textTheme.bodySmall?.copyWith(
+            style: AppTextStyles.bodySmall.copyWith(
               color: muted ? colors.textSecondary : colors.textPrimary,
               fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
             ),
@@ -205,7 +206,10 @@ class _PiringSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: AppSurfaces.hero(context, radius: AppRadius.card + AppSpacing.xs),
+      decoration: AppSurfaces.hero(
+        context,
+        radius: AppRadius.card + AppSpacing.xs,
+      ),
       child: const Column(
         children: [
           Align(
@@ -234,7 +238,10 @@ class _PiringError extends StatelessWidget {
     final colors = AppTheme.colorsOf(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: AppSurfaces.hero(context, radius: AppRadius.card + AppSpacing.xs),
+      decoration: AppSurfaces.hero(
+        context,
+        radius: AppRadius.card + AppSpacing.xs,
+      ),
       child: Column(
         children: [
           Icon(Icons.cloud_off_rounded, color: colors.primary),
@@ -242,15 +249,10 @@ class _PiringError extends StatelessWidget {
           Text(
             AppStrings.makanLoadError,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colors.primary,
-                ),
+            style: AppTextStyles.bodySmall.copyWith(color: colors.primary),
           ),
           const SizedBox(height: AppSpacing.sm),
-          TextButton(
-            onPressed: onRetry,
-            child: const Text(AppStrings.retry),
-          ),
+          TextButton(onPressed: onRetry, child: const Text(AppStrings.retry)),
         ],
       ),
     );
@@ -263,10 +265,12 @@ class _AsiExclusiveHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: AppSurfaces.hero(context, radius: AppRadius.card + AppSpacing.xs),
+      decoration: AppSurfaces.hero(
+        context,
+        radius: AppRadius.card + AppSpacing.xs,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -287,7 +291,7 @@ class _AsiExclusiveHero extends StatelessWidget {
                   header: true,
                   child: Text(
                     AppStrings.asiExclusiveTitle,
-                    style: textTheme.titleMedium?.copyWith(
+                    style: AppTextStyles.titleMedium.copyWith(
                       color: colors.primary,
                     ),
                   ),
@@ -298,7 +302,7 @@ class _AsiExclusiveHero extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             AppStrings.asiExclusiveBody,
-            style: textTheme.bodySmall?.copyWith(color: colors.primary),
+            style: AppTextStyles.bodySmall.copyWith(color: colors.primary),
           ),
           const SizedBox(height: AppSpacing.lg),
           FilledButton.icon(
