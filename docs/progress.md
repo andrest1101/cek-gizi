@@ -763,3 +763,124 @@ Kepala Makan (tanggal, judul, ganti anak, segmen Hari ini/Riwayat) disematkan di
 - `flutter test` → **293/293 passed**.
 - Perilaku: kepala hilang dari layar saat menggulir (identik dengan Beranda).
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-4 — Beranda & Tumbuh: 3 blok berhierarki (2026-11-18)
+
+### Ruang lingkup
+Perbaikan struktur & presentasi sesuai pemetaan UX-4. **Tidak ada aturan gizi, angka, atau resep baru** — semua nilai tetap berasal dari domain (`PiringDay`, `GrowthSummary`, `GrowthStatusCopy`).
+
+### Beranda
+1. `PiringHeroCard`: hero tetap satu per layar (ring + angka dominan), kini ditambah **2 ubin metrik berdampingan** di dalam permukaan yang sama, dipisah hairline: protein hewani (ikon+teks, pindah dari status line) dan tren berat (`GrowthSummary.weightDeltaOf`; "Belum ada ukuran" bila kosong).
+2. Identitas anak pindah ke header sebagai `ChildSwitcherButton` — `ChildSwitcherCard` tidak dipakai lagi di Beranda.
+3. `HomeWeekChips` (baru): strip 7 hari jadi **pil horizontal** yang bisa digeser; `WeekStrip` grid tetap dipakai di Riwayat Makan. `openWeekHistory()` diekstrak agar kedua pintu memakai satu logika.
+4. `PiringTipsCard`: bukan kartu/sunken lagi — jadi satu baris ringkas (maks 2 baris + aksi inline) yang ditempatkan sebagai `footer` di dalam `GrowthStatusCard`. Hasilnya 3 blok: **Fokus hari ini → Minggu ini → Tumbuh ringkas**.
+
+### Tumbuh
+1. `ZScoreSummaryStrip` (baru): tiga ubin (Tinggi, Berat, BB/TB) memuat z-score + status ikon/teks/warna, **sekaligus pemilih indeks grafik** — menggantikan `SegmentControl` terpisah.
+2. `GrowthChartCard` jadi **full-bleed** (menyentuh tepi layar; hairline atas/bawah, tanpa kartu melayang). Blok lain dibungkus padding 20dp.
+3. Riwayat pengukuran jadi **accordion kustom** (`Semantics(expanded:)`, `AnimatedSize`, hormati `AppMotion.of`): ringkasan + status selalu terlihat, z-score & aksi edit/hapus dibuka saat diketuk. `ExpansionTile` tidak dipakai karena memicu assert semantics pada Flutter 3.32.8.
+
+### Perubahan tes
+- `makan_flow_test`: `_berandaScrollable` mengambil `Scrollable` pertama karena Beranda kini punya daftar vertikal + strip horizontal; tes riwayat menggulir ke segmen sebelum mengetuk.
+- `growth_flow_test`: gulir ke grafik/ubin/riwayat sebelum berinteraksi karena konten lebih tinggi.
+- `layout_scale_test`: tinggi chip minggu dinaikkan (88dp) agar aman 360dp @1,3.
+- `test/features/ux4_layout_test.dart` (baru, 2 tes): struktur 3 blok Beranda & perilaku accordion Tumbuh.
+
+### Dependency baru
+**Tidak ada.**
+
+### Verifikasi (2026-11-18)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **295/295 passed** (baseline 293; +2 tes UX-4).
+- `flutter build apk --debug` → **✓ Built**.
+- DoD §10.1: gradien 0; `Colors.*` (selain `transparent`) di `lib/features` + `lib/shared` = 0.
+- Layout 360dp @1.3 light + dark: Beranda & Tumbuh tanpa overflow.
+- Commit belum dijalankan (manual oleh pemilik).
+
+## UX-7 — Splash & Opening Lottie (2026-11-18)
+
+### Ruang lingkup
+Layar pembuka & splash diganti dari animasi logo Flutter statis menjadi **Lottie bermerek** yang disediakan pemilik. Tidak ada perubahan alur onboarding/consent.
+
+### Dependency baru (disetujui 2026-11-18)
+- **`lottie` (^3.3.1)** — renderer vektor untuk `cekgizi_opening.json` (1080×1080, 60fps, 3 dtk, 9 layer, tanpa aset gambar eksternal) sebagai pengganti animasi logo. Alasan: satu-satunya cara menampilkan Lottie secara aman di Flutter; tanpa plugin native, tanpa jaringan; tetap bisa diuji widget.
+
+### Perubahan
+1. `OpeningScreen` ditulis ulang: `Lottie.asset('assets/animations/cekgizi_opening.json', controller, repeat: false)`, `onLoaded` dipakai untuk mengatur durasi lalu `forward()`. Saat selesai → `context.go(nextLocation)` seperti sebelumnya. Reduce-motion dihormati (langsung lanjut). **Timeout pengaman 4,5 dtk** dan `errorBuilder` (fallback `_Wordmark`) menjamin tidak pernah macet seperti kasus splash lama.
+2. `_StartupScreen` (yang tampil selagi backend disiapkan) disederhanakan: **solid `#145C45` + `CircularProgressIndicator`** — tidak ada logo ganda sebelum Lottie.
+3. `AppSurfaces.splashSurface` / `onSplashSurface` / `onSplashSurfaceMuted` (baru): token konstan `#145C45`, sama dengan `Background_Surface` di dalam Lottie sehingga **tidak ada letterbox/warna berbeda** di light maupun dark.
+4. Android: `values(-night)/colors.xml` → `splash_background = #145C45`; `launch_background.xml` / `drawable-v21` memakai warna tersebut; `values(-night)-v31` (Android 12+) memakai warna yang sama.
+5. Tes `opening_screen_test.dart` diperbarui: mencari widget `Lottie` (bukan `Image`) dan memverifikasi pindah layar saat animasi selesai serta saat reduce-motion.
+
+### Catatan penting — "logo Flutter"
+Tidak ditemukan class splash/logo Flutter di engine yang dipakai (Flutter 3.32.8). Logo Flutter yang tampak sebelumnya kemungkinan besar berasal dari artefak **debug** (`flutter run`), bukan dari kode aplikasi. Setelah perubahan ini splash native sudah solid `#145C45`; jika logo masih muncul, **uninstall aplikasi lama / cek build release** (`flutter run --release`) — di release Flutter tidak menyuntik logo.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **295/295 passed**.
+- `flutter build apk --debug` → **✓ Built**.
+- DoD §10.1: gradien 0; `Colors.*` (selain `transparent`) di `lib/features` + `lib/shared` = 0.
+- Perlu tinjauan di perangkat: light/dark, apakah video/Lottie terpotong atau pas, dan apakah logo Flutter benar-benar hilang saat debug/uninstall ulang.
+- Commit belum dijalankan (manual oleh pemilik).
+
+## UX-8 — Splash Satu Page, Logo Pusat, Ikon CekGizi (2026-11-18)
+
+### Ruang lingkup
+Lanjutan UX-7: perbaikan posisi Lottie, satu page splash, ganti launcher/splash icon bawaan Flutter, dan speed Lottie 0,65×.
+
+### Dependency baru (disetujui 2026-11-18)
+- **`flutter_launcher_icons` (devDependency, ^0.14.4)** — generate launcher icon Android (`ic_launcher`) dari `assets/logo/logo_splash_screen.png` sekali jalan; tidak di-ship di runtime. Alasan: sumber ikon default Flutter (`mipmap-*/ic_launcher.png`) harus diganti ke logo CekGizi tanpa manipulasi manual 5 density.
+- `lottie` (^3.3.1) sudah tercantum di UX-7.
+
+### Perubahan
+1. **Ikon aplikasi**: sebelumnya `mipmap-*/ic_launcher.png` adalah **logo Flutter bawaan** — itulah yang tampak saat aplikasi dibuka. Kini digenerate dari logo CekGizi (`flutter_launcher_icons`; config di `pubspec.yaml`).
+2. **Splash Android 12+** (`values-v31` & `values-night-v31`): `windowSplashScreenAnimatedIcon` dihapus → splash sistem **solid `#145C45` tanpa ikon**. Logo pertama kali muncul di dalam Lottie.
+3. **Satu page**: `_StartupScreen` dihapus. `CekGiziApp` langsung `MaterialApp.router`; `backendReadyProvider` (baru, default = future selesai untuk tes) di-override di `main()` dengan `bootstrapBackend()`. `OpeningScreen` menunggu animasi **∧** backend bersamaan: bila Lottie selesai lebih dulu, frame terakhir ditahan dengan progres halus; bila backend selesai lebih dulu, aplikasi langsung masuk setelah animasi. Reduce-motion: langsung lanjut. Fallback keras 20 dtk.
+4. **Posisi Lottie**: ukuran kotak eksplisit (`shortSide × 0.66`, dibatasi 208–300dp) + `Center` + `Column(mainAxisSize: min)` — terpusat di kedua sumbu.
+5. **Speed Lottie 0,65×**: durasi controller dilebarkan jadi `composition.duration / 0.65` (~4,6 dtk). `_fallbackDelay` disesuaikan ke 20 dtk.
+6. Tes `opening_screen_test.dart` dibungkus `ProviderScope` (OpeningScreen kini `ConsumerStatefulWidget`); `app_test.dart` dibersihkan.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **294/294 passed** (baseline 295; satu tes percobaan reduce-motion-lambat-backend dihapus karena lingkungan tes tidak bisa memaksa `disableAnimations` lewat root wrapper — cakupan reduce-motion tetap ada di `opening_screen_test.dart`).
+- `flutter build apk --debug` → **✓ Built**.
+- DoD: gradien 0; `Colors.*` (selain `transparent`) di `lib/features` + `lib/shared` = 0.
+- Wajib di perangkat: uninstall aplikasi lama dulu (Android meng-cache ikon/splash), lalu install ulang; pastikan urutannya native hijau → Lottie (satu page, center, 0,65×) → aplikasi, dan tidak ada logo Flutter.
+- Commit belum dijalankan (manual oleh pemilik).
+
+## UX-8b — Ukuran Lottie diperbesar (2026-11-18)
+
+Font & logo Lottie terlalu kecil: ukuran diubah dari `shortSide × 0.66` (±238dp di 360dp) menjadi **`shortSide × 0.80`** (±288dp; dibatasi 220–330dp). Satu page splash, posisi center, ∧ backend, x0.65 — tidak berubah.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **294/294 passed**
+- `flutter build apk --debug` → **✓ Built**
+- Commit belum dijalankan (manual oleh pemilik).
+
+## UX-9 — Efek suara khas logo saat splash (2026-11-18)
+
+### Ruang lingkup
+Memutar audio khusus logo bersamaan dengan Lottie di `OpeningScreen`. Tidak ada perubahan alur/onboarding.
+
+### Dependency baru (disetujui 2026-11-18)
+- **`audioplayers` (^6.6.0)** — satu-satunya audio player yang dipakai (tanpa konfigurasi native tambahan; mendukung WAV). Alasan: memainkan `assets/audio/cek-gizi_audio.wav` bersama animasi; tanpa jaringan; cukup satu instance; tidak ada playback background.
+
+### Perubahan
+1. `assets/audio/cek-gizi_audio.wav` (814 KB, dibuat pemilik/AI — durasi sudah diselaraskan dengan Lottie 0,65×).
+2. `pubspec.yaml`: `assets/audio/` didaftarkan; `audioplayers` ditambahkan.
+3. `OpeningScreen`: saat `onLoaded` (normal path), audio diputar **sekali** pada volume **0,35**, bersamaan dengan `forward()`.
+   - Reduce-motion → **tanpa suara**.
+   - Gagal audio → diabaikan (bisu), splash tetap jalan.
+   - `ReleaseMode.stop`; player dilepas di `dispose()`.
+   - Tidak ada toggle Akun dulu; default **nyala** (sesuai permintaan), bisa ditambahkan nanti bila perlu.
+
+### Catatan ukuran file
+WAV 814 KB menambah ukuran APK (~0,8 MB). Bila ukuran jadi prioritas, sebaiknya dikonversi ke MP3/AAC (~100–150 KB) dengan tool eksternal; kode tidak berubah (cukup ganti aset/`AssetSource`).
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **294/294 passed** (audio dipanggil dalam try/catch, tidak menyentuh tes).
+- `flutter build apk --debug` → **✓ Built**.
+- Perlu tinjauan di perangkat: apakah suara terdengar di cold start, apakah tidak mengejutkan (volume 0,35), dan apakah reduce-motion benar-benar membisukan.
+- Commit belum dijalankan (manual oleh pemilik).

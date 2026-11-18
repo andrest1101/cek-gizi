@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 import 'package:cekgizi/core/config/app_config.dart';
-import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/splash/presentation/screens/opening_screen.dart';
 
@@ -22,15 +23,17 @@ GoRouter _router() => GoRouter(
 );
 
 Widget _app(GoRouter router, {bool reduceMotion = false}) {
-  return MaterialApp.router(
-    theme: AppTheme.light(),
-    darkTheme: AppTheme.dark(),
-    routerConfig: router,
-    builder: (context, child) => MediaQuery(
-      data: MediaQuery.of(
-        context,
-      ).copyWith(disableAnimations: reduceMotion),
-      child: child!,
+  return ProviderScope(
+    child: MaterialApp.router(
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      routerConfig: router,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(
+          context,
+        ).copyWith(disableAnimations: reduceMotion),
+        child: child!,
+      ),
     ),
   );
 }
@@ -54,11 +57,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
 
       expect(find.bySemanticsLabel(AppConfig.appName), findsOneWidget);
-      expect(find.byType(Image), findsOneWidget);
-      expect(find.text(AppStrings.openingTagline), findsOneWidget);
+      expect(find.byType(Lottie), findsOneWidget);
       expect(tester.takeException(), isNull);
 
-      // Animasi selesai → layar berikutnya. Ini juga memastikan tidak ada
+      // Lottie selesai → layar berikutnya. Ini juga memastikan tidak ada
       // timer pengaman yang tertinggal (aplikasi tidak "macet di logo").
       await tester.pumpAndSettle();
       expect(find.text('layar-berikut'), findsOneWidget);

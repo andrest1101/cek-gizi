@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Warna splash native = latar terang aplikasi (#FBF7F0). -->
-    <color name="splash_background">#FBF7F0</color>
+    <!-- Splash native = warna latar Lottie pembuka (#145C45), bukan putih. -->
+    <color name="splash_background">#145C45</color>
 </resources>

@@ -56,6 +56,18 @@ abstract final class AppSurfaces {
     );
   }
 
+  /// Latar splash/opening (satu-satunya permukaan video/Lottie). Warna ini
+  /// sengaja konstan light & dark karena latar di dalam Lottie
+  /// (`Background_Surface`) juga satu warna: `#145C45`. Dipakai sebagai
+  /// `Scaffold.backgroundColor` di layar pembuka dan splash native Android.
+  static const Color splashSurface = Color(0xFF145C45);
+
+  /// Warna isi di atas [splashSurface] (logo fallback, indikator memuat).
+  static const Color onSplashSurface = Color(0xFFFFFFFF);
+
+  /// Warna indikator sekunder di atas [splashSurface] (track/proses).
+  static const Color onSplashSurfaceMuted = Color(0xFFA3D6BF);
+
   /// Warna permukaan kartu aktif - untuk `Material`/ripple di atas kartu.
   static Color cardColor(BuildContext context) {
     final colors = AppTheme.colorsOf(context);

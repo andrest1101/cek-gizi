@@ -181,25 +181,29 @@ class _DayCell extends StatelessWidget {
   }
 }
 
-/// Strip 7 hari + tautan "Lihat riwayat" untuk Beranda.
-class HomeWeekStrip extends ConsumerWidget {
-  const HomeWeekStrip({super.key, required this.childId});
+/// Buka tab Makan pada bagian Riwayat, opsional dengan hari yang dipilih.
+Future<void> openWeekHistory(
+  BuildContext context,
+  WidgetRef ref, {
+  DateTime? day,
+}) async {
+  if (day != null) {
+    focusHistoryDay(ref, day);
+  } else {
+    ref.read(historySelectedDayProvider.notifier).select(null);
+    ref.read(makanSectionProvider.notifier).show(MakanSection.history);
+  }
+  context.go('/makan');
+}
+
+/// Versi Beranda: pil horizontal yang bisa digeser, bukan tujuh kolom penuh.
+///
+/// Tetap memakai data `historySummaryProvider` yang sama dengan `WeekStrip`
+/// di tab Riwayat - hanya cara menampilkannya yang berbeda.
+class HomeWeekChips extends ConsumerWidget {
+  const HomeWeekChips({super.key, required this.childId});
 
   final String childId;
-
-  Future<void> _openHistory(
-    BuildContext context,
-    WidgetRef ref, {
-    DateTime? day,
-  }) async {
-    if (day != null) {
-      focusHistoryDay(ref, day);
-    } else {
-      ref.read(historySelectedDayProvider.notifier).select(null);
-      ref.read(makanSectionProvider.notifier).show(MakanSection.history);
-    }
-    context.go('/makan');
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -215,7 +219,225 @@ class HomeWeekStrip extends ConsumerWidget {
         SectionHeader(
           title: AppStrings.homeWeekTitle,
           trailing: TextButton(
-            onPressed: () => _openHistory(context, ref),
+            onPressed: () => openWeekHistory(context, ref),
+            style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+            child: const Text(AppStrings.homeWeekHistoryCta),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          AppStrings.homeWeekHint,
+          style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        summaryAsync.when(
+          loading: () => const Skeleton(height: 76, radius: AppRadius.card),
+          error: (error, stackTrace) => Row(
+            children: [
+              Icon(Icons.cloud_off_rounded, size: 18, color: colors.textSecondary),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  AppStrings.homeWeekLoadError,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () =>
+                    ref.invalidate(historySummaryProvider(childId)),
+                style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+                child: const Text(AppStrings.retry),
+              ),
+            ],
+          ),
+          data: (summary) {
+            if (summary == null || summary.daysWithLogs == 0) {
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.md,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(AppRadius.control),
+                ),
+                child: Text(
+                  AppStrings.homeWeekEmpty,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+              );
+            }
+            final days = summary.recent(7).reversed.toList();
+            return SizedBox(
+              height: 88,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: days.length,
+                itemBuilder: (context, index) {
+                  final day = days[index];
+                  final isToday = day.day.year == now.year &&
+                      day.day.month == now.month &&
+                      day.day.day == now.day;
+                  final isSelected = selectedDay != null &&
+                      selectedDay.year == day.day.year &&
+                      selectedDay.month == day.day.month &&
+                      selectedDay.day == day.day.day;
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      right: index == days.length - 1 ? 0 : AppSpacing.xs,
+                    ),
+                    child: _HomeWeekChip(
+                      day: day,
+                      isToday: isToday,
+                      isSelected: isSelected,
+                      onTap: () => openWeekHistory(
+                        context,
+                        ref,
+                        day: day.day,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _HomeWeekChip extends StatelessWidget {
+  const _HomeWeekChip({
+    required this.day,
+    required this.isToday,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final HistoryDay day;
+  final bool isToday;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    final textTheme = Theme.of(context).textTheme;
+    final label = isToday
+        ? AppStrings.homeWeekToday
+        : IdDateFormat.weekdayShort(day.day);
+    final fill = isSelected
+        ? colors.primaryContainer
+        : colors.surfaceVariant;
+
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: AppStrings.homeWeekDaySemantics(
+        isToday ? AppStrings.homeWeekToday : IdDateFormat.full(day.day),
+        day.metCount,
+        day.targetCount,
+        hasLogs: day.hasLogs,
+        reached: day.targetReached,
+      ),
+      excludeSemantics: true,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppRadius.control),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.control),
+          child: Container(
+            width: 68,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xs,
+              vertical: AppSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              color: fill,
+              borderRadius: BorderRadius.circular(AppRadius.control),
+              border: isSelected
+                  ? Border.all(color: colors.primary, width: 1.5)
+                  : null,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.labelMedium?.copyWith(
+                    color: isSelected ? colors.primary : colors.textSecondary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${day.day.day}',
+                  style: textTheme.titleMedium?.copyWith(
+                    color: isSelected ? colors.primary : colors.textPrimary,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+                const SizedBox(height: 2),
+                SizedBox(
+                  height: 14,
+                  child: day.targetReached
+                      ? Icon(
+                          Icons.check_circle_rounded,
+                          size: 13,
+                          color: colors.primary,
+                        )
+                      : day.hasLogs
+                          ? Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: colors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Strip 7 hari + tautan "Lihat riwayat" untuk Beranda (versi lama).
+/// Dipertahankan untuk kompatibilitas & dipakai bila layout penuh dibutuhkan.
+class HomeWeekStrip extends ConsumerWidget {
+  const HomeWeekStrip({super.key, required this.childId});
+
+  final String childId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = AppTheme.colorsOf(context);
+    final textTheme = Theme.of(context).textTheme;
+    final selectedDay = ref.watch(historySelectedDayProvider);
+    final summaryAsync = ref.watch(historySummaryProvider(childId));
+    final now = ref.watch(clockProvider)();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(
+          title: AppStrings.homeWeekTitle,
+          trailing: TextButton(
+            onPressed: () => openWeekHistory(context, ref),
             style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
             child: const Text(AppStrings.homeWeekHistoryCta),
           ),
@@ -271,7 +493,7 @@ class HomeWeekStrip extends ConsumerWidget {
               days: summary.recent(7),
               selectedDay: selectedDay,
               today: now,
-              onSelect: (day) => _openHistory(context, ref, day: day),
+              onSelect: (day) => openWeekHistory(context, ref, day: day),
             );
           },
         ),

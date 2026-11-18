@@ -45,6 +45,8 @@ dependencies:
   url_launcher: ^6.3.2
   flutter_local_notifications: ^20.1.0
   timezone: ^0.10.1
+  lottie: ^3.3.1
+  audioplayers: ^6.6.0
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +58,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -70,6 +73,8 @@ flutter:
 
   assets:
     - assets/fonts/
+    - assets/animations/
+    - assets/audio/
     - assets/reference/
     - assets/rules/
     - assets/logo/
@@ -117,3 +122,12 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Ikon launcher Android di-generate dari logo CekGizi (bukan bawaan Flutter).
+# Jalankan ulang setelah mengganti assets/logo/logo_splash_screen.png:
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: false
+  image_path: "assets/logo/logo_splash_screen.png"
+  min_sdk_android: 21

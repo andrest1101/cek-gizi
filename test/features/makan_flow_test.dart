@@ -14,10 +14,14 @@ import 'package:cekgizi/features/meals/presentation/providers/meals_providers.da
 
 import '../fakes.dart';
 
-final _berandaScrollable = find.descendant(
-  of: find.byKey(const Key('home-list')),
-  matching: find.byType(Scrollable),
-);
+/// Beranda punya daftar vertikal + strip hari horizontal: ambil yang pertama
+/// (vertikal) supaya finder tidak ambigu.
+final _berandaScrollable = find
+    .descendant(
+      of: find.byKey(const Key('home-list')),
+      matching: find.byType(Scrollable),
+    )
+    .first;
 
 /// Cari scrollable layar yang sedang aktif (Makan hari ini / Makan Riwayat /
 /// Beranda). Cabang yang offstage tidak dipilih.
