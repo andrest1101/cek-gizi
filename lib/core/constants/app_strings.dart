@@ -785,4 +785,13 @@ abstract final class AppStrings {
   static const capturePanelCta = photoScanFab;
   static const capturePanelSemantics =
       'Kenali isi piring. Buka kamera untuk memotret makanan anak.';
+  static const startupLoading = 'Menyiapkan aplikasi…';
+  static const capturePanelEyebrow = 'FOTO PIRING';
+  static const capturePanelStepPhoto = 'Foto piring';
+  static const capturePanelStepRecognize = 'Dikenali AI';
+  static const capturePanelStepReview = 'Kamu periksa';
+  static const capturePanelPrivacy =
+      'Foto dihapus setelah dikenali. Tidak disimpan.';
+  static const capturePanelManualCta = 'Catat tanpa foto';
+  static const scanPreparing = 'Menyiapkan kamera…';
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,8 +11,11 @@ import 'package:cekgizi/core/theme/app_theme.dart';
 
 /// Lightweight branded opening shown after app initialization.
 ///
-/// Backend and preferences are initialized before Flutter mounts, so this
-/// screen is intentionally a short transition rather than a network loader.
+/// Backend and preferences are initialized before Flutter mounts (dengan
+/// batas waktu), so this screen is intentionally a short transition rather
+/// than a network loader. Ada pengaman: bila animasi tidak pernah selesai
+/// (mis. ticker dijeda oleh sistem), layar tetap melanjutkan setelah
+/// [_fallbackDelay] agar aplikasi tidak pernah berhenti di logo.
 class OpeningScreen extends StatefulWidget {
   const OpeningScreen({super.key, required this.nextLocation});
 
@@ -22,6 +27,13 @@ class OpeningScreen extends StatefulWidget {
 
 class _OpeningScreenState extends State<OpeningScreen>
     with SingleTickerProviderStateMixin {
+  static const Duration _animationDuration = Duration(milliseconds: 1250);
+
+  /// Batas keras sebelum dipaksa lanjut. Lebih longgar dari durasi animasi
+  /// supaya tidak memotong gerak normal, tetapi tetap jauh di bawah ambang
+  /// "terasa macet".
+  static const Duration _fallbackDelay = Duration(milliseconds: 1900);
+
   late final AnimationController _controller;
   late final Animation<double> _logoOpacity;
   late final Animation<double> _logoScale;
@@ -30,14 +42,13 @@ class _OpeningScreenState extends State<OpeningScreen>
   late final Animation<double> _taglineOpacity;
   late final Animation<Offset> _taglineOffset;
   bool _openingStarted = false;
+  bool _navigated = false;
+  Timer? _fallback;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1250),
-    );
+    _controller = AnimationController(vsync: this, duration: _animationDuration);
     _logoOpacity = CurvedAnimation(
       parent: _controller,
       curve: const Interval(0, 0.42, curve: Curves.easeOutCubic),
@@ -70,28 +81,46 @@ class _OpeningScreenState extends State<OpeningScreen>
             curve: const Interval(0.62, 1, curve: Curves.easeOutCubic),
           ),
         );
+    // Tunggu frame pertama dulu: MediaQuery & GoRouter siap dipakai, dan
+    // pengguna melihat logo seketika.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startOpening());
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_openingStarted) return;
+  void _startOpening() {
+    if (!mounted || _openingStarted) return;
     _openingStarted = true;
-    _playOpening();
+    _fallback = Timer(_fallbackDelay, _goNext);
+
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller.value = 1;
+      _goNext();
+      return;
+    }
+    unawaited(_playAnimation());
   }
 
-  Future<void> _playOpening() async {
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    if (reduceMotion) {
-      _controller.value = 1;
-    } else {
+  /// `forward()` bisa berakhir dengan `TickerCanceled` bila layar dilepas
+  /// sebelum animasi selesai - itu bukan galat yang perlu ditampilkan.
+  Future<void> _playAnimation() async {
+    try {
       await _controller.forward();
+    } catch (_) {
+      // Diabaikan: pengaman [_fallback] / dispose yang menangani.
     }
-    if (mounted) context.go(widget.nextLocation);
+    _goNext();
+  }
+
+  void _goNext() {
+    if (!mounted || _navigated) return;
+    _navigated = true;
+    _fallback?.cancel();
+    _fallback = null;
+    context.go(widget.nextLocation);
   }
 
   @override
   void dispose() {
+    _fallback?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -104,6 +133,8 @@ class _OpeningScreenState extends State<OpeningScreen>
       'assets/logo/logo_splash_screen.png',
       width: 176,
       height: 176,
+      // Batasi bitmap yang di-decode: aset 176dp tidak perlu resolusi penuh.
+      cacheWidth: 352,
       fit: BoxFit.contain,
       filterQuality: FilterQuality.high,
       semanticLabel: '${AppConfig.appName} — logo',
@@ -137,46 +168,51 @@ class _OpeningScreenState extends State<OpeningScreen>
       backgroundColor: colors.background,
       body: SafeArea(
         child: Center(
-          child: Semantics(
-            label: AppConfig.appName,
-            liveRegion: true,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (reduceMotion)
-                  logo
-                else
-                  FadeTransition(
-                    opacity: _logoOpacity,
-                    child: ScaleTransition(scale: _logoScale, child: logo),
-                  ),
-                const SizedBox(height: AppSpacing.lg),
-                if (reduceMotion)
-                  title
-                else
-                  FadeTransition(
-                    opacity: _titleOpacity,
-                    child: SlideTransition(
-                      position: _titleOffset,
-                      child: _StaggeredWord(
-                        word: AppConfig.appName,
-                        controller: _controller,
-                        style: title.style!,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenPadding,
+            ),
+            child: Semantics(
+              label: AppConfig.appName,
+              liveRegion: true,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (reduceMotion)
+                    logo
+                  else
+                    FadeTransition(
+                      opacity: _logoOpacity,
+                      child: ScaleTransition(scale: _logoScale, child: logo),
+                    ),
+                  const SizedBox(height: AppSpacing.lg),
+                  if (reduceMotion)
+                    title
+                  else
+                    FadeTransition(
+                      opacity: _titleOpacity,
+                      child: SlideTransition(
+                        position: _titleOffset,
+                        child: _StaggeredWord(
+                          word: AppConfig.appName,
+                          controller: _controller,
+                          style: title.style!,
+                        ),
                       ),
                     ),
-                  ),
-                const SizedBox(height: AppSpacing.xs),
-                if (reduceMotion)
-                  tagline
-                else
-                  FadeTransition(
-                    opacity: _taglineOpacity,
-                    child: SlideTransition(
-                      position: _taglineOffset,
-                      child: tagline,
+                  const SizedBox(height: AppSpacing.xs),
+                  if (reduceMotion)
+                    tagline
+                  else
+                    FadeTransition(
+                      opacity: _taglineOpacity,
+                      child: SlideTransition(
+                        position: _taglineOffset,
+                        child: tagline,
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
