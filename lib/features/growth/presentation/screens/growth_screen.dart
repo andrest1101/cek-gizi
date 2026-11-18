@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
+import 'package:cekgizi/core/theme/app_motion.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
@@ -19,14 +20,15 @@ import 'package:cekgizi/features/growth/presentation/widgets/add_measurement_she
 import 'package:cekgizi/features/growth/presentation/widgets/growth_chart.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/growth_status_card.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/status_copy.dart';
+import 'package:cekgizi/features/growth/presentation/widgets/zscore_summary_strip.dart';
 import 'package:cekgizi/shared/widgets/child_switcher.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/screen_header.dart';
 import 'package:cekgizi/shared/widgets/section_header.dart';
-import 'package:cekgizi/shared/widgets/segment_control.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 import 'package:cekgizi/shared/widgets/status_pill.dart';
+import 'package:cekgizi/shared/widgets/z_score_table.dart';
 
 /// Layar Tumbuh (PRD §6.5): status terbaru, grafik pita SD, riwayat ukur.
 class GrowthScreen extends ConsumerStatefulWidget {
@@ -99,63 +101,81 @@ class _GrowthBody extends ConsumerWidget {
     // dan riwayat kosong disembunyikan agar tidak ada tiga blok kosong.
     final showChart = measurementsAsync.isLoading || hasMeasurements;
 
+    // Grafik sengaja full-bleed: blok lain dibungkus padding, grafik tidak.
+    Widget block(Widget child) => Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+      child: child,
+    );
+
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenPadding,
-        AppSpacing.md,
-        AppSpacing.screenPadding,
-        AppSpacing.xxxl + AppSpacing.lg,
+      key: const Key('growth-list'),
+      padding: const EdgeInsets.only(
+        top: AppSpacing.md,
+        bottom: AppSpacing.xxxl + AppSpacing.lg,
       ),
       children: [
-        ScreenHeader(
-          eyebrow: IdDateFormat.eyebrow(now),
-          title: AppStrings.growthTitle,
-          subtitle: AppStrings.growthSubtitle,
-          trailing: const ChildSwitcherButton(),
+        block(
+          ScreenHeader(
+            eyebrow: IdDateFormat.eyebrow(now),
+            title: AppStrings.growthTitle,
+            subtitle: AppStrings.growthSubtitle,
+            trailing: const ChildSwitcherButton(),
+          ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        const GrowthStatusCard(showMetrics: false),
+        block(const GrowthStatusCard(showMetrics: false)),
         if (showChart) ...[
+          const SizedBox(height: AppSpacing.lg),
+          if (measurementsAsync.value != null &&
+              measurementsAsync.value!.isNotEmpty)
+            block(
+              ZScoreSummaryStrip(
+                latest: GrowthSummary.sorted(measurementsAsync.value!).last,
+                selected: index,
+                onChanged: onIndexChanged,
+              ),
+            ),
           const SizedBox(height: AppSpacing.lg),
           GrowthChartCard(
             child: child,
             index: index,
-            onIndexChanged: onIndexChanged,
             measurementsAsync: measurementsAsync,
           ),
           const SizedBox(height: AppSpacing.sectionGap),
-          const SectionHeader(title: AppStrings.growthHistoryTitle),
+          block(const SectionHeader(title: AppStrings.growthHistoryTitle)),
           const SizedBox(height: AppSpacing.md),
-          measurementsAsync.when(
-            loading: () => const _HistorySkeleton(),
-            error: (error, stackTrace) => ErrorCard(
-              message: AppStrings.growthLoadError,
-              onRetry: () => ref.invalidate(measurementsProvider(child.id)),
-            ),
-            data: (measurements) {
-              final sorted = GrowthSummary.sorted(measurements);
-              if (sorted.isEmpty) {
-                return Container(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: AppSurfaces.sunken(context),
-                  child: Text(
-                    AppStrings.growthHistoryEmpty,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppTheme.colorsOf(context).textSecondary,
+          block(
+            measurementsAsync.when(
+              loading: () => const _HistorySkeleton(),
+              error: (error, stackTrace) => ErrorCard(
+                message: AppStrings.growthLoadError,
+                onRetry: () => ref.invalidate(measurementsProvider(child.id)),
+              ),
+              data: (measurements) {
+                final sorted = GrowthSummary.sorted(measurements);
+                if (sorted.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: AppSurfaces.sunken(context),
+                    child: Text(
+                      AppStrings.growthHistoryEmpty,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppTheme.colorsOf(context).textSecondary,
+                      ),
                     ),
-                  ),
+                  );
+                }
+                return Column(
+                  children: [
+                    for (final measurement in sorted.reversed)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                        child: _MeasurementTile(measurement: measurement),
+                      ),
+                  ],
                 );
-              }
-              return Column(
-                children: [
-                  for (final measurement in sorted.reversed)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                      child: _MeasurementTile(measurement: measurement),
-                    ),
-                ],
-              );
-            },
+              },
+            ),
           ),
         ],
       ],
@@ -169,22 +189,31 @@ class GrowthChartCard extends ConsumerWidget {
     super.key,
     required this.child,
     required this.index,
-    required this.onIndexChanged,
     required this.measurementsAsync,
   });
 
   final ChildProfile child;
   final AnthropometryIndex index;
-  final ValueChanged<AnthropometryIndex> onIndexChanged;
   final AsyncValue<List<GrowthMeasurement>> measurementsAsync;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colorsOf(context);
 
+    // Permukaan grafik menyentuh tepi layar: tidak ada kartu melayang.
+    // Kedalaman tetap dari tone + hairline, bukan bayangan.
     return Container(
-      decoration: AppSurfaces.card(context),
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border(
+          top: BorderSide(color: colors.outline, width: 1),
+          bottom: BorderSide(color: colors.outline, width: 1),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.screenPadding,
+        vertical: AppSpacing.lg,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -196,28 +225,6 @@ class GrowthChartCard extends ConsumerWidget {
                 color: colors.textPrimary,
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          SegmentControl<AnthropometryIndex>(
-            selected: index,
-            onChanged: onIndexChanged,
-            options: const <SegmentOption<AnthropometryIndex>>[
-              SegmentOption(
-                value: AnthropometryIndex.haz,
-                label: AppStrings.growthTabLengthHeightShort,
-                semanticLabel: AppStrings.growthTabLengthHeightSemantics,
-              ),
-              SegmentOption(
-                value: AnthropometryIndex.waz,
-                label: AppStrings.growthTabWeightShort,
-                semanticLabel: AppStrings.growthTabWeightSemantics,
-              ),
-              SegmentOption(
-                value: AnthropometryIndex.whz,
-                label: AppStrings.growthTabWeightHeightShort,
-                semanticLabel: AppStrings.growthTabWeightHeightSemantics,
-              ),
-            ],
           ),
           const SizedBox(height: AppSpacing.md),
           measurementsAsync.when(
@@ -485,105 +492,19 @@ class _HistorySkeleton extends StatelessWidget {
   }
 }
 
-class _MeasurementTile extends ConsumerWidget {
+class _MeasurementTile extends ConsumerStatefulWidget {
   const _MeasurementTile({required this.measurement});
 
   final GrowthMeasurement measurement;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colors = AppTheme.colorsOf(context);
-    final category = GrowthStatusCopy.categoryLabel(
-      AnthropometryIndex.haz,
-      measurement.statusHaz,
-    );
-    final tone = GrowthStatusCopy.toneOf(
-      AnthropometryIndex.haz,
-      measurement.statusHaz,
-    );
+  ConsumerState<_MeasurementTile> createState() => _MeasurementTileState();
+}
 
-    return Container(
-      decoration: AppSurfaces.card(context),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.sm,
-        AppSpacing.md,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${GrowthStatusCopy.formatKgCm(measurement.weightKg)} kg · '
-                      '${GrowthStatusCopy.formatKgCm(measurement.lengthHeightCm)} cm',
-                      softWrap: true,
-                      style: AppTextStyles.titleMedium.copyWith(
-                        color: colors.textPrimary,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${IdDateFormat.full(measurement.measuredOn)} · '
-                      '${measurement.ageMonths} ${AppStrings.childAgeMonths}',
-                      softWrap: true,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuButton<String>(
-                tooltip: AppStrings.growthOptionsTooltip,
-                icon: Icon(
-                  Icons.more_vert_rounded,
-                  color: colors.textSecondary,
-                ),
-                onSelected: (value) async {
-                  switch (value) {
-                    case 'edit':
-                      await showMeasurementSheet(
-                        context,
-                        existing: measurement,
-                      );
-                    case 'delete':
-                      await _confirmDelete(context, ref);
-                  }
-                },
-                itemBuilder: (context) => const [
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: Text(AppStrings.actionEdit),
-                  ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Text(AppStrings.actionDelete),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
-            child: StatusPill(label: category, tone: tone),
-          ),
-        ],
-      ),
-    );
-  }
+class _MeasurementTileState extends ConsumerState<_MeasurementTile> {
+  bool _expanded = false;
 
-  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+  Future<void> _confirmDelete(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -606,7 +527,150 @@ class _MeasurementTile extends ConsumerWidget {
       if (childId == null) return;
       await ref
           .read(measurementsProvider(childId).notifier)
-          .deleteMeasurement(measurement.id);
+          .deleteMeasurement(widget.measurement.id);
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    final measurement = widget.measurement;
+    final value =
+        '${GrowthStatusCopy.formatKgCm(measurement.weightKg)} kg · '
+        '${GrowthStatusCopy.formatKgCm(measurement.lengthHeightCm)} cm';
+    final category = GrowthStatusCopy.categoryLabel(
+      AnthropometryIndex.haz,
+      measurement.statusHaz,
+    );
+    final tone = GrowthStatusCopy.toneOf(
+      AnthropometryIndex.haz,
+      measurement.statusHaz,
+    );
+
+    return Container(
+      key: ValueKey('measurement-${measurement.id}'),
+      decoration: AppSurfaces.card(context),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            button: true,
+            expanded: _expanded,
+            label: '$value. $category. '
+                '${_expanded ? AppStrings.actionClose : AppStrings.growthHistoryTitle}',
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => setState(() => _expanded = !_expanded),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                    AppSpacing.sm,
+                    AppSpacing.md,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              value,
+                              softWrap: true,
+                              style: AppTextStyles.titleMedium.copyWith(
+                                color: colors.textPrimary,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xs),
+                            StatusPill(label: category, tone: tone),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Icon(
+                        _expanded
+                            ? Icons.expand_less_rounded
+                            : Icons.expand_more_rounded,
+                        color: colors.textSecondary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          AnimatedSize(
+            duration: AppMotion.of(context, AppMotion.normal),
+            curve: AppMotion.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: _expanded
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Divider(height: 1, color: colors.outline),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.lg,
+                          AppSpacing.md,
+                          AppSpacing.lg,
+                          AppSpacing.md,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              '${IdDateFormat.full(measurement.measuredOn)} · '
+                              '${measurement.ageMonths} ${AppStrings.childAgeMonths}',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Container(
+                              padding: const EdgeInsets.all(AppSpacing.md),
+                              decoration: AppSurfaces.sunken(context),
+                              child: ZScoreTable(measurement: measurement),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TextButton.icon(
+                                  onPressed: () => showMeasurementSheet(
+                                    context,
+                                    existing: measurement,
+                                  ),
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    size: 18,
+                                  ),
+                                  label: const Text(AppStrings.actionEdit),
+                                ),
+                                const SizedBox(width: AppSpacing.xs),
+                                TextButton.icon(
+                                  onPressed: () => _confirmDelete(context),
+                                  icon: const Icon(
+                                    Icons.delete_outline_rounded,
+                                    size: 18,
+                                  ),
+                                  label: const Text(AppStrings.actionDelete),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
   }
 }
