@@ -650,3 +650,57 @@ PRD Batch 8 hanya bagian **pengingat lokal** (PRD §6.8, §12) + layar Pengatura
 - Perangkat nyata: tampilan notifikasi Android 13+ (izin `POST_NOTIFICATIONS` pertama kali), penjadwalan setelah reboot, dan pemilih waktu bawaan sistem.
 - Blok B (Resep) menunggu `recipes.json` dari pemilik.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-0 & UX-1 — Spesifikasi visual v2.1 + navigasi 5 tab (2026-11-18)
+
+### Ruang lingkup
+Batch UX-0 (kontrak visual) + UX-1 (arsitektur navigasi baru). **Tidak ada fitur gizi baru dan tidak ada data karangan.** Semua perhitungan, aturan, dan copy fitur tetap seperti batch sebelumnya.
+
+### Dependency baru
+**Tidak ada.** Navbar, bubble, panel kamera, dan token baru dibuat dari widget/token yang sudah ada.
+
+### UX-0 — Kontrak visual (`docs/ui-guidelines.md`)
+1. Dokumen baru `docs/ui-guidelines.md`: prinsip, larangan (gradien/`Colors.*`/ikon tanpa label), tabel token warna light+dark, skala tipografi, spacing/radius/motion, tiga lapisan permukaan (`card`/`sunken`/`hero`), aturan navigasi, inventaris komponen `lib/shared/widgets/`, pola per layar, a11y, dan copywriting.
+2. Token baru: `displayMetric` (40/44, w700) dan `navLabel` (11,5/14, w500) di `AppTextStyles`.
+3. Enam token hero di `AppColors` (light + dark, ikut `copyWith`/`lerp`): `heroSurface`, `onHeroSurface`, `onHeroSurfaceMuted`, `onHeroAccent`, `heroTrack`, `heroEdge`.
+4. `AppSurfaces.hero` berubah dari tonal `primaryContainer` menjadi **permukaan solid dominan** (light `#1F6F54`; dark `#1E4A38` + hairline `heroEdge`), dengan kontras teks ≥ 4,5:1 yang diuji di `test/core/theme/app_theme_test.dart`.
+
+### UX-1 — Navigasi 5 tab
+1. `AppDestination` + `AppNavBar` kustom (`lib/features/home/presentation/widgets/app_nav_bar.dart`): **Beranda · Makan · Resep · Tumbuh · Akun**, pil tonal di destinasi aktif, label selalu tampil, tanpa garis atas, target sentuh ≥ 48dp. Urutan enum = urutan `StatefulShellBranch`.
+2. Router: 5 cabang (`/`, `/makan`, `/recipes`, `/growth`, `/account`). `/tanya` menjadi route penuh di luar shell; `/settings` dihapus.
+3. `TanyaBubble` (`features/chat/presentation/widgets/tanya_bubble.dart`) — pil berlabel "Tanya gizi" di kanan bawah, tampil di semua tab; Tanya tetap layar penuh dan kini punya tombol tutup eksplisit (dulu tab, tidak butuh tombol kembali).
+4. `CapturePanel` (`features/meals/presentation/widgets/capture_panel.dart`) — pintu kamera satu-satunya, di tab Makan, disembunyikan untuk anak < 6 bulan. `PhotoScanFab` dihapus dari Beranda.
+5. `AccountScreen` (`features/account/`) — profil anak + `ReminderSettingsSection` (logika pengingat dipindah dari `SettingsScreen`) + catatan privasi/disclaimer. `SettingsScreen` (`/settings`) dihapus; kebutuhan Batch 8 kini tinggal di tab Akun.
+6. `RecipesScreen` (`features/recipes/`) — empty state jujur "Katalog resep sedang disiapkan" sampai `recipes.json` tersedia; tidak ada resep contoh.
+7. `PiringHeroCard`/`PiringRing(hero: true)` memakai token hero; `Skeleton` menerima warna agar terbaca di atas hero.
+8. Header Beranda dibersihkan (dua `IconButton` dipindah ke tab Akun/panel Makan) supaya satu layar punya satu aksi utama.
+
+### Verifikasi (2026-11-18)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **287/287 passed** (baseline 281; +4 `test/features/navigation_test.dart`, +2 tes kontras token hero di `app_theme_test`; 2 tes FAB diganti 2 tes panel kamera, netral).
+- Layout 360dp @1.3 light + dark: Beranda, Makan, Resep, Tumbuh, Akun, Tanya, dan Kelola anak tanpa overflow (`layout_scale_test` diperbarui ke tab Akun/Resep).
+- DoD §10.1: gradien 0; `Colors.xxx` di `lib/features` + `lib/shared` hanya `Colors.transparent`; `GEMINI_API_KEY=<literal>` 0.
+
+### Deviasi sadar (keputusan pemilik)
+- PRD v2.0 §6.2 masih menyebut 3–4 tab dengan Tanya sebagai tab. Implementasi kini 5 tab dengan Tanya sebagai bubble + route penuh. **PRD perlu diselaraskan ke v2.1** (menunggu izin pemilik untuk mengedit `PRD.md`); fitur & isi tidak berubah.
+- Batch 8 memakai rute `/settings`; pada UX-1 isinya dipindahkan ke tab Akun. Tidak ada fungsi yang hilang.
+
+### Belum terverifikasi (butuh kamu)
+- Verifikasi visual di perangkat (light & dark, 360dp @1.3): hero hijau, pil navbar, bubble Tanya, panel kamera.
+- Review apakah tab "Resep" sebaiknya disembunyikan sampai `recipes.json` ada (kini tampil dengan empty state jujur).
+- Commit belum dijalankan (manual oleh pemilik).
+
+## Batch 8 — Perbaikan build Android (core library desugaring) (2026-11-18)
+
+### Temuan
+`flutter run` (APK debug) gagal di task `:app:checkDebugAarMetadata`:
+`flutter_local_notifications` membutuhkan **core library desugaring** untuk `:app` (memakai API `java.time` di perangkat lama).
+
+### Perubahan (`android/app/build.gradle.kts`)
+1. `compileOptions`: tambah `isCoreLibraryDesugaringEnabled = true`.
+2. Dependency Gradle baru (bukan pub): `com.android.tools:desugar_jdk_libs:2.1.4` — versi yang dipatok oleh README `flutter_local_notifications` 20.1.0; dicantumkan resmi sesuai aturan dependency baru.
+3. Java/Kotlin tetap 11 (desugaring kompatibel; tidak ada alasan menaikkan menjadi 17).
+
+### Verifikasi
+- `flutter build apk --debug` → **✓ Built** `build/app/outputs/flutter-apk/app-debug.apk` (Gradle `assembleDebug` 105 dtk). `Exit code 1` pada pemanggilan sebelumnya hanya karena stderr PowerShell (peringatan x86), bukan kegagalan build.
+- `flutter analyze` / `flutter test` tidak berubah (tidak ada kode Dart yang disentuh).
