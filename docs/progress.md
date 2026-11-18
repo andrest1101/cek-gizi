@@ -615,7 +615,38 @@ Navigasi ke-4 **Tanya** (`chat_bubble_outline_rounded`/`chat_bubble_rounded`, `/
 
 ### Catatan
 - Riwayat chat satu thread global; konteks usia/jenis kelamin diambil dari anak terpilih **saat kirim** (bukan per-thread anak). `child_id` disimpan di baris pesan (boleh null).
+- Fix CI (2026-11-18): `flutter-version` di `.github/workflows/ci.yml` di-pin ke `3.32.8` karena `channel: stable` mengambang ke Flutter terbaru (≈3.47) dan `flutter analyze` di CI gagal dengan 69 `deprecated_member_use` (`package:flutter/material.dart` ditandai deprecated setelah v3.47.0-0.pre). Lokal memakai 3.32.8 dan bersih. Migrasi ke SDK terbaru adalah pekerjaan terpisah, bukan fitur.
 - Follow-up chips tidak disimpan di DB (sesi aktif saja); `safety_flag` dari server disimpan apa adanya di `chat_messages`.
 - `RedFlagChecker` (Dart, Batch 3) dan daftar kata kunci di Edge Function harus tetap selaras; tidak ada kode bersama antar runtime (disengaja).
 - Ilustrasi `ChatIllustration` token-only CustomPainter (`shared/illustrations/`).
 - Commit belum dijalankan (manual oleh pemilik) - lihat `docs/commit-plan.md`.
+
+## Batch 8 Blok A — Pengingat lokal + Pengaturan minimal (2026-11-18)
+
+### Ruang lingkup
+PRD Batch 8 hanya bagian **pengingat lokal** (PRD §6.8, §12) + layar Pengaturan minimal (bagian Pengingat saja). **Blok B (Resep) TIDAK dikerjakan** — `recipes.json` belum disediakan pemilik; implementasi fitur Resep menunggu file tersebut (skema PRD §9.1, ≥24 resep, ditinjau ahli gizi/bidan).
+
+### Dependency baru (disetujui pemilik 2026-11-18)
+- `flutter_local_notifications` (^20.1.0) — notifikasi lokal terjadwal (ukur anak bulanan & catat makan harian), tanpa server/push; stack PRD §4. Alasan tertulis sesuai aturan dependency baru.
+- `timezone` (^0.10.1) — dependensi transitif resmi untuk `zonedSchedule`; zona waktu lokal dipilih dari offset perangkat (Indonesia tidak mengenal DST), fallback UTC.
+
+### Perubahan
+1. `lib/core/notifications/reminder_schedule.dart` — `ReminderSettings` (default MATI) + next-occurrence murni (harian & bulanan, tanggal 1–28).
+2. `lib/core/notifications/notification_service.dart` — abstraksi `ReminderScheduler` (fake di tes) + `LocalNotificationScheduler`: init tz, izin Android 13+/iOS (opsional, default ditolak), channel lokal `cek_gizi_reminders`, `zonedSchedule` mode inexact (tanpa izin exact alarm), id 7101 (bulanan) & 7102 (harian); jadwal dibatalkan dan ditulis ulang penuh pada setiap perubahan.
+3. `lib/core/notifications/reminder_providers.dart` — `reminderSettingsProvider` (Notifier; mundur atomik + snackbar bila penerapan gagal) dan `reminderSchedulerProvider` (diooverride di tes).
+4. `LocalPrefs` — 5 kunci pengingat (bulanan: enabled + hari 1–28; harian: enabled + jam/menit, default 19.00).
+5. Layar **Pengaturan minimal** `/settings` (`lib/features/settings/presentation/screens/settings_screen.dart`): bagian **Pengingat** saja; switch untuk dua pengingat, pemilih tanggal 1–28 & pemilih jam; default MATI; catatan kaki jujur. Profil/akun/privasi tetap Batch 9.
+6. Avatar di header Beranda (`account_circle_rounded`, tooltip "Pengaturan") membuka `/settings`; tombol "Kelola anak" tetap ada.
+7. Router: rute `/settings` di luar shell (layar push, bukan tab).
+8. AndroidManifest: `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, receiver `ScheduledNotificationReceiver` & `ScheduledNotificationBootReceiver` (reschedule setelah reboot/ganti paket). iOS tidak diubah. Semua copy di `AppStrings`; tidak ada push server; tidak ada data anak di isi notifikasi.
+
+### Verifikasi (2026-11-18)
+- `flutter analyze` — **No issues found!**
+- `flutter test` — **281/281 passed** (baseline 267; +12 `reminder_schedule_test`, +2 layout test Pengaturan light/dark).
+- Layout 360dp @1.3 light + dark: layar Pengaturan (pengingat) muat; Kelola anak tetap hijau.
+- DoD §10.1: gradien 0; `Colors.xxx` di features/shared tetap 0.
+
+### Belum terverifikasi (butuh kamu)
+- Perangkat nyata: tampilan notifikasi Android 13+ (izin `POST_NOTIFICATIONS` pertama kali), penjadwalan setelah reboot, dan pemilih waktu bawaan sistem.
+- Blok B (Resep) menunggu `recipes.json` dari pemilik.
+- Commit belum dijalankan (manual oleh pemilik).

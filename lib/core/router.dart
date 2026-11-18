@@ -16,6 +16,7 @@ import 'package:cekgizi/features/home/presentation/home_screen.dart';
 import 'package:cekgizi/features/meals/presentation/screens/makan_screen.dart';
 import 'package:cekgizi/features/meals/presentation/screens/scan_screen.dart';
 import 'package:cekgizi/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:cekgizi/features/settings/presentation/screens/settings_screen.dart';
 import 'package:cekgizi/features/chat/presentation/screens/tanya_screen.dart';
 import 'package:cekgizi/features/splash/presentation/screens/opening_screen.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
@@ -126,6 +127,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/consent',
         name: '/consent',
         builder: (context, state) => ConsentScreen(prefs: prefs),
+      ),
+      GoRoute(
+        path: '/settings',
+        name: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
       GoRoute(
         path: '/children',

@@ -37,9 +37,8 @@ class GrowthChart extends ConsumerWidget {
     final tablesAsync = ref.watch(permenkesTablesProvider);
     return tablesAsync.when(
       loading: () => const Skeleton(height: 220),
-      error: (error, stackTrace) => _ChartError(
-        onRetry: () => ref.invalidate(permenkesTablesProvider),
-      ),
+      error: (error, stackTrace) =>
+          _ChartError(onRetry: () => ref.invalidate(permenkesTablesProvider)),
       data: (tables) => _ChartBody(
         measurements: measurements,
         index: index,
@@ -94,15 +93,21 @@ class _ChartBody extends StatelessWidget {
     ];
 
     final bars = <LineChartBarData>[
-      _reference(series.neg3, secondary.withValues(alpha: 0.35),
-          width: 1, dashArray: const [4, 4]),
-      _reference(series.neg2, secondary,
-          width: 1.5, dashArray: const [6, 4]),
-      _reference(series.upper, secondary,
-          width: 1.5, dashArray: const [6, 4]),
+      _reference(
+        series.neg3,
+        secondary.withValues(alpha: 0.35),
+        width: 1,
+        dashArray: const [4, 4],
+      ),
+      _reference(series.neg2, secondary, width: 1.5, dashArray: const [6, 4]),
+      _reference(series.upper, secondary, width: 1.5, dashArray: const [6, 4]),
       if (hasOuterUpper)
-        _reference(series.outerUpper, secondary.withValues(alpha: 0.35),
-            width: 1, dashArray: const [4, 4]),
+        _reference(
+          series.outerUpper,
+          secondary.withValues(alpha: 0.35),
+          width: 1,
+          dashArray: const [4, 4],
+        ),
       _reference(series.median, secondary, width: 2),
       LineChartBarData(
         spots: [
@@ -173,10 +178,8 @@ class _ChartBody extends StatelessWidget {
                   showTitles: true,
                   reservedSize: 34,
                   interval: (maxY - minY) / 4,
-                  getTitlesWidget: (value, meta) => Text(
-                    value.toStringAsFixed(0),
-                    style: axisStyle,
-                  ),
+                  getTitlesWidget: (value, meta) =>
+                      Text(value.toStringAsFixed(0), style: axisStyle),
                 ),
               ),
             ),
@@ -216,7 +219,6 @@ class _ChartError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       alignment: Alignment.center,
@@ -228,13 +230,12 @@ class _ChartError extends StatelessWidget {
           Text(
             AppStrings.growthReferenceError,
             textAlign: TextAlign.center,
-            style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: colors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          TextButton(
-            onPressed: onRetry,
-            child: const Text(AppStrings.retry),
-          ),
+          TextButton(onPressed: onRetry, child: const Text(AppStrings.retry)),
         ],
       ),
     );

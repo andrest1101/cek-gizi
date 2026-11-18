@@ -1,4 +1,4 @@
-﻿import 'package:cekgizi/core/config/app_config.dart';
+import 'package:cekgizi/core/config/app_config.dart';
 
 /// Semua copy UI terpusat di sini (Bahasa Indonesia, nada hangat dan
 /// tidak menghakimi - PRD Â§7.6). Widget tidak boleh menulis string bebas.
@@ -39,6 +39,11 @@ abstract final class AppStrings {
       'Pantau tinggi, berat, dan status pertumbuhan menurut Permenkes 2/2020, '
       'dengan bahasa yang tenang dan jelas.';
   static const onboardingTitle3 = 'Pendamping, bukan dokter';
+  static const onboardingEyebrow1 = 'KENALI MAKAN HARIAN';
+  static const onboardingEyebrow2 = 'PANTAU PERTUMBUHAN';
+  static const onboardingEyebrow3 = 'EDUKASI YANG AMAN';
+  static String onboardingStep(int page, int total) =>
+      '${page.toString().padLeft(2, '0')} / ${total.toString().padLeft(2, '0')}';
   static const onboardingBody3 =
       '${AppConfig.appName} memberi edukasi, bukan diagnosis. Untuk kekhawatiran '
       'kesehatan, hubungi Posyandu, puskesmas, atau dokter.';
@@ -77,6 +82,9 @@ abstract final class AppStrings {
   static const childSexMale = 'Laki-laki';
   static const childSexFemale = 'Perempuan';
   static const childAvatarLabel = 'Avatar';
+  static const childDetailsSectionTitle = 'Data anak';
+  static const childAvatarOptionsTitle = 'Pilih avatar';
+  static const childAvatarHint = 'Gunakan avatar ilustrasi, bukan foto anak.';
   static const childSave = 'Simpan';
   static const childDelete = 'Hapus';
   static const childDeleteTitle = 'Hapus data anak?';
@@ -99,12 +107,14 @@ abstract final class AppStrings {
       'Ketuk kartu untuk memilih anak yang tampil di Beranda.';
   static const childListLoadError =
       'Gagal memuat data anak. Periksa koneksi internet kamu, lalu coba lagi.';
-  static const childBirthDateHint = 'Usia 0â€“60 bulan.';
+  static const childBirthDateHint = 'Usia 0 sampai 60 bulan.';
   static const childNicknameMaxLength = 'Maksimal 30 karakter.';
   static const childSaveError =
       'Gagal menyimpan. Periksa koneksi internet kamu, lalu coba lagi.';
   static const childNotFound = 'Anak tidak ditemukan.';
   static String childAvatarSemantics(String key) => 'Avatar $key';
+  static String childAvatarPreviewSemantics(String label) =>
+      'Pratinjau avatar untuk $label';
 
   // â”€â”€ Tumbuh â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const growthTitle = 'Tumbuh';
@@ -128,7 +138,7 @@ abstract final class AppStrings {
   static const growthTrendHint =
       'Belum cukup data untuk melihat tren. Tambah satu ukuran lagi.';
   static const growthLegendBand = 'Rentang wajar';
-  static const growthLegendLimit = 'Batas Â±2 SD';
+  static const growthLegendLimit = 'Ambang -2 dan +2 SD';
   static const growthLegendMedian = 'Median';
   static const growthLegendChild = 'Anak';
   static const growthLatestWeight = 'Berat terakhir';
@@ -177,7 +187,7 @@ abstract final class AppStrings {
   static const validationDateBeforeBirth =
       'Tanggal ukur tidak boleh sebelum anak lahir.';
   static const validationAgeRange =
-      'Usia saat ukur di luar 0â€“60 bulan. Remaja tidak bisa dipantau aplikasi ini.';
+      'Usia saat ukur di luar 0 sampai 60 bulan. Remaja tidak bisa dipantau aplikasi ini.';
   static const validationDuplicateDate =
       'Sudah ada pengukuran pada tanggal ini. Ubah atau hapus dulu yang lama.';
   static const validationRequired = 'Wajib diisi.';
@@ -587,7 +597,7 @@ abstract final class AppStrings {
       'Informasi umum, bukan pengganti tenaga kesehatan.';
   static String tanyaAssistantTyping() =>
       '${AppConfig.appName} sedang menjawab.';
-  static const tanyaInputHint = 'Tulis pertanyaanâ€¦';
+  static const tanyaInputHint = 'Tulis pertanyaan...';
   static const tanyaInputSemantics = 'Tulis pertanyaan tentang gizi anak';
   static const tanyaSendSemantics = 'Kirim pertanyaan';
   static const tanyaEmptyTitle = 'Tanya apa saja tentang gizi anak';
@@ -707,8 +717,28 @@ abstract final class AppStrings {
   };
 
   /// Indeks antropometri (tampilan detail).
-  static const hazLabel = 'PB/U â€“ TB/U';
+  static const hazLabel = 'PB/U atau TB/U';
   static const wazLabel = 'BB/U';
-  static const whzLabel = 'BB/PB â€“ BB/TB';
+  static const whzLabel = 'BB/PB atau BB/TB';
   static const statusOutOfRangeShort = 'Di luar rentang wajar';
+
+  // ── Pengaturan & pengingat (PRD §6.8) ──────────────────────────────
+  static const settingsTitle = 'Pengaturan';
+  static const homeSettings = 'Pengaturan';
+  static const settingsRemindersTitle = 'Pengingat';
+  static const settingsReminderFootnote =
+      'Pengingat default mati dan hanya tampil di perangkat ini. '
+      'Kamu bisa mematikannya kapan saja.';
+  static const settingsReminderMonthlyTitle = 'Ukur anak bulanan';
+  static String settingsReminderMonthlyBody(int day) =>
+      'Setiap tanggal $day, pukul 08.00';
+  static const settingsReminderMonthlyDayLabel = 'Tanggal';
+  static const settingsReminderDailyTitle = 'Catat makan harian';
+  static String settingsReminderDailyBody(String time) =>
+      'Setiap hari, pukul $time';
+  static const settingsReminderTimeLabel = 'Pukul';
+  static const settingsReminderPermissionDenied =
+      'Izin notifikasi belum diberikan. Aktifkan dulu di pengaturan HP kamu.';
+  static const settingsReminderSaveError =
+      'Gagal menyimpan pengingat. Coba lagi.';
 }

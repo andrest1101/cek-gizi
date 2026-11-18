@@ -16,7 +16,10 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          # Pin ke SDK yang dipakai saat pengembangan agar hasil analisis
+          # di CI identik dengan lokal (flaky lint karena drift versi).
           channel: stable
+          flutter-version: '3.32.8'
           cache: true
 
       - name: Install dependencies

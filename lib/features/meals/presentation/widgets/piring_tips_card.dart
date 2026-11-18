@@ -5,6 +5,7 @@ import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/meals/presentation/meals_actions.dart';
@@ -52,16 +53,20 @@ class PiringTipsCard extends ConsumerWidget {
             final tip = rules.tipFor(code);
             if (tip == null) return const SizedBox.shrink();
             final groupLabel = AppStrings.groupLabel(code);
-            return _TipsContent(
-              tip: tip,
-              groupLabel: groupLabel,
-              isReviewed: rules.isReviewed,
-              onLog: () => logFoodGroup(
-                context,
-                ref,
-                childId: child.id,
-                groupCode: code,
+            return Semantics(
+              container: true,
+              label: '${AppStrings.tipTitle}. $groupLabel. $tip',
+              child: _TipsContent(
+                tip: tip,
                 groupLabel: groupLabel,
+                isReviewed: rules.isReviewed,
+                onLog: () => logFoodGroup(
+                  context,
+                  ref,
+                  childId: child.id,
+                  groupCode: code,
+                  groupLabel: groupLabel,
+                ),
               ),
             );
           },
@@ -87,8 +92,6 @@ class _TipsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
-
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
@@ -118,7 +121,7 @@ class _TipsContent extends StatelessWidget {
               children: [
                 Text(
                   AppStrings.tipTitle,
-                  style: textTheme.labelMedium?.copyWith(
+                  style: AppTextStyles.label.copyWith(
                     color: colors.textSecondary,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.8,
@@ -128,14 +131,14 @@ class _TipsContent extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   groupLabel,
-                  style: textTheme.titleMedium?.copyWith(
+                  style: AppTextStyles.titleMedium.copyWith(
                     color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   tip,
-                  style: textTheme.bodySmall?.copyWith(
+                  style: AppTextStyles.bodySmall.copyWith(
                     color: colors.textSecondary,
                   ),
                 ),
@@ -143,7 +146,7 @@ class _TipsContent extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     AppStrings.piringUnreviewedCaption,
-                    style: textTheme.labelMedium?.copyWith(
+                    style: AppTextStyles.label.copyWith(
                       color: colors.textSecondary,
                       fontSize: 10,
                       height: 1.35,

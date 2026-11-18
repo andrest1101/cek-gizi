@@ -73,10 +73,11 @@ class PiringRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
-    final label = semanticsLabel ??
+    final label =
+        semanticsLabel ??
         AppStrings.piringGroupsMetSemantics(metCount, codes.length);
-    final gap = gapDegrees ??
+    final gap =
+        gapDegrees ??
         segmentGapDegrees(
           strokeWidth: strokeWidth,
           size: size,
@@ -113,7 +114,7 @@ class PiringRing extends StatelessWidget {
                       ),
                       Text(
                         AppStrings.piringGroupsLabel,
-                        style: textTheme.labelMedium?.copyWith(
+                        style: AppTextStyles.label.copyWith(
                           color: colors.textSecondary,
                         ),
                       ),
@@ -165,13 +166,7 @@ class _PiringRingPainter extends CustomPainter {
           ? (isAnimal ? colors.accent : colors.primary)
           : colors.surfaceVariant;
       final startAngle = startOffset + i * arc * math.pi / 180;
-      canvas.drawArc(
-        rect,
-        startAngle,
-        sweep * math.pi / 180,
-        false,
-        paint,
-      );
+      canvas.drawArc(rect, startAngle, sweep * math.pi / 180, false, paint);
     }
   }
 
@@ -211,7 +206,8 @@ class PiringProgressRing extends StatelessWidget {
     final safeTotal = total <= 0 ? 1 : total;
     final safeMet = met < 0 ? 0 : (met > safeTotal ? safeTotal : met);
     final label =
-        semanticsLabel ?? AppStrings.piringGroupsMetSemantics(safeMet, safeTotal);
+        semanticsLabel ??
+        AppStrings.piringGroupsMetSemantics(safeMet, safeTotal);
 
     return Semantics(
       label: label,

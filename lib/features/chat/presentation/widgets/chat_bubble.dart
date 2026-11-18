@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cekgizi/core/config/app_config.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/chat/domain/entities/chat_message.dart';
 
@@ -18,7 +19,6 @@ class ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     final isUser = message.role == ChatRole.user;
     final maxWidth = MediaQuery.of(context).size.width * 0.78;
 
@@ -41,7 +41,7 @@ class ChatBubble extends StatelessWidget {
         ),
         child: SelectableText(
           message.content,
-          style: textTheme.bodyMedium?.copyWith(
+          style: AppTextStyles.body.copyWith(
             color: isUser ? colors.onPrimary : colors.textPrimary,
           ),
         ),
@@ -49,10 +49,7 @@ class ChatBubble extends StatelessWidget {
     );
 
     if (isUser) {
-      return Align(
-        alignment: Alignment.centerRight,
-        child: bubble,
-      );
+      return Align(alignment: Alignment.centerRight, child: bubble);
     }
 
     return Row(

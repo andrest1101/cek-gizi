@@ -9,6 +9,7 @@ import 'package:cekgizi/core/supabase/supabase_client_provider.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/consent/data/repositories/consent_repository_impl.dart';
 import 'package:cekgizi/features/consent/domain/use_cases/accept_consent.dart';
@@ -55,8 +56,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
-
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
     return Scaffold(
       appBar: AppBar(title: const Text(AppConfig.appName)),
       body: SafeArea(
@@ -68,21 +68,35 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
             AppSpacing.xxxl,
           ),
           children: [
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: TonalIconCircle(
-                icon: Icons.privacy_tip_rounded,
-                iconSemantics: AppStrings.consentPrivacySemantics,
-                size: 64,
-                iconSize: 30,
-              ),
+            Row(
+              children: [
+                const TonalIconCircle(
+                  icon: Icons.privacy_tip_rounded,
+                  iconSemantics: AppStrings.consentPrivacySemantics,
+                  size: 56,
+                  iconSize: 27,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    AppStrings.consentDataTitle,
+                    style: AppTextStyles.label.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.xl),
             Semantics(
               header: true,
               child: Text(
                 AppStrings.consentTitle,
-                style: textTheme.titleLarge?.copyWith(
+                style: AppTextStyles.titleLarge.copyWith(
+                  fontSize: 26,
+                  height: 1.25,
                   color: colors.textPrimary,
                 ),
               ),
@@ -90,29 +104,22 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
             const SizedBox(height: AppSpacing.sm),
             Text(
               AppStrings.consentIntro,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colors.textSecondary,
-              ),
+              style: AppTextStyles.body.copyWith(color: colors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.xxl),
             Text(
               AppStrings.consentDataTitle,
-              style: textTheme.titleMedium?.copyWith(
+              style: AppTextStyles.titleMedium.copyWith(
                 color: colors.textPrimary,
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.lg),
             for (final bullet in AppStrings.consentBullets)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                child: _Bullet(text: bullet),
-              ),
+              _Bullet(text: bullet),
+            const SizedBox(height: AppSpacing.sm),
             Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: AppSurfaces.sunken(
-                context,
-                radius: AppRadius.card,
-              ),
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              decoration: AppSurfaces.sunken(context, radius: AppRadius.card),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -127,7 +134,8 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                       Expanded(
                         child: Text(
                           AppStrings.consentDisclaimerTitle,
-                          style: textTheme.labelLarge?.copyWith(
+                          style: AppTextStyles.titleMedium.copyWith(
+                            fontSize: 15,
                             color: colors.textPrimary,
                           ),
                         ),
@@ -137,7 +145,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     AppStrings.disclaimer,
-                    style: textTheme.bodySmall?.copyWith(
+                    style: AppTextStyles.bodySmall.copyWith(
                       color: colors.textSecondary,
                     ),
                   ),
@@ -158,7 +166,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                   Expanded(
                     child: Text(
                       _error!,
-                      style: textTheme.bodySmall?.copyWith(
+                      style: AppTextStyles.bodySmall.copyWith(
                         color: colors.statusAlert,
                       ),
                     ),
@@ -167,9 +175,15 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               ),
               const SizedBox(height: AppSpacing.md),
             ],
-            Container(
+            AnimatedContainer(
+              duration: reduceMotion
+                  ? Duration.zero
+                  : const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
               decoration: BoxDecoration(
-                color: AppSurfaces.cardColor(context),
+                color: _agreed
+                    ? colors.primaryContainer
+                    : AppSurfaces.cardColor(context),
                 borderRadius: BorderRadius.circular(AppRadius.card),
                 border: Border.all(
                   color: _agreed ? colors.primary : colors.outline,
@@ -178,20 +192,20 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               ),
               child: CheckboxListTile(
                 value: _agreed,
-                onChanged: (value) =>
-                    setState(() => _agreed = value ?? false),
+                onChanged: (value) => setState(() => _agreed = value ?? false),
                 controlAffinity: ListTileControlAffinity.leading,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.card),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xs,
+                  vertical: AppSpacing.sm,
                 ),
                 title: Text(
                   AppStrings.consentAgreeLabel,
-                  style: textTheme.bodyMedium?.copyWith(
+                  style: AppTextStyles.bodySmall.copyWith(
                     color: colors.textPrimary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -211,9 +225,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
             Text(
               AppStrings.consentDeclineHint,
               textAlign: TextAlign.center,
-              style: textTheme.labelMedium?.copyWith(
-                color: colors.textSecondary,
-              ),
+              style: AppTextStyles.label.copyWith(color: colors.textSecondary),
             ),
           ],
         ),
@@ -233,22 +245,26 @@ class _Bullet extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(
-            color: colors.primaryContainer,
-            shape: BoxShape.circle,
+        Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.xs),
+          child: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: colors.primaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.check_rounded, size: 17, color: colors.primary),
           ),
-          child: Icon(Icons.check_rounded, size: 16, color: colors.primary),
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Text(
             text,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colors.textPrimary,
-                ),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: colors.textPrimary,
+              height: 1.55,
+            ),
           ),
         ),
       ],

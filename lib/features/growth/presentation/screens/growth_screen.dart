@@ -6,6 +6,7 @@ import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/utils/date_format.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
@@ -139,9 +140,9 @@ class _GrowthBody extends ConsumerWidget {
                   decoration: AppSurfaces.sunken(context),
                   child: Text(
                     AppStrings.growthHistoryEmpty,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppTheme.colorsOf(context).textSecondary,
-                        ),
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppTheme.colorsOf(context).textSecondary,
+                    ),
                   ),
                 );
               }
@@ -180,7 +181,6 @@ class GrowthChartCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
 
     return Container(
       decoration: AppSurfaces.card(context),
@@ -192,7 +192,7 @@ class GrowthChartCard extends ConsumerWidget {
             header: true,
             child: Text(
               AppStrings.growthChartTitle,
-              style: textTheme.titleMedium?.copyWith(
+              style: AppTextStyles.titleMedium.copyWith(
                 color: colors.textPrimary,
               ),
             ),
@@ -234,8 +234,10 @@ class GrowthChartCard extends ConsumerWidget {
                 children: [
                   LayoutBuilder(
                     builder: (context, constraints) {
-                      final height = (constraints.maxWidth * 0.78)
-                          .clamp(230.0, 320.0);
+                      final height = (constraints.maxWidth * 0.78).clamp(
+                        230.0,
+                        320.0,
+                      );
                       return SizedBox(
                         height: height,
                         child: GrowthChart(
@@ -252,7 +254,7 @@ class GrowthChartCard extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     AppStrings.growthChartCaption,
-                    style: textTheme.labelMedium?.copyWith(
+                    style: AppTextStyles.label.copyWith(
                       color: colors.textSecondary,
                     ),
                   ),
@@ -270,7 +272,7 @@ class GrowthChartCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             AppStrings.growthTrendHint,
-                            style: textTheme.bodySmall?.copyWith(
+                            style: AppTextStyles.bodySmall.copyWith(
                               color: colors.textSecondary,
                             ),
                           ),
@@ -319,18 +321,14 @@ class _ChartEmpty extends StatelessWidget {
       decoration: AppSurfaces.sunken(context, radius: AppRadius.card),
       child: Column(
         children: [
-          Icon(
-            Icons.show_chart_rounded,
-            size: 32,
-            color: colors.textSecondary,
-          ),
+          Icon(Icons.show_chart_rounded, size: 32, color: colors.textSecondary),
           const SizedBox(height: AppSpacing.sm),
           Text(
             AppStrings.growthNoMeasurementsBody,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colors.textSecondary,
-                ),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: colors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -356,15 +354,12 @@ class _ChartError extends StatelessWidget {
           Text(
             AppStrings.growthReferenceError,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colors.textSecondary,
-                ),
+            style: AppTextStyles.bodySmall.copyWith(
+              color: colors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          TextButton(
-            onPressed: onRetry,
-            child: const Text(AppStrings.retry),
-          ),
+          TextButton(onPressed: onRetry, child: const Text(AppStrings.retry)),
         ],
       ),
     );
@@ -402,11 +397,7 @@ class _ChartLegend extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   for (var i = 0; i < 3; i++)
-                    Container(
-                      width: 3,
-                      height: 2,
-                      color: colors.textSecondary,
-                    ),
+                    Container(width: 3, height: 2, color: colors.textSecondary),
                 ],
               ),
             ),
@@ -418,7 +409,11 @@ class _ChartLegend extends StatelessWidget {
             width: 14,
             height: 12,
             child: Center(
-              child: Container(width: 14, height: 2, color: colors.textSecondary),
+              child: Container(
+                width: 14,
+                height: 2,
+                color: colors.textSecondary,
+              ),
             ),
           ),
         ),
@@ -452,18 +447,25 @@ class _LegendItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        swatch,
-        const SizedBox(width: AppSpacing.xs),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 210),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          swatch,
+          const SizedBox(width: AppSpacing.xs),
+          Flexible(
+            child: Text(
+              label,
+              softWrap: true,
+              style: AppTextStyles.label.copyWith(
                 color: AppTheme.colorsOf(context).textSecondary,
               ),
-        ),
-      ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -491,7 +493,6 @@ class _MeasurementTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     final category = GrowthStatusCopy.categoryLabel(
       AnthropometryIndex.haz,
       measurement.statusHaz,
@@ -522,7 +523,8 @@ class _MeasurementTile extends ConsumerWidget {
                     Text(
                       '${GrowthStatusCopy.formatKgCm(measurement.weightKg)} kg · '
                       '${GrowthStatusCopy.formatKgCm(measurement.lengthHeightCm)} cm',
-                      style: textTheme.titleMedium?.copyWith(
+                      softWrap: true,
+                      style: AppTextStyles.titleMedium.copyWith(
                         color: colors.textPrimary,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
@@ -531,7 +533,10 @@ class _MeasurementTile extends ConsumerWidget {
                     Text(
                       '${IdDateFormat.full(measurement.measuredOn)} · '
                       '${measurement.ageMonths} ${AppStrings.childAgeMonths}',
-                      style: textTheme.bodySmall?.copyWith(
+                      softWrap: true,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.bodySmall.copyWith(
                         color: colors.textSecondary,
                       ),
                     ),

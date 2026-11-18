@@ -6,6 +6,7 @@ import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
@@ -74,9 +75,9 @@ class ChildrenScreen extends ConsumerWidget {
               children: [
                 Text(
                   AppStrings.childManageHint,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.colorsOf(context).textSecondary,
-                      ),
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppTheme.colorsOf(context).textSecondary,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 for (var index = 0; index < children.length; index++)
@@ -130,7 +131,6 @@ class _ChildCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     final age = child.ageLabel(DateTime.now());
 
     return DecoratedBox(
@@ -173,7 +173,7 @@ class _ChildCard extends ConsumerWidget {
                         child.nickname,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: textTheme.titleMedium?.copyWith(
+                        style: AppTextStyles.titleMedium.copyWith(
                           color: colors.textPrimary,
                         ),
                       ),
@@ -182,7 +182,7 @@ class _ChildCard extends ConsumerWidget {
                         age,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: textTheme.bodySmall?.copyWith(
+                        style: AppTextStyles.bodySmall.copyWith(
                           color: colors.textSecondary,
                         ),
                       ),
@@ -201,8 +201,9 @@ class _ChildCard extends ConsumerWidget {
                                 AppStrings.childSelectedBadge,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: textTheme.labelMedium?.copyWith(
+                                style: AppTextStyles.label.copyWith(
                                   color: colors.primary,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),

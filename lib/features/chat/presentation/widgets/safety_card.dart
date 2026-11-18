@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/chat/domain/entities/chat_message.dart';
 
@@ -27,7 +28,6 @@ class _SafetyCardState extends State<SafetyCard> {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     final isEmergency = widget.flag == ChatSafetyFlag.emergency;
 
     if (_acknowledged) return const SizedBox.shrink();
@@ -49,10 +49,7 @@ class _SafetyCardState extends State<SafetyCard> {
         decoration: BoxDecoration(
           color: fill,
           borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(
-            color: accent.withValues(alpha: 0.55),
-            width: 1,
-          ),
+          border: Border.all(color: accent.withValues(alpha: 0.55), width: 1),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +70,7 @@ class _SafetyCardState extends State<SafetyCard> {
                     isEmergency
                         ? AppStrings.tanyaSafetyEmergencyTitle
                         : AppStrings.tanyaSafetyReferTitle,
-                    style: textTheme.titleMedium?.copyWith(
+                    style: AppTextStyles.titleMedium.copyWith(
                       color: accent,
                       fontWeight: FontWeight.w700,
                     ),
@@ -83,7 +80,7 @@ class _SafetyCardState extends State<SafetyCard> {
                     isEmergency
                         ? AppStrings.tanyaSafetyEmergencyBody
                         : AppStrings.tanyaSafetyReferBody,
-                    style: textTheme.bodySmall?.copyWith(
+                    style: AppTextStyles.bodySmall.copyWith(
                       color: colors.textPrimary,
                     ),
                   ),
@@ -102,7 +99,7 @@ class _SafetyCardState extends State<SafetyCard> {
                     const SizedBox(height: AppSpacing.sm),
                     Text(
                       AppStrings.tanyaSafetyEmergencyNote,
-                      style: textTheme.bodySmall?.copyWith(
+                      style: AppTextStyles.bodySmall.copyWith(
                         color: colors.textSecondary,
                         fontStyle: FontStyle.italic,
                       ),
@@ -141,8 +138,6 @@ class _SafetyCardState extends State<SafetyCard> {
   void _showCallFailed(BuildContext context) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(content: Text(AppStrings.tanyaCallFailed)),
-      );
+      ..showSnackBar(const SnackBar(content: Text(AppStrings.tanyaCallFailed)));
   }
 }

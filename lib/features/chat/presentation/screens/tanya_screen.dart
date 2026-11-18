@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/chat/domain/entities/chat_message.dart';
@@ -178,19 +179,19 @@ class _TanyaScreenState extends ConsumerState<TanyaScreen> {
                       quotaText,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: colors.textSecondary,
-                            fontFeatures: const [
-                              FontFeature.tabularFigures(),
-                            ],
-                          ),
+                      style: AppTextStyles.label.copyWith(
+                        color: colors.textSecondary,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                     ),
                   ),
                 ),
               ),
             Expanded(
               child: child == null
-                  ? _NoChildBody(onAddChild: () => context.push('/children/add'))
+                  ? _NoChildBody(
+                      onAddChild: () => context.push('/children/add'),
+                    )
                   : chatAsync.when(
                       loading: _ChatSkeleton.new,
                       error: (error, stackTrace) => Center(
@@ -198,8 +199,7 @@ class _TanyaScreenState extends ConsumerState<TanyaScreen> {
                           padding: const EdgeInsets.all(AppSpacing.xl),
                           child: ErrorCard(
                             message: AppStrings.tanyaError('offline'),
-                            onRetry: () =>
-                                ref.invalidate(chatMessagesProvider),
+                            onRetry: () => ref.invalidate(chatMessagesProvider),
                           ),
                         ),
                       ),
@@ -237,7 +237,6 @@ class _DisclaimerBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenPadding,
@@ -264,7 +263,7 @@ class _DisclaimerBanner extends StatelessWidget {
                 AppStrings.tanyaDisclaimerBanner,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: textTheme.bodySmall?.copyWith(
+                style: AppTextStyles.bodySmall.copyWith(
                   color: colors.textSecondary,
                 ),
               ),
@@ -340,9 +339,8 @@ class _ChatBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isEmpty = state.messages.isEmpty &&
-        !state.sending &&
-        state.sendError == null;
+    final isEmpty =
+        state.messages.isEmpty && !state.sending && state.sendError == null;
 
     if (isEmpty) {
       return ListView(
@@ -362,10 +360,9 @@ class _ChatBody extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xl),
           Text(
             AppStrings.tanyaQuickChipsTitle,
-            style: Theme.of(context)
-                .textTheme
-                .labelMedium
-                ?.copyWith(color: AppTheme.colorsOf(context).textSecondary),
+            style: AppTextStyles.label.copyWith(
+              color: AppTheme.colorsOf(context).textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -450,12 +447,9 @@ class _QuickChip extends ConsumerWidget {
     final colors = AppTheme.colorsOf(context);
     return ActionChip(
       label: Text(label),
-      onPressed: () => ref.read(chatMessagesProvider.notifier).sendQuestion(
-            label,
-          ),
-      labelStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: colors.textPrimary,
-          ),
+      onPressed: () =>
+          ref.read(chatMessagesProvider.notifier).sendQuestion(label),
+      labelStyle: AppTextStyles.label.copyWith(color: colors.textPrimary),
       backgroundColor: colors.surfaceVariant,
       side: BorderSide(color: colors.outline, width: 1),
       shape: const StadiumBorder(),
@@ -481,9 +475,7 @@ class _FollowupsRow extends StatelessWidget {
         children: [
           Text(
             AppStrings.tanyaFollowupsTitle,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: colors.textSecondary,
-                ),
+            style: AppTextStyles.label.copyWith(color: colors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.xs),
           Wrap(
@@ -494,10 +486,9 @@ class _FollowupsRow extends StatelessWidget {
                 ActionChip(
                   label: Text(followup),
                   onPressed: () => onSend(followup),
-                  labelStyle:
-                      Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: colors.textPrimary,
-                          ),
+                  labelStyle: AppTextStyles.label.copyWith(
+                    color: colors.textPrimary,
+                  ),
                   backgroundColor: colors.surfaceVariant,
                   side: BorderSide(color: colors.outline, width: 1),
                 ),
@@ -535,10 +526,7 @@ class _SyncFailedBanner extends StatelessWidget {
           Expanded(
             child: Text(
               AppStrings.tanyaSyncFailed,
-              style: Theme.of(context)
-                  .textTheme
-                  .labelMedium
-                  ?.copyWith(color: colors.textSecondary),
+              style: AppTextStyles.label.copyWith(color: colors.textSecondary),
             ),
           ),
           TextButton(
@@ -607,10 +595,7 @@ class _InputBar extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             IconButton.filled(
-              constraints: const BoxConstraints(
-                minWidth: 48,
-                minHeight: 48,
-              ),
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               onPressed: canSend ? onSend : null,
               tooltip: AppStrings.tanyaSendSemantics,
               icon: const Icon(Icons.send_rounded),

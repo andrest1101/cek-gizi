@@ -6,6 +6,7 @@ import 'package:cekgizi/core/config/app_config.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/utils/greeting.dart';
 import 'package:cekgizi/core/utils/date_format.dart';
@@ -111,7 +112,6 @@ class _HomeHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colorsOf(context);
-    final textTheme = Theme.of(context).textTheme;
     final now = DateTime.now();
     final selectedChild = ref.watch(selectedChildProvider).value;
     final childName = selectedChild?.nickname;
@@ -131,7 +131,7 @@ class _HomeHeader extends ConsumerWidget {
             children: [
               Text(
                 IdDateFormat.eyebrow(now),
-                style: textTheme.labelMedium?.copyWith(
+                style: AppTextStyles.label.copyWith(
                   color: colors.textSecondary,
                   letterSpacing: 0.5,
                 ),
@@ -145,7 +145,7 @@ class _HomeHeader extends ConsumerWidget {
                       : AppStrings.homeGreeting(Greeting.of(now), childName),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: textTheme.titleLarge?.copyWith(
+                  style: AppTextStyles.titleLarge.copyWith(
                     color: colors.textPrimary,
                   ),
                 ),
@@ -158,6 +158,12 @@ class _HomeHeader extends ConsumerWidget {
           tooltip: AppStrings.homeManageChild,
           onPressed: () => context.push('/children'),
           icon: const Icon(Icons.manage_accounts_rounded, size: 21),
+        ),
+        const SizedBox(width: AppSpacing.xs),
+        IconButton.filledTonal(
+          tooltip: AppStrings.homeSettings,
+          onPressed: () => context.push('/settings'),
+          icon: const Icon(Icons.account_circle_rounded, size: 21),
         ),
       ],
     );
