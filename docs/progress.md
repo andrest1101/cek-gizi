@@ -884,3 +884,12 @@ WAV 814 KB menambah ukuran APK (~0,8 MB). Bila ukuran jadi prioritas, sebaiknya 
 - `flutter build apk --debug` → **✓ Built**.
 - Perlu tinjauan di perangkat: apakah suara terdengar di cold start, apakah tidak mengejutkan (volume 0,35), dan apakah reduce-motion benar-benar membisukan.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-2c — Ilustrasi "piring dipindai" flat-lay (2026-11-18)
+
+Ilustrasi `PlateViewfinderIllustration` dipertimbangkan terlalu mirip wajah (dua bulatan sejajar + garis). Diubah jadi **flat-lay heterogen & asimetris**: tumpukan nasi (kiri bawah, dengan garis tekstur), satu lauk bulat telur (kanan atas, diputar −22°), dua daun memanjang diagonal di tengah. Lingkaran putus-putus & sudut viewfinder tetap dipertahankan. Token-only `CustomPainter`, tanpa dependency baru, tanpa warna literal.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **294/294 passed**
+- Commit belum dijalankan (manual oleh pemilik).
