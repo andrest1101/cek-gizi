@@ -29,7 +29,7 @@ menulis angka/warna baru di widget.
 
 ## 2. Warna
 
-Sumber: `AppColors` (`ThemeExtension`) — light & dark, masing-masing 20
+Sumber: `AppColors` (`ThemeExtension`) — light & dark, masing-masing 22
 token. `AppColors.copyWith` dan `lerp` wajib diperbarui bila menambah field.
 
 | Peran | Token | Light | Dark |
@@ -43,6 +43,7 @@ token. `AppColors.copyWith` dan `lerp` wajib diperbarui bila menambah field.
 | Aksi utama | `primary` / `onPrimary` | `#1F6F54` / putih | `#7FD1A8` / `#06251A` |
 | Tonal lembut | `primaryContainer` | `#D8EBDD` | `#1B4A38` |
 | Sorotan hangat | `accent` | `#E9893B` | `#F2A55F` |
+| Pita hangat | `accentContainer` / `onAccentContainer` | `#FBE8D6` / `#7A4318` | `#3E2A19` / `#F7C79B` |
 | Status normal | `statusGood` | `#2E7D32` | `#7BD88F` |
 | Perlu perhatian (isi/teks) | `statusWatch` / `statusWatchText` | `#F2B84B` / `#8A5A12` | `#F2C14E` |
 | Perlu diperiksa | `statusAlert` | `#C0392B` | `#FF8E80` |
@@ -127,16 +128,24 @@ Kedalaman berasal dari perbedaan tone 1 langkah + hairline, bukan shadow.
 | `ChildAvatar` / `ChildSwitcher` | identitas anak, tanpa nama ganda |
 | `ZScoreTable` | tabel z-score aksesibel |
 
+| `SectionReveal` | masuk 250 ms (opacity + 8dp), ikut `AppMotion.of` |
+
 Ilustrasi bergaya garis (`ChatIllustration`, `EmptyPlateIllustration`,
-`SeedlingIllustration`) memakai token warna, bukan file gambar raster.
+`SeedlingIllustration`, `PlateViewfinderIllustration`) memakai token warna,
+bukan file gambar raster. `PlateViewfinderIllustration` punya dua mode:
+`onHero` (panel Makan) dan `onCamera` (latar preview terbalik).
 
 ## 8. Pola per layar
 
 - **Beranda**: sapaan + anak aktif, lalu `PiringHeroCard` (hero hijau,
   satu angka dominan 40dp), status protein hewani, tips, ringkasan tumbuh.
   Header tidak menyimpan aksi (kelola anak & pengaturan pindah ke Akun).
-- **Makan**: `CapturePanel` → tur singkat → panel ringkasan → checklist
-  kelompok → catatan hari ini.
+- **Makan**: header (tanggal + judul + ganti anak + segmen Hari
+  ini/Riwayat) **ikut menggulir** di dalam daftar — tidak disematkan di atas
+  layar. Lalu `CapturePanel` (viewfinder + 3 langkah + privasi + CTA + pintu
+  "Catat tanpa foto") → panel ringkasan → tur singkat → checklist kelompok →
+  catatan hari ini. Pita protein hewani memakai `accentContainer` bila belum
+  ada, `primaryContainer` bila sudah ada — selalu ikon + teks.
 - **Resep**: empty state jujur sampai `recipes.json` tersedia.
 - **Tumbuh**: input pengukuran + grafik pita SD + tabel z-score.
 - **Akun**: profil anak (kelola anak), pengingat lokal, catatan privasi.

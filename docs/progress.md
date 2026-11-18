@@ -704,3 +704,62 @@ Batch UX-0 (kontrak visual) + UX-1 (arsitektur navigasi baru). **Tidak ada fitur
 ### Verifikasi
 - `flutter build apk --debug` → **✓ Built** `build/app/outputs/flutter-apk/app-debug.apk` (Gradle `assembleDebug` 105 dtk). `Exit code 1` pada pemanggilan sebelumnya hanya karena stderr PowerShell (peringatan x86), bukan kegagalan build.
 - `flutter analyze` / `flutter test` tidak berubah (tidak ada kode Dart yang disentuh).
+
+## Fix splash + UX-2 + UX-3 — startup tanpa "macet di logo", Makan & motion v2.2 (2026-11-18)
+
+### Fix "stuck di logo CekGizi" (prioritas)
+**Temuan:** `main()` menunggu `Supabase.initialize` + `signInAnonymously` tanpa batas waktu. Saat jaringan lambat/putus, eksekusi berhenti sebelum `runApp`, sehingga pengguna melihat splash native (ikon CekGizi) tanpa henti. Splash native bawaan juga berwarna putih generik.
+
+**Perubahan:**
+1. `lib/core/bootstrap/startup_guard.dart` (baru): `runStartupTask<T>()` — timeout + tangkap galat, hanya mencatat tipe galat (tanpa data sensitif), tidak pernah melempar.
+2. `auth_bootstrap.dart`: inisialisasi SDK (batas 8s) dan sesi anonim (batas 5s) lewat guard. Kegagalan sesi tidak menghentikan aplikasi; layar terkait tetap punya tombol "Coba lagi".
+3. `main.dart`: bootstrap tidak lagi di-`await` sebelum `runApp`; semua langkah I/O tetap dibatasi sehingga frame pertama selalu tergambar. `CekGiziApp(backendReady: …)` menampilkan `_StartupScreen` bermerek + indikator memuat sampai bootstrap selesai (tanpa `MaterialApp.router`, memakai `Theme` + `Directionality` sendiri).
+4. `OpeningScreen`: mulai setelah frame pertama, `TickerFuture` dibungkus (ticker bisa dibatalkan sistem), **timer pengaman 1900 ms** memaksa lanjut bila animasi tidak pernah selesai, `cacheWidth: 352` agar PNG 1,2 MB tidak di-decode penuh.
+5. Android: `values/colors.xml` + `values-night/colors.xml` (krem `#FBF7F0` / gelap `#101713`), `drawable(-v21)/launch_background.xml` memakai warna tersebut, serta `values(-night)-v31/styles.xml` untuk splash sistem Android 12+ (latar + ikon merek). Tidak ada gambar baru; ikon memakai `ic_launcher` yang sudah ada.
+6. Tes regresi: `test/core/bootstrap/startup_guard_test.dart` (3 tes: sukses, future menggantung, galat), `test/features/splash/opening_screen_test.dart` (napas animasi + jalan saat "kurangi animasi" aktif), dan `test/app_test.dart` (layar bermerek tampil selagi backend disiapkan, lalu hilang setelah selesai).
+
+### UX-2 — Makan & kamera
+1. `CapturePanel` disusun ulang: eyebrow "FOTO PIRING", judul, ilustrasi viewfinder, tiga langkah (Foto piring → Dikenali AI → Kamu periksa), catatan privasi, CTA utama, serta pintu offline **"Catat tanpa foto"** (membuka sheet catat manual). Seluruhnya di atas permukaan hero dengan token `onHeroSurface*`.
+2. `PlateViewfinderIllustration` (baru, `shared/illustrations/`): CustomPainter token-only — sudut bingkai, lingkaran putus-putus, piring, tiga benda makanan abstrak. Dipakai di panel Makan (onHero) dan di layar kamera saat memuat (onCamera, kontras mengikuti tema terbalik).
+3. `ScanScreen`: loading memakai ilustrasi + `AppStrings.scanPreparing`; viewfinder responsif menggantikan lingkaran statis; header & kontrol bawah memakai scrim solid (bukan bayangan/gradien).
+4. `MakanTodayView`: panel ringkasan kini punya hairline + pita status protein hewani (ikon + teks + warna); tur "Mulai dari sini" dipindah ke dekat checklist.
+
+### UX-3 — warna, gerak, ilustrasi
+1. Dua token baru di `AppColors` (`accentContainer` / `onAccentContainer`, ikut `copyWith` + `lerp`) untuk pita hangat "belum ada protein hewani"; kontras ≥ 4,5:1 diuji di `app_theme_test.dart`.
+2. `SectionReveal` (baru, `shared/widgets/`): masuk 250 ms (opacity + 8 dp), lewat `AppMotion.of` sehingga "kurangi animasi" menonaktifkannya. Dipakai pada panel kamera & ringkasan Makan.
+3. `PiringRing` besar kini menyala bertahap 400 ms (track digambar untuk semua busur, busur terisi mengisi dari kiri ke kanan); `PiringProgressRing` sudah lebih dulu animatif.
+4. `AppTheme`: tema terpadu untuk `TextButton`, `IconButton`, FAB (pill, elevasi rendah), `Chip`, `ProgressIndicator`, dan `SnackBar` (floating, hairline, tanpa elevasi) — menghilangkan tampilan "polos" default Material.
+
+### Dependency baru
+**Tidak ada.** Semua komponen memakai Flutter SDK + token yang sudah ada.
+
+### Verifikasi (2026-11-18)
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **293/293 passed** (baseline 287; +3 startup guard, +1 opening reduce-mode, +1 kontras token hangat, +1 layar startup bermerek).
+- DoD §10.1: `LinearGradient|RadialGradient|SweepGradient` = 0; `Colors.*` (kecuali `transparent`) di `lib/features` + `lib/shared` = 0.
+- Layout 360dp @1.3 light + dark: Makan tanpa overflow (pita status dibungkus `Expanded` agar teks panjang tidak melebar).
+
+### Catatan tes
+- Dua tes `scan_flow_test` dan satu tes tur `makan_flow_test` diperbarui untuk menggulir ke CTA/tur yang sekarang berada di bawah lipatan akibat panel kamera yang lebih tinggi. Alur & asersi fitur tidak berubah.
+
+### Belum terverifikasi (butuh kamu)
+- Perangkat nyata: apakah splash benar-benar hilang saat jaringan mati (coba mode pesawat saat membuka aplikasi), serta tampilan splash Android 12+ light/dark.
+- Review visual akhir light/dark @1.3 untuk panel kamera & ring animasi di perangkat.
+- Commit belum dijalankan (manual oleh pemilik).
+
+## UX-2b — Header Makan ikut menggulir (2026-11-18)
+
+### Temuan
+Kepala Makan (tanggal, judul, ganti anak, segmen Hari ini/Riwayat) disematkan di luar daftar sehingga selalu menutupi konten saat pengguna menggulir — tidak seperti Beranda.
+
+### Perubahan
+1. `makan_header.dart` (baru): `MakanHeader` — kepala Makan (eyebrow tanggal + ScreenHeader + SegmentControl) sebagai satu komponen.
+2. `MakanTodayView` & `MakanHistoryView`: `MakanHeader` menjadi anak pertama daftar, sehingga seluruh kepala ikut menggulir.
+3. `MakanScreen`: header/segmen dihapus dari posisi statis; body hanya berisi `AnimatedSwitcher` berisi salah satu bagian.
+4. `makan_flow_test` ("riwayat"): gulir kembali ke segmen sebelum mengetuknya; alur tetap sama.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **293/293 passed**.
+- Perilaku: kepala hilang dari layar saat menggulir (identik dengan Beranda).
+- Commit belum dijalankan (manual oleh pemilik).
