@@ -2,4 +2,5 @@
 <resources>
     <!-- Splash native = warna latar Lottie pembuka (#145C45), bukan putih. -->
     <color name="splash_background">#145C45</color>
+	<color name="ic_launcher_background">#145C45</color>
 </resources>

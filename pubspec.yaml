@@ -77,7 +77,9 @@ flutter:
     - assets/audio/
     - assets/reference/
     - assets/rules/
-    - assets/logo/
+    # Hanya versi mark yang dibundel; master & foreground hanya dipakai
+    # saat generate ikon launcher (tidak perlu ikut ke dalam APK).
+    - assets/logo/logo_cek-gizi_mark.png
     - assets/logo_kelompok_norm/
 
   fonts:
@@ -124,10 +126,17 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
 # Ikon launcher Android di-generate dari logo CekGizi (bukan bawaan Flutter).
-# Jalankan ulang setelah mengganti assets/logo/logo_splash_screen.png:
+# Jalankan ulang setelah mengganti assets/logo/logo_cek-gizi.png:
 #   dart run flutter_launcher_icons
+# `adaptive_icon_foreground` = huruf C–G dengan latar transparan, agar
+# Android 8+ memasknya rapi; API < 26 memakai `image_path` apa adanya.
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: false
-  image_path: "assets/logo/logo_splash_screen.png"
+  image_path: "assets/logo/logo_cek-gizi.png"
+  adaptive_icon_background: "#145C45"
+  adaptive_icon_foreground: "assets/logo/logo_cek-gizi_foreground.png"
+  # Tanpa inset tambahan: huruf C–G sudah berada di dalam safe zone 72dp,
+  # jadi jangan dikecilkan lagi oleh plugin.
+  adaptive_icon_foreground_inset: 0
   min_sdk_android: 21
