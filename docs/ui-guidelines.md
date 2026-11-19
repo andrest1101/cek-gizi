@@ -1,4 +1,4 @@
-# CekGizi — Spesifikasi Visual (v2.1, Batch UX-0)
+# CekGizi — Spesifikasi Visual (v2.4, Batch UX-11)
 
 Dokumen ini adalah **kontrak visual** untuk seluruh layar. PRD v2.0 tetap
 sumber kebenaran fitur; dokumen ini hanya mengatur bagaimana fitur tampil.
@@ -62,6 +62,9 @@ Aturan:
 - Semua teks di atas hero wajib `onHeroSurface*` (kontras ≥ 4,5:1, diuji
   di `test/core/theme/app_theme_test.dart`).
 - Status selalu **ikon + teks + warna**; warna tidak pernah sendirian.
+- Kontrol nonaktif: latar `surfaceVariant` + teks `textSecondary` (bukan
+  hijau pudar), dan border checkbox memakai `textSecondary` agar tetap
+  terlihat di dark mode.
 
 ## 3. Tipografi (Plus Jakarta Sans, bundled)
 
@@ -131,11 +134,28 @@ Kedalaman berasal dari perbedaan tone 1 langkah + hairline, bukan shadow.
 | `ZScoreTable` | tabel z-score aksesibel |
 
 | `SectionReveal` | masuk 250 ms (opacity + 8dp), ikut `AppMotion.of` |
+| `AppLogoMark` | ikon merek 40dp (sudut `control`, hairline `outline`), dari `logo_cek-gizi_mark.png`; dekoratif (`ExcludeSemantics`) karena nama app selalu ada di sebelahnya |
 
 Ilustrasi bergaya garis (`ChatIllustration`, `EmptyPlateIllustration`,
-`SeedlingIllustration`, `PlateViewfinderIllustration`) memakai token warna,
-bukan file gambar raster. `PlateViewfinderIllustration` punya dua mode:
-`onHero` (panel Makan) dan `onCamera` (latar preview terbalik).
+`SeedlingIllustration`, `PlateViewfinderIllustration`,
+`OnboardingGrowthIllustration`, `OnboardingGuidanceIllustration`) memakai
+token warna, bukan file gambar raster. `PlateViewfinderIllustration` punya dua
+mode: `onHero` (panel Makan) dan `onCamera` (latar preview terbalik).
+`OnboardingGrowthIllustration` **tanpa angka/label** — pita SD + garis tren
+saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
+
+### Merek
+
+- `assets/logo/logo_cek-gizi.png` (1024×1024) = **master** untuk ikon launcher
+  Android (`flutter_launcher_icons`). Jangan diubah di widget.
+- `assets/logo/logo_cek-gizi_mark.png` (256×256) = potongan rapat dari master
+  (padding ±16% di sekitar huruf C–G) khusus untuk `AppLogoMark` di dalam app,
+  agar terbaca pada 40dp dan tidak mendekode 1024px ke memori.
+- Ikon launcher memakai **adaptive icon** (Android 8+): latar solid `#145C45`,
+  foreground `logo_cek-gizi_foreground.png` (huruf C–G dengan alfa, inset 0
+  karena sudah di dalam safe zone 72dp). API < 26 memakai `image_path` apa
+  adanya. Hanya `logo_cek-gizi_mark.png` yang dibundel ke APK; master dan
+  foreground hanya dipakai saat generate ikon.
 
 ## 8. Pola per layar
 
@@ -156,6 +176,21 @@ bukan file gambar raster. `PlateViewfinderIllustration` punya dua mode:
   accordion (ringkasan selalu tampil, z-score & aksi dibuka saat diketuk).
 - **Akun**: profil anak (kelola anak), pengingat lokal, catatan privasi.
 - **Tanya**: banner disclaimer tetap, area pesan, input bar, chip cepat.
+- **Onboarding** (v2.4): 3 halaman geser. Top bar merek (`AppLogoMark` 40dp
+  + nama app + "Lewati" target 48dp) → **stage ilustrasi full-bleed**
+  (tinggi 50% area, `surfaceVariant`, sudut bawah `card`, ring + titik
+  `accent`) → eyebrow pill `primaryContainer` → judul 26/32 w700 rata kiri →
+  body 15/23 `textSecondary` → footer tetap: progress 3 segmen + "01 / 03",
+  CTA 52dp, disclaimer 11/16. Satu halaman = satu cerita; teks tidak
+  di tengah agar hierarki terbaca. Reduce-motion = lompat halaman.
+- **Consent / persetujuan** (v2.4): tanpa AppBar/back. Top bar merek + pil
+  "Langkah terakhir" → **hero hijau** (`AppSurfaces.hero`) berisi ikon perisai,
+  eyebrow, judul 24/30, intro → kartu **4 baris data** berikon
+  (profil anak, foto makanan, akses terbatas, kendali penuh; divider hairline
+  indent 68) → callout disclaimer `accentContainer` → **footer tetap** berisi
+  checkbox (state terpilih `primaryContainer` + border `primary`), CTA 52dp
+  (disabled sampai dicentang), dan hint penolakan. Checkbox + CTA tidak pernah
+  butuh scroll. Error tampil di atas checkbox dengan `liveRegion`.
 - **Splash / opening** (v2.3): **satu page** — native Android & frame
   pertama Flutter solid `#145C45` (`AppSurfaces.splashSurface`), lalu
   `OpeningScreen` memutar Lottie `assets/animations/cekgizi_opening.json`
@@ -164,8 +199,8 @@ bukan file gambar raster. `PlateViewfinderIllustration` punya dua mode:
   sinkron dengan `forward()`; reduce-motion = bisu). Lottie ∧
   `backendReadyProvider` bersamaan: bila animasi selesai lebih dulu, frame
   terakhir ditahan + progres halus. Reduce-motion dihormati; ada timeout
-  pengaman 20 dtk; tidak ada logo ganda. Launcher icon Android = logo
-  CekGizi (bukan bawaan Flutter).
+  pengaman 20 dtk; tidak ada logo ganda. Launcher icon Android dibuat dari
+  `logo_cek-gizi.png`; logo di dalam app memakai `AppLogoMark`.
 
 ## 9. Aksesibilitas (PRD §7.7)
 

@@ -829,7 +829,7 @@ Tidak ditemukan class splash/logo Flutter di engine yang dipakai (Flutter 3.32.8
 Lanjutan UX-7: perbaikan posisi Lottie, satu page splash, ganti launcher/splash icon bawaan Flutter, dan speed Lottie 0,65×.
 
 ### Dependency baru (disetujui 2026-11-18)
-- **`flutter_launcher_icons` (devDependency, ^0.14.4)** — generate launcher icon Android (`ic_launcher`) dari `assets/logo/logo_splash_screen.png` sekali jalan; tidak di-ship di runtime. Alasan: sumber ikon default Flutter (`mipmap-*/ic_launcher.png`) harus diganti ke logo CekGizi tanpa manipulasi manual 5 density.
+- **`flutter_launcher_icons` (devDependency, ^0.14.4)** — generate launcher icon Android (`ic_launcher`) dari `assets/logo/logo_cek-gizi.png` sekali jalan; tidak di-ship di runtime. Alasan: sumber ikon default Flutter (`mipmap-*/ic_launcher.png`) harus diganti ke logo CekGizi tanpa manipulasi manual 5 density.
 - `lottie` (^3.3.1) sudah tercantum di UX-7.
 
 ### Perubahan
@@ -928,3 +928,62 @@ Di layar sempit (360dp @1,3) teks kategori resmi terpotong ("Berat bada..."). St
 - `flutter build apk --debug` → **✓ Built**
 - Commit belum dijalankan (manual oleh pemilik).
 
+
+## UX-11 — Onboarding, consent, dan logo merek baru (2026-11-19)
+
+### A. Onboarding 3 halaman
+`OnboardingScreen` ditulis ulang menjadi tiga cerita vertikal: **stage
+ilustrasi full-bleed** (50% tinggi area, `surfaceVariant`, sudut bawah
+`card`, ring dekoratif + titik `accent`), **eyebrow pill** `primaryContainer`,
+judul 26/32 w700 rata kiri, body 15/23 `textSecondary`, lalu footer tetap:
+progress 3 segmen + "01 / 03", CTA 52dp, disclaimer 11/16.
+- Ilustrasi: `PlateViewfinderIllustration` (halaman 1),
+  `OnboardingGrowthIllustration` (baru — pita SD + garis tren, **tanpa angka**),
+  `OnboardingGuidanceIllustration` (baru — gelembung tanya + lencana perisai).
+- Reduce-motion → `jumpToPage`; tanpa animasi berulang.
+- Top bar memakai `AppLogoMark` + nama dari `AppConfig.appName`.
+
+### B. Consent (halaman persetujuan)
+`ConsentScreen` kini: top bar merek + pil "Langkah terakhir" → hero
+`AppSurfaces.hero` (ikon perisai, eyebrow, judul 24/30, intro) → kartu
+**4 baris data** berikon (profil anak, foto makanan, akses terbatas, kendali
+penuh; divider hairline indent 68) → callout `accentContainer` → **footer
+tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
+- Checkbox + CTA **selalu terlihat**; CTA disabled sampai dicentang.
+- Spinner memakai `onPrimary` di atas tombol hijau.
+- String baru di `AppStrings`: `consentEyebrow`, `consentStepLabel`,
+  `consentDataItems` (4 record). `consentVersion` tetap `'1'` karena makna
+  persetujuan tidak berubah.
+- `AppTheme`: tombol `FilledButton` nonaktif kini `surfaceVariant` +
+  `textSecondary` (jelas terkunci, bukan hijau pudar); border checkbox
+  memakai `textSecondary` agar terlihat di dark mode.
+
+### C. Logo merek baru
+- Master `assets/logo/logo_cek-gizi.png` (1024×1024) menggantikan
+  `logo_splash_screen.png` sebagai sumber **ikon launcher Android**
+  (`dart run flutter_launcher_icons` → 5 density `ic_launcher.png` legacy +
+  adaptive icon `mipmap-anydpi-v26`).
+- `assets/logo/logo_cek-gizi_foreground.png` (alfa, latar transparan) dipakai
+  sebagai foreground adaptive icon; latar `#145C45`; inset 0 karena huruf
+  sudah di dalam safe zone 72dp.
+- `assets/logo/logo_cek-gizi_mark.png` (256×256) dibuat **sekali** (Pillow,
+  offline) dengan memotong rapat area huruf C–G + padding ±16%, khusus untuk
+  `AppLogoMark` 40dp di top bar onboarding & consent. Master tidak diubah.
+- `AppLogoMark` memakai `cacheWidth` sesuai device pixel ratio agar tidak
+  mendekode 1024px ke memori.
+- `pubspec.yaml` hanya membundel `logo_cek-gizi_mark.png`; master dan
+  foreground tidak ikut ke dalam APK.
+- Native splash tetap solid `#145C45` tanpa ikon (logo pertama muncul di
+  Lottie), jadi tidak ada logo ganda.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **294/294 passed**
+- `flutter build apk --debug` → **✓ Built**
+- DoD grep gradien & `Colors.*` → 0.
+- Tes diperbarui: `onboarding_screen_test` (logo, progress, CTA) dan
+  `layout_scale_test` (footer consent sticky; checkbox mengaktifkan CTA).
+- Perlu tinjauan perangkat: swipe onboarding, "Lewati", checkbox + CTA
+  consent, dark mode, dan ikon launcher baru (uninstall app lama dulu karena
+  Android meng-cache ikon).
+- Commit belum dijalankan (manual oleh pemilik).
