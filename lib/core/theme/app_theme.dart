@@ -124,7 +124,7 @@ abstract final class AppTheme {
       ),
       checkboxTheme: CheckboxThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        side: BorderSide(color: colors.outline, width: 1.5),
+        side: BorderSide(color: colors.textSecondary, width: 1.5),
         fillColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
               ? colors.primary
@@ -149,6 +149,10 @@ abstract final class AppTheme {
         style: FilledButton.styleFrom(
           backgroundColor: colors.primary,
           foregroundColor: colors.onPrimary,
+          // Status nonaktif dibuat jelas "terkunci", bukan hijau pudar:
+          // latar tenang + teks sekunder yang tetap terbaca.
+          disabledBackgroundColor: colors.surfaceVariant,
+          disabledForegroundColor: colors.textSecondary,
           minimumSize: const Size(48, 48),
           padding: const EdgeInsets.symmetric(horizontal: 20),
           textStyle: AppTextStyles.label,
