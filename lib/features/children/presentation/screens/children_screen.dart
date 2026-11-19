@@ -10,8 +10,8 @@ import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
+import 'package:cekgizi/features/children/presentation/widgets/child_photo_avatar.dart';
 import 'package:cekgizi/shared/illustrations/seedling_illustration.dart';
-import 'package:cekgizi/shared/widgets/child_avatar.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
@@ -159,11 +159,7 @@ class _ChildCard extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                ChildAvatar(
-                  avatarKey: child.avatarKey,
-                  size: 48,
-                  semanticLabel: child.nickname,
-                ),
+                ChildPhotoAvatar(child: child, size: 48),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(

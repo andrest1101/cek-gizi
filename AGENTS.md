@@ -48,7 +48,7 @@ You MUST strictly adhere to Clean Architecture and feature-based directory struc
   - _Never_ estimate calories/macros from photos.
   - _Never_ diagnose, never suggest drugs/supplements/dosages.
   - _Red flag handling:_ the Edge Function checks red-flag keywords (kejang, sesak, tersedak, biru, lemas, tidak mau minum, muntah terus, diare, berdarah, bengkak setelah makan, alergi, demam) **before** calling the LLM and returns a fixed referral message. Kejang/sesak/tersedak/biru → `emergency` flag → direct to IGD / 112.
-- **Data privacy:** no child photos anywhere; food photos are discarded after analysis and never logged. Only `age_months` (and `sex` for chat) is sent to Gemini. No child name or birthdate leaves the device.
+- **Data privacy:** child profile photos are optional and never leave the device — stored in the app-private `child_photos/` folder (excluded from Android backup), deleted together with the child profile — food photos are discarded after analysis and never logged. Only `age_months` (and `sex` for chat) is sent to Gemini. No child name or birthdate leaves the device.
 - **Offline:** growth calculations, z-score tables, recipes, and the food list MUST work offline from local assets. Scan and chat require internet and must show a friendly error card with a retry button.
 
 ## 5. Coding Standards & Error Handling

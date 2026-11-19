@@ -81,6 +81,12 @@ abstract final class AppStrings {
           'catatan perkembangannya.',
     ),
     (
+      title: 'Foto profil (opsional)',
+      body:
+          'Hanya tersimpan di perangkat ini dan tidak pernah diunggah ke '
+          'server maupun AI.',
+    ),
+    (
       title: 'Foto makanan',
       body:
           'Dikirim hanya untuk dikenali AI, lalu dihapus setelah dianalisis. '
@@ -111,8 +117,31 @@ abstract final class AppStrings {
   static const childSexFemale = 'Perempuan';
   static const childAvatarLabel = 'Avatar';
   static const childDetailsSectionTitle = 'Data anak';
-  static const childAvatarOptionsTitle = 'Pilih avatar';
-  static const childAvatarHint = 'Gunakan avatar ilustrasi, bukan foto anak.';
+  static const childAvatarHint =
+      'Avatar mengikuti jenis kelamin. Kamu bisa menambahkan foto sendiri.';
+  static const childPhotoTitle = 'Foto profil';
+  static const childPhotoHint =
+      'Opsional. Foto hanya tersimpan di perangkat ini dan tidak pernah '
+      'diunggah.';
+  static const childPhotoTake = 'Ambil foto';
+  static const childPhotoGallery = 'Galeri';
+  static const childPhotoRemove = 'Hapus foto';
+  static const childPhotoProcessing = 'Menyiapkan foto…';
+  static const childPhotoError = 'Foto tidak bisa dipakai. Coba foto lain.';
+  static const childPhotoPermissionError =
+      'Izin kamera atau galeri belum diberikan. Aktifkan dulu di pengaturan '
+      'HP kamu.';
+  static const childPhotoSaveError =
+      'Data anak tersimpan, tetapi foto gagal disimpan. Coba lagi dari '
+      'halaman Ubah data anak.';
+  static const childPhotoRemoveTitle = 'Hapus foto profil?';
+  static const childPhotoRemoveBody =
+      'Foto akan dihapus dari perangkat ini dan avatar ilustrasi dipakai lagi.';
+  static String childPhotoPreviewSemantics(String label) =>
+      'Pratinjau foto profil $label';
+  static const childPhotoAddSemantics = 'Tambah atau ganti foto profil';
+  static String childAvatarDefaultSemantics(String sexLabel) =>
+      'Avatar ilustrasi $sexLabel';
   static const childSave = 'Simpan';
   static const childDelete = 'Hapus';
   static const childDeleteTitle = 'Hapus data anak?';
@@ -140,9 +169,6 @@ abstract final class AppStrings {
   static const childSaveError =
       'Gagal menyimpan. Periksa koneksi internet kamu, lalu coba lagi.';
   static const childNotFound = 'Anak tidak ditemukan.';
-  static String childAvatarSemantics(String key) => 'Avatar $key';
-  static String childAvatarPreviewSemantics(String label) =>
-      'Pratinjau avatar untuk $label';
 
   // â”€â”€ Tumbuh â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const growthTitle = 'Tumbuh';
@@ -779,16 +805,52 @@ abstract final class AppStrings {
   // ── Akun (tab kelima - PRD §6.8, §9.4) ────────────────────────────
   static const accountEyebrow = 'AKUN';
   static const accountTitle = 'Akun';
-  static const accountSubtitle = 'Profil anak dan pengingat di perangkat ini.';
+  static const accountSubtitle = 'Profil anak, foto, dan pengingat kamu.';
   static const accountChildSection = 'Profil anak';
   static const accountChildManage = 'Kelola anak';
   static const accountChildEmptyTitle = 'Belum ada anak';
   static const accountChildEmptyBody =
       'Tambahkan profil anak agar ringkasan dan pengingat bisa dipakai.';
   static const accountChildEmptyCta = 'Tambah anak';
-  static const accountLocalNote =
-      'Data anak dan pengingat disimpan di perangkat ini. Kunci dan akun '
-      'akan hadir di pembaruan berikutnya.';
+  static const accountChildAdd = 'Tambah';
+  static const accountChildAddTooltip = 'Tambah anak';
+  static const accountChildEdit = 'Ubah data anak';
+  static const accountChildrenAll = 'Semua anak';
+  static const accountLastMeasurement = 'Pengukuran terakhir';
+  static const accountNoMeasurement = 'Belum ada pengukuran';
+  static const accountNoMeasurementBody =
+      'Catat berat dan tinggi untuk melihat status gizi.';
+  static const accountAddMeasurement = 'Tambah';
+  static const accountMeasurementLoading = 'Memuat ukuran…';
+  static const accountMeasurementToday = 'Hari ini';
+  static const accountMeasurementYesterday = 'Kemarin';
+  static String accountMeasurementDaysAgo(int days) => '$days hari lalu';
+  static const accountPrivacyTitle = 'Privasi & data';
+  static const accountPrivacyChildTitle = 'Profil anak';
+  static const accountPrivacyChildBody =
+      'Tersimpan di akun anonim kamu dan hanya bisa diakses dari akun ini.';
+  static const accountPrivacyPhotoTitle = 'Foto profil';
+  static const accountPrivacyPhotoBody =
+      'Opsional, hanya di perangkat ini, dan tidak pernah diunggah.';
+  static const accountPrivacyFoodTitle = 'Foto makanan';
+  static const accountPrivacyFoodBody =
+      'Dihapus setelah dikenali. Tidak disimpan.';
+  static const accountPrivacyReminderTitle = 'Pengingat';
+  static const accountPrivacyReminderBody =
+      'Hanya di perangkat ini dan bisa dimatikan kapan saja.';
+  static const accountReferenceTitle = 'Sumber rujukan';
+  static const accountReferenceSubtitle = 'Permenkes 2/2020 & WHO';
+  static const accountReferenceSheetTitle = 'Sumber rujukan';
+  static const accountReferencePermenkes =
+      'Permenkes No. 2 Tahun 2020 tentang Standar Antropometri Anak';
+  static const accountReferenceWho = 'WHO Child Growth Standards (2006)';
+  static const accountReferenceNote =
+      'Z-score dan klasifikasi status gizi dihitung di perangkat dari tabel '
+      'rujukan resmi, bukan dari AI.';
+  static const accountReferenceClose = 'Tutup';
+  static const accountAboutBody =
+      'Alat bantu edukasi dan pemantauan gizi, bukan alat diagnosis.';
+  static const accountVersionLabel = 'Versi';
   static const accountDisclaimerTitle = 'Tentang aplikasi';
   static const accountDisclaimerBody =
       'Alat bantu edukasi dan pemantauan gizi, bukan alat diagnosis. '

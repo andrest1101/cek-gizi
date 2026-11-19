@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
-import 'package:cekgizi/shared/widgets/child_avatar.dart';
+import 'package:cekgizi/features/children/presentation/widgets/child_photo_avatar.dart';
 
 /// Baris identitas anak (avatar + nama + usia) untuk header layar
 /// Tumbuh/Makan. Bila [semanticsLabel] diisi, baris dibungkus Semantics.
@@ -18,11 +18,7 @@ class ChildIdentityRow extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Row(
       children: [
-        ChildAvatar(
-          avatarKey: child.avatarKey,
-          size: 40,
-          semanticLabel: child.nickname,
-        ),
+        ChildPhotoAvatar(child: child, size: 40),
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(

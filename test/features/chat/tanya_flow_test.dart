@@ -24,7 +24,7 @@ Future<void> _pumpApp(
 }) async {
   SharedPreferences.setMockInitialValues({
     'onboarding_completed': true,
-    'consent_version_accepted': '1',
+    'consent_version_accepted': '2',
   });
   final prefs = await LocalPrefs.load();
 
@@ -270,7 +270,7 @@ void main() {
   ) async {
     SharedPreferences.setMockInitialValues({
       'onboarding_completed': true,
-      'consent_version_accepted': '1',
+      'consent_version_accepted': '2',
     });
     final prefs = await LocalPrefs.load();
     final chatRepo = FakeChatRepository();

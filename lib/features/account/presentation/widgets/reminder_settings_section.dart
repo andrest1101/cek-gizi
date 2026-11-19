@@ -7,6 +7,8 @@ import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
+import 'package:cekgizi/shared/widgets/section_heading.dart';
+import 'package:cekgizi/shared/widgets/settings_tile.dart';
 
 /// Bagian Pengingat di layar Akun (PRD §6.8).
 ///
@@ -90,34 +92,33 @@ class ReminderSettingsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          AppStrings.settingsRemindersTitle,
-          style: AppTextStyles.titleMedium.copyWith(color: colors.textPrimary),
-        ),
+        const SectionHeading(title: AppStrings.settingsRemindersTitle),
         const SizedBox(height: AppSpacing.md),
         Container(
           decoration: AppSurfaces.card(context),
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          clipBehavior: Clip.antiAlias,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SwitchListTile.adaptive(
-                value: settings.monthlyEnabled,
-                onChanged: toggleMonthly,
-                contentPadding: EdgeInsets.zero,
-                secondary: Icon(
-                  Icons.calendar_month_rounded,
-                  color: colors.textSecondary,
+              SettingsTile(
+                icon: Icons.calendar_month_rounded,
+                title: AppStrings.settingsReminderMonthlyTitle,
+                subtitle: AppStrings.settingsReminderMonthlyBody(
+                  settings.monthlyDay,
                 ),
-                title: Text(AppStrings.settingsReminderMonthlyTitle),
-                subtitle: Text(
-                  AppStrings.settingsReminderMonthlyBody(settings.monthlyDay),
+                trailing: Switch.adaptive(
+                  value: settings.monthlyEnabled,
+                  onChanged: toggleMonthly,
                 ),
               ),
-              if (settings.monthlyEnabled) ...[
-                const SizedBox(height: AppSpacing.sm),
+              if (settings.monthlyEnabled)
                 Padding(
-                  padding: const EdgeInsets.only(left: AppSpacing.lg),
+                  padding: const EdgeInsets.fromLTRB(
+                    68,
+                    0,
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                  ),
                   child: Row(
                     children: [
                       Text(
@@ -141,28 +142,26 @@ class ReminderSettingsSection extends ConsumerWidget {
                     ],
                   ),
                 ),
-              ],
-              Divider(height: 1, color: colors.outline),
-              const SizedBox(height: AppSpacing.sm),
-              SwitchListTile.adaptive(
-                value: settings.dailyEnabled,
-                onChanged: toggleDaily,
-                contentPadding: EdgeInsets.zero,
-                secondary: Icon(
-                  Icons.restaurant_rounded,
-                  color: colors.textSecondary,
+              Divider(height: 1, indent: 68, color: colors.outline),
+              SettingsTile(
+                icon: Icons.restaurant_rounded,
+                title: AppStrings.settingsReminderDailyTitle,
+                subtitle: AppStrings.settingsReminderDailyBody(
+                  _formatTime(settings.dailyHour, settings.dailyMinute),
                 ),
-                title: Text(AppStrings.settingsReminderDailyTitle),
-                subtitle: Text(
-                  AppStrings.settingsReminderDailyBody(
-                    _formatTime(settings.dailyHour, settings.dailyMinute),
-                  ),
+                trailing: Switch.adaptive(
+                  value: settings.dailyEnabled,
+                  onChanged: toggleDaily,
                 ),
               ),
-              if (settings.dailyEnabled) ...[
-                const SizedBox(height: AppSpacing.sm),
+              if (settings.dailyEnabled)
                 Padding(
-                  padding: const EdgeInsets.only(left: AppSpacing.lg),
+                  padding: const EdgeInsets.fromLTRB(
+                    68,
+                    0,
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                  ),
                   child: Row(
                     children: [
                       Text(
@@ -174,6 +173,12 @@ class ReminderSettingsSection extends ConsumerWidget {
                       const SizedBox(width: AppSpacing.md),
                       TextButton(
                         onPressed: changeDailyTime,
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(0, 48),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                          ),
+                        ),
                         child: Text(
                           _formatTime(settings.dailyHour, settings.dailyMinute),
                           style: AppTextStyles.titleMedium.copyWith(
@@ -185,7 +190,6 @@ class ReminderSettingsSection extends ConsumerWidget {
                     ],
                   ),
                 ),
-              ],
             ],
           ),
         ),
