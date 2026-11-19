@@ -121,7 +121,9 @@ Kedalaman berasal dari perbedaan tone 1 langkah + hairline, bukan shadow.
 
 | Komponen | Catatan |
 | --- | --- |
-| `ScreenHeader` | eyebrow + judul + subtitle + trailing opsional |
+| ScreenHeader | eyebrow + judul + subtitle + trailing opsional |
+| SectionHeading | judul seksi + aksi opsional (mis. Kelola anak) |
+| SettingsTile | baris pengaturan berikon tonal 40dp + trailing switch/chevron |
 | `SectionHeader` | judul bagian di dalam daftar |
 | `EmptyState` | ikon/ilustrasi tonal + satu kalimat + satu aksi |
 | `ErrorCard` | pesan ramah + "Coba lagi" |
@@ -130,7 +132,8 @@ Kedalaman berasal dari perbedaan tone 1 langkah + hairline, bukan shadow.
 | `StatusPill` | pita status: ikon + teks + warna |
 | `SegmentControl` | pemilih 2 bagian (Hari ini/Riwayat) |
 | `TonalIconCircle` | ikon di lingkaran tonal, bukan emoji |
-| `ChildAvatar` / `ChildSwitcher` | identitas anak, tanpa nama ganda |
+| `ChildAvatar` / `ChildSwitcher` | identitas anak; avatar default 2 bentuk (siluet laki/perempuan, otomatis ikut jenis kelamin) atau foto profil **lokal** (opsional, tidak pernah diunggah) |
+| `ChildPhotoAvatar` (features) | avatar yang memuat foto lokal (`ChildPhotoStore`) dengan fallback ilustrasi |
 | `ZScoreTable` | tabel z-score aksesibel |
 
 | `SectionReveal` | masuk 250 ms (opacity + 8dp), ikut `AppMotion.of` |
@@ -161,7 +164,9 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
 
 - **Beranda** (v2.3): sapaan + `ChildSwitcherButton` di header, lalu **3 blok**:
   (1) `PiringHeroCard` — hero hijau, satu angka dominan 40dp + dua ubin metrik
-  (protein hewani & tren berat) dipisah hairline; (2) `HomeWeekChips` — pil
+  (protein hewani & tren berat) dipisah hairline; di belakang hero digambar
+  dekorasi **busur konsentris + 3 titik** (`HeroPatternPainter`, alpha ±0,09,
+  `IgnorePointer` + `ExcludeSemantics`, di-clip radius kartu) → (2) `HomeWeekChips` — pil
   horizontal yang bisa digeser; (3) `GrowthStatusCard` dengan tips sebagai
   satu baris di dalamnya. Header tidak menyimpan aksi kelola/pengaturan.
 - **Makan**: header (tanggal + judul + ganti anak + segmen Hari
@@ -174,7 +179,20 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
 - **Tumbuh** (v2.3): ringkasan `ZScoreSummaryStrip` (3 ubin, sekaligus
   pemilih indeks) → grafik pita SD **full-bleed** → riwayat berbentuk
   accordion (ringkasan selalu tampil, z-score & aksi dibuka saat diketuk).
-- **Akun**: profil anak (kelola anak), pengingat lokal, catatan privasi.
+- **Akun** (v2.5): `ScreenHeader` → seksi **Profil anak** (`SectionHeading` +
+  aksi "Kelola anak") → `AccountIdentityCard` (foto/avatar 68dp, nama 20 w700,
+  pill usia & jenis kelamin, aksi ubah, divider hairline, baris **Pengukuran
+  terakhir** — berat/tinggi + tanggal relatif, atau CTA "Belum ada
+  pengukuran") → chip anak horizontal `AccountChildStrip` (hanya bila ≥ 2
+  anak; state terpilih `primaryContainer` + border `primary`, plus chip
+  "+ Tambah") → `ReminderSettingsSection` bergaya `SettingsTile` → seksi
+  **Privasi & data** (`AccountPrivacyCard`: profil anak, foto profil, foto
+  makanan, pengingat — jujur, tanpa klaim berlebihan) → seksi **Tentang
+  aplikasi** (`AccountAboutSection`: sumber rujukan dalam sheet — Permenkes
+  2/2020 & WHO — versi app, disclaimer).
+- **Formatir anak** (v2.5): preview besar 104dp + badge kamera; aksi **Ambil
+  foto** / **Galeri** / **Hapus foto**; hint jujur "hanya tersimpan di
+  perangkat ini"; error izin/kompresi tampil inline di kartu.
 - **Tanya**: banner disclaimer tetap, area pesan, input bar, chip cepat.
 - **Onboarding** (v2.4): 3 halaman geser. Top bar merek (`AppLogoMark` 40dp
   + nama app + "Lewati" target 48dp) → **stage ilustrasi full-bleed**
@@ -183,11 +201,11 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
   body 15/23 `textSecondary` → footer tetap: progress 3 segmen + "01 / 03",
   CTA 52dp, disclaimer 11/16. Satu halaman = satu cerita; teks tidak
   di tengah agar hierarki terbaca. Reduce-motion = lompat halaman.
-- **Consent / persetujuan** (v2.4): tanpa AppBar/back. Top bar merek + pil
+- **Consent / persetujuan** (v2.4–v2.5): tanpa AppBar/back. Top bar merek + pil
   "Langkah terakhir" → **hero hijau** (`AppSurfaces.hero`) berisi ikon perisai,
-  eyebrow, judul 24/30, intro → kartu **4 baris data** berikon
-  (profil anak, foto makanan, akses terbatas, kendali penuh; divider hairline
-  indent 68) → callout disclaimer `accentContainer` → **footer tetap** berisi
+  eyebrow, judul 24/30, intro → kartu **5 baris data** berikon (profil anak,
+  foto profil (opsional), foto makanan, akses terbatas, kendali penuh;
+  divider hairline indent 68) → callout disclaimer `accentContainer` → **footer tetap** berisi
   checkbox (state terpilih `primaryContainer` + border `primary`), CTA 52dp
   (disabled sampai dicentang), dan hint penolakan. Checkbox + CTA tidak pernah
   butuh scroll. Error tampil di atas checkbox dengan `liveRegion`.

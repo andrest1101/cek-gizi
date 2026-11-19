@@ -987,3 +987,88 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
   consent, dark mode, dan ikon launcher baru (uninstall app lama dulu karena
   Android meng-cache ikon).
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-12 - Akun modern, avatar 2 jenis kelamin, foto profil lokal & dekorasi hero (2026-11-19)
+
+### Keputusan pemilik (Opsi A, disetujui 2026-11-19)
+- Foto profil anak **hanya lokal** — tidak pernah ke Supabase / Edge Function /
+  Gemini. Amendemen sumber kebenaran: PRD §0 #7, §8.1 (baris foto profil),
+  §8.3; AGENTS.md §4 (aturan data privacy).
+- `consentVersion` **1 → 2** (teks consent bertambah baris "Foto profil
+  (opsional)"); pengguna lama diminta setuju sekali lagi. Semua tes memakai
+  `'consent_version_accepted': '2'`.
+
+### A. Avatar default 2 bentuk (siluet)
+- `AvatarCatalog` (13 ikon) **dihapus**. `ChildAvatar` merender: foto lokal
+  bila ada → `Image.file`; selain itu `ChildAvatarFigurePainter` (siluet
+  bust: perempuan rambut panjang ke bahu, laki-laki kap pendek; `primary` di
+  atas `primaryContainer`, kilau halus `onPrimary` alpha 0,18).
+- `avatar_key` di DB dipertahankan (`'boy'`/`'girl'` saat simpan) tetapi
+  **tidak lagi menentukan bentuk** — default selalu ikut jenis kelamin;
+  baris lama (`sprout` dst.) tampil benar tanpa migrasi.
+- Form anak: grid 13 ikon digantikan preview besar 104dp + badge kamera.
+
+### B. Foto profil lokal - UX-12B
+- Alur: Ambil foto (kamera) / Galeri → `image_picker` (512px,
+  `requestFullMetadata: false`) → `flutter_image_compress` (JPEG q82, 512px,
+  `keepExif: false`) → disimpan ke `child_photos/<childId>-<ts>.jpg` di
+  `getApplicationSupportDirectory()`. File sementara picker dihapus setelah
+  diproses.
+- `ChildPhotoStore` (abstraksi + `LocalChildPhotoStore`): `save` menimpa
+  versi lama, `delete` menghapus semua foto milik anak (dipanggil saat
+  profil anak dihapus), id disanitasi (`[A-Za-z0-9_-]`) agar tidak keluar
+  folder. `childPhotoPathProvider` (autoDispose family) null-safe untuk
+  lingkungan tanpa plugin → avatar default.
+- Nama file ber-stempel waktu → tidak ada cache gambar basi.
+- Android: `allowBackup="true"` + `fullBackupContent="@xml/backup_rules"` +
+  `dataExtractionRules="@xml/data_extraction_rules"` — folder `child_photos/`
+  dikecualikan dari cloud backup & device transfer.
+- Gagal simpan foto **tidak** membatalkan simpan data anak; pengguna diberi
+  snackbar "Data anak tersimpan, tetapi foto gagal disimpan…".
+- Dependency baru: **`path_provider` ^2.1.5** — dibutuhkan untuk direktori
+  privat aplikasi tempat foto disimpan.
+
+### C. Layar Akun - UX-12A (ditulis ulang)
+- `AccountIdentityCard` (baru): foto/avatar 68dp, nama 20 w700, pill usia &
+  L/P, aksi ubah, divider hairline, baris **Pengukuran terakhir** (data nyata
+  `measurementsProvider` + `GrowthSummary`: berat/tinggi + tanggal relatif,
+  atau CTA "Belum ada pengukuran").
+- `AccountChildStrip` (baru): chip horizontal anak (≥ 2 anak) + chip
+  "+ Tambah" (< 5 anak). State terpilih `primaryContainer` + border `primary`.
+- `ReminderSettingsSection`: `SwitchListTile` default diganti `SettingsTile`
+  berikon tonal. Logika pengingat tidak berubah.
+- `AccountPrivacyCard` (baru): ringkasan privasi jujur — profil anak (akun
+  anonim), foto profil (lokal), foto makanan (dibuang), pengingat (lokal).
+- `AccountAboutSection` (baru): sheet "Sumber rujukan" (Permenkes 2/2020,
+  WHO Child Growth Standards 2006 — teks apa adanya, tanpa tautan karangan),
+  versi app dari `AppConfig.appVersion` (baru), disclaimer.
+- `SectionHeading` & `SettingsTile` (shared) baru.
+- Ekspor data / hapus akun / tema toggle **sengaja tidak** ditambahkan
+  (menunggu Edge Function `delete-account` / UX-5).
+
+### D. Dekorasi kartu "Piring Hari Ini"
+- `HeroPatternPainter` (baru): dua kelompok busur konsentris (kanan-atas,
+  kiri-bawah) + tiga titik; stroke 1,5; `onHeroSurface` alpha ±0,09; di
+  belakang konten (`IgnorePointer` + `ExcludeSemantics`, di-clip radius
+  kartu); juga dipakai di varian ASI eksklusif. Ring, teks, dan CTA tidak
+  berubah — dekorasi hanya di sudut.
+
+### Tes
+- Baru: `child_photo_store_test` (6), `account_screen_test` (2),
+  `child_form_photo_test` (1).
+- Diperbarui: `consent_version_accepted` '1' → '2' di semua tes;
+  `layout_scale_test` (scroll ke Privasi/Tentang + field nama; 360dp @1,3
+  tetap hijau); `navigation_test` (tap "Kelola anak" dilakukan sebelum gulir).
+- `fakeChild` tidak berubah; render avatar tidak memakai `avatarKey`.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **303/303 passed** (sebelumnya 294)
+- `flutter build apk --debug` → **✓ Built**
+- DoD grep: gradien = 0; `Colors.*` di features/shared hanya
+  `Colors.transparent`; `GEMINI_API_KEY` = 0.
+- Layout 360dp @1,3 light & dark hijau (pill meta memakai ellipsis).
+- Belum diuji di perangkat: kamera/galeri nyata (ambil/ganti/hapus foto),
+  pengecualian backup, tampilan light/dark Akun, dan hero baru di Beranda.
+- Commit belum dijalankan (manual oleh pemilik). Lihat pemisahan commit yang
+  disarankan di percakapan (UX-11 masih uncommitted).
