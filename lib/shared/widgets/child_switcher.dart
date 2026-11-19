@@ -9,7 +9,7 @@ import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
-import 'package:cekgizi/shared/widgets/child_avatar.dart';
+import 'package:cekgizi/features/children/presentation/widgets/child_photo_avatar.dart';
 
 /// Baris identitas anak di Beranda: avatar, usia, dan chevron ke sheet
 /// ganti anak. Nama anak TIDAK diulang di sini karena sudah tampil di
@@ -23,8 +23,8 @@ class ChildSwitcherCard extends ConsumerWidget {
     if (children.isEmpty) return const SizedBox.shrink();
 
     final selectedId = ref.watch(selectedChildIdProvider);
-    final child = children.where((c) => c.id == selectedId).firstOrNull ??
-        children.first;
+    final child =
+        children.where((c) => c.id == selectedId).firstOrNull ?? children.first;
     final now = DateTime.now();
     final age = child.ageLabel(now);
 
@@ -46,11 +46,7 @@ class ChildSwitcherCard extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                ChildAvatar(
-                  avatarKey: child.avatarKey,
-                  size: 48,
-                  semanticLabel: child.nickname,
-                ),
+                ChildPhotoAvatar(child: child, size: 48),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
@@ -58,7 +54,8 @@ class ChildSwitcherCard extends ConsumerWidget {
                     children: [
                       Text(
                         age,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               color: AppTheme.colorsOf(context).textPrimary,
                             ),
                       ),
@@ -66,8 +63,8 @@ class ChildSwitcherCard extends ConsumerWidget {
                       Text(
                         AppStrings.childSwitcherTooltip,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppTheme.colorsOf(context).textSecondary,
-                            ),
+                          color: AppTheme.colorsOf(context).textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -77,8 +74,10 @@ class ChildSwitcherCard extends ConsumerWidget {
                   height: 40,
                   margin: const EdgeInsets.only(left: AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: AppSurfaces.sunken(context, radius: AppRadius.pill)
-                        .color,
+                    color: AppSurfaces.sunken(
+                      context,
+                      radius: AppRadius.pill,
+                    ).color,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -107,8 +106,8 @@ class ChildSwitcherButton extends ConsumerWidget {
     if (children.isEmpty) return const SizedBox.shrink();
     final colors = AppTheme.colorsOf(context);
     final selectedId = ref.watch(selectedChildIdProvider);
-    final child = children.where((c) => c.id == selectedId).firstOrNull ??
-        children.first;
+    final child =
+        children.where((c) => c.id == selectedId).firstOrNull ?? children.first;
 
     return Semantics(
       container: true,
@@ -130,11 +129,7 @@ class ChildSwitcherButton extends ConsumerWidget {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    ChildAvatar(
-                      avatarKey: child.avatarKey,
-                      size: 38,
-                      semanticLabel: child.nickname,
-                    ),
+                    ChildPhotoAvatar(child: child, size: 38),
                     Positioned(
                       right: -2,
                       bottom: -2,
@@ -217,9 +212,7 @@ class ChildSwitcherSheet extends ConsumerWidget {
             header: true,
             child: Text(
               AppStrings.childListTitle,
-              style: textTheme.titleMedium?.copyWith(
-                color: colors.textPrimary,
-              ),
+              style: textTheme.titleMedium?.copyWith(color: colors.textPrimary),
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
@@ -229,10 +222,7 @@ class ChildSwitcherSheet extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           for (final child in children)
-            _ChildSheetRow(
-              child: child,
-              isSelected: child.id == selectedId,
-            ),
+            _ChildSheetRow(child: child, isSelected: child.id == selectedId),
           const SizedBox(height: AppSpacing.sm),
           Divider(color: colors.outline),
           TextButton.icon(
@@ -282,11 +272,7 @@ class _ChildSheetRow extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                ChildAvatar(
-                  avatarKey: child.avatarKey,
-                  size: 40,
-                  semanticLabel: child.nickname,
-                ),
+                ChildPhotoAvatar(child: child, size: 40),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(

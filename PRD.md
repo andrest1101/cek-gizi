@@ -44,7 +44,7 @@
 | 4   | Estimasi kalori dan makro dari foto                            | **Dihapus dari v1**                                                          | Porsi tidak bisa ditakar dari satu foto, sehingga angka palsu-presisi                             |
 | 5   | Growth tracker berupa garis sederhana, bab "Z-Score" tanpa isi | **Z-score resmi Permenkes 2/2020**, kurva pita SD, klasifikasi status        | Tanpa standar rujukan, grafik tidak menunjukkan apa pun                                           |
 | 6   | Target "kader Posyandu"                                        | **Fokus orang tua**. Mode kader masuk v2                                     | Kader butuh banyak anak sekaligus. Fitur v1 tidak melayani itu                                    |
-| 7   | Foto anak dan foto makanan di Storage                          | **Tanpa foto anak. Foto makanan dibuang setelah dianalisis**                 | Data anak itu sensitif. Meminimalkan data juga menyederhanakan v1                                 |
+| 7   | Foto anak dan foto makanan di Storage                          | **Foto profil anak (opsional) hanya di perangkat, tidak pernah di server. Foto makanan dibuang setelah dianalisis** | Data anak itu sensitif. Meminimalkan data juga menyederhanakan v1                                 |
 | 8   | Model "Gemini 1.5 Flash / Pro"                                 | **Nama model dibaca dari env `GEMINI_MODEL`**                                | Nama model cepat usang                                                                            |
 | 9   | Tidak ada persetujuan privasi                                  | **Layar consent, ekspor data, hapus akun**                                   | Data kesehatan dan data anak termasuk data pribadi spesifik dalam UU PDP                          |
 | 10  | Chatbot tanpa pengaman teknis                                  | **Pemeriksaan red flag di server + kuota + batasan topik**                   | Ketentuan Gemini API melarang penggunaan untuk saran medis                                        |
@@ -561,6 +561,7 @@ Text scale hingga 1,3 tanpa overflow di lebar 360dp. Semua ikon dan grafik punya
 | -------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------- |
 | Nama panggilan, tanggal lahir, jenis kelamin | Supabase                                        | **Tidak**. Hanya `age_months` (dan `sex` untuk chat) |
 | Berat, panjang/tinggi, z-score               | Supabase                                        | **Tidak**                                            |
+| Foto profil anak (opsional)                  | **Tetap di perangkat** — folder privat `child_photos/` (dikecualikan dari backup otomatis) | **Tidak** |
 | Foto makanan                                 | **Tidak disimpan** (dibuang setelah dianalisis) | Ya, tanpa EXIF dan tanpa wajah                       |
 | Catatan makan (nama item, kelompok)          | Supabase                                        | Tidak                                                |
 | Pesan chat                                   | Supabase (bisa dihapus pengguna)                | Ya, tanpa nama anak                                  |
@@ -574,7 +575,7 @@ Text scale hingga 1,3 tanpa overflow di lebar 360dp. Semua ikon dan grafik punya
 
 ### 8.3 Kepatuhan
 
-Data kesehatan dan data anak termasuk kategori data pribadi spesifik dalam UU PDP (UU 27/2022). Wajib ada: layar consent berversi (tujuan, data yang dikumpulkan, hak pengguna), kebijakan privasi, ekspor data, hapus akun, dan minimisasi data seperti 8.1. **Ini bukan nasihat hukum**: pemilik proyek berkonsultasi sebelum rilis publik.
+Data kesehatan dan data anak termasuk kategori data pribadi spesifik dalam UU PDP (UU 27/2022). Wajib ada: layar consent berversi (tujuan, data yang dikumpulkan, hak pengguna), kebijakan privasi, ekspor data, hapus akun, dan minimisasi data seperti 8.1. Foto profil anak (opsional) hanya tersimpan di perangkat, tidak pernah diunggah, ikut terhapus saat profil anak dihapus, dan tidak ikut backup otomatis. **Ini bukan nasihat hukum**: pemilik proyek berkonsultasi sebelum rilis publik.
 
 ### 8.4 Keamanan
 

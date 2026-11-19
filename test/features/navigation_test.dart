@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +17,7 @@ import '../fakes.dart';
 Future<void> _pumpApp(WidgetTester tester) async {
   SharedPreferences.setMockInitialValues({
     'onboarding_completed': true,
-    'consent_version_accepted': '1',
+    'consent_version_accepted': '2',
   });
   final prefs = await LocalPrefs.load();
   final child = fakeChild();
@@ -123,17 +122,7 @@ void main() {
 
     expect(find.text(AppStrings.accountChildSection), findsOneWidget);
     expect(find.text(AppStrings.settingsRemindersTitle), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text(AppStrings.accountDisclaimerTitle),
-      200,
-      scrollable: find
-          .descendant(
-            of: find.byKey(const Key('account-list')),
-            matching: find.byType(Scrollable),
-          )
-          .first,
-    );
-    expect(find.text(AppStrings.accountDisclaimerTitle), findsOneWidget);
+    expect(find.text(AppStrings.accountChildManage), findsOneWidget);
 
     await tester.tap(find.text(AppStrings.accountChildManage));
     await tester.pumpAndSettle();

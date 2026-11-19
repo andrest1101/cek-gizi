@@ -25,7 +25,7 @@ void main() {
   Future<LocalPrefs> prefs() async {
     SharedPreferences.setMockInitialValues({
       'onboarding_completed': true,
-      'consent_version_accepted': '1',
+      'consent_version_accepted': '2',
     });
     return LocalPrefs.load();
   }
@@ -60,19 +60,20 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('Beranda: hero, strip pil horizontal, tips di dalam kartu tumbuh', (
-    tester,
-  ) async {
-    await pumpApp(tester, child: fakeChild());
+  testWidgets(
+    'Beranda: hero, strip pil horizontal, tips di dalam kartu tumbuh',
+    (tester) async {
+      await pumpApp(tester, child: fakeChild());
 
-    expect(find.text(AppStrings.piringTitle.toUpperCase()), findsOneWidget);
-    expect(find.byType(HomeWeekChips), findsOneWidget);
-    // Identitas pindah ke header, bukan kartu berdiri sendiri.
-    expect(find.byType(ChildSwitcherCard), findsNothing);
-    // Tips tetap tampil, tetapi sebagai baris di dalam blok tumbuh.
-    expect(find.byType(PiringTipsCard), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+      expect(find.text(AppStrings.piringTitle.toUpperCase()), findsOneWidget);
+      expect(find.byType(HomeWeekChips), findsOneWidget);
+      // Identitas pindah ke header, bukan kartu berdiri sendiri.
+      expect(find.byType(ChildSwitcherCard), findsNothing);
+      // Tips tetap tampil, tetapi sebagai baris di dalam blok tumbuh.
+      expect(find.byType(PiringTipsCard), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('Tumbuh: detail pengukuran terbuka saat baris diketuk', (
     tester,

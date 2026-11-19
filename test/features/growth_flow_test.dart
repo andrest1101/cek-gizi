@@ -19,24 +19,27 @@ void main() {
     tester,
   ) async {
     final child = fakeChild();
-    SharedPreferences.setMockInitialValues(
-      {'onboarding_completed': true, 'consent_version_accepted': '1'},
-    );
+    SharedPreferences.setMockInitialValues({
+      'onboarding_completed': true,
+      'consent_version_accepted': '2',
+    });
     final prefs = await LocalPrefs.load();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           localPrefsProvider.overrideWithValue(prefs),
-          childRepositoryProvider
-              .overrideWithValue(FakeChildRepository([child])),
-          growthRepositoryProvider
-              .overrideWithValue(FakeGrowthRepository()),
+          childRepositoryProvider.overrideWithValue(
+            FakeChildRepository([child]),
+          ),
+          growthRepositoryProvider.overrideWithValue(FakeGrowthRepository()),
           permenkesTablesProvider.overrideWith(
             (ref) => Future.value(const FakeAnthropometryTables()),
           ),
           foodLogRepositoryProvider.overrideWithValue(FakeFoodLogRepository()),
-          nutritionRulesProvider.overrideWith((ref) => Future.value(fakeNutritionRules())),
+          nutritionRulesProvider.overrideWith(
+            (ref) => Future.value(fakeNutritionRules()),
+          ),
         ],
         child: const CekGiziApp(),
       ),
@@ -110,11 +113,7 @@ void main() {
 
     // Ganti indeks grafik ke Berat/Umur lewat ubin ringkasan (di atas grafik).
     final weightTile = find.text(AppStrings.growthTabWeightShort);
-    await tester.scrollUntilVisible(
-      weightTile,
-      -120,
-      scrollable: growthScroll,
-    );
+    await tester.scrollUntilVisible(weightTile, -120, scrollable: growthScroll);
     await tester.pumpAndSettle();
     await tester.tap(weightTile);
     await tester.pumpAndSettle();

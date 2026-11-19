@@ -316,6 +316,7 @@ class _ConsentDataSection extends StatelessWidget {
 
 const _consentDataIcons = <IconData>[
   Icons.child_care_rounded,
+  Icons.face_retouching_natural_rounded,
   Icons.photo_camera_rounded,
   Icons.lock_rounded,
   Icons.tune_rounded,

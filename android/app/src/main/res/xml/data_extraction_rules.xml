@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aturan ekstraksi data Android 12+ (API 31+): kecualikan folder foto profil
+     anak dari cloud backup dan device transfer. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="child_photos/" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="child_photos/" />
+    </device-transfer>
+</data-extraction-rules>

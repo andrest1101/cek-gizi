@@ -19,7 +19,9 @@ final class LocalPrefs {
   static const _keyReminderDailyMinute = 'reminder_daily_minute';
 
   /// Versi teks consent terkini - bila dinaikkan, pengguna diminta setuju lagi.
-  static const String consentVersion = '1';
+  /// v2 (2026-11-19): teks consent menambahkan baris "Foto profil (opsional)"
+  /// yang hanya tersimpan di perangkat.
+  static const String consentVersion = '2';
 
   static Future<LocalPrefs> load() async {
     final prefs = await SharedPreferences.getInstance();

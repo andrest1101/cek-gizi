@@ -80,7 +80,7 @@ void main() {
         tester,
         await prefsFor({
           'onboarding_completed': true,
-          'consent_version_accepted': '1',
+          'consent_version_accepted': '2',
         }),
       );
       expect(tester.takeException(), isNull);
@@ -110,7 +110,7 @@ void main() {
         tester,
         await prefsFor({
           'onboarding_completed': true,
-          'consent_version_accepted': '1',
+          'consent_version_accepted': '2',
         }),
       );
       expect(tester.takeException(), isNull);
@@ -188,7 +188,7 @@ void main() {
           tester,
           await prefsFor({
             'onboarding_completed': true,
-            'consent_version_accepted': '1',
+            'consent_version_accepted': '2',
           }),
         );
 
@@ -239,7 +239,7 @@ void main() {
           tester,
           await prefsFor({
             'onboarding_completed': true,
-            'consent_version_accepted': '1',
+            'consent_version_accepted': '2',
           }),
           logs: [
             fakeFoodLog(
@@ -293,7 +293,7 @@ void main() {
           tester,
           await prefsFor({
             'onboarding_completed': true,
-            'consent_version_accepted': '1',
+            'consent_version_accepted': '2',
           }),
         );
 
@@ -309,6 +309,16 @@ void main() {
         expect(find.text(AppStrings.childListTitle), findsOneWidget);
 
         await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.text(AppStrings.childPhotoTitle), findsOneWidget);
+
+        await tester.scrollUntilVisible(
+          find.text(AppStrings.childNicknameLabel),
+          200,
+          scrollable: find.byType(Scrollable).first,
+          maxScrolls: 40,
+        );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         expect(find.text(AppStrings.childNicknameLabel), findsOneWidget);
@@ -332,7 +342,7 @@ void main() {
         tester,
         await prefsFor({
           'onboarding_completed': true,
-          'consent_version_accepted': '1',
+          'consent_version_accepted': '2',
         }),
       );
 
@@ -340,7 +350,20 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.text(AppStrings.accountChildSection), findsOneWidget);
-      expect(find.text(AppStrings.settingsRemindersTitle), findsOneWidget);
+
+      final accountScrollable = find.descendant(
+        of: find.byKey(const Key('account-list')),
+        matching: find.byType(Scrollable),
+      );
+
+      await tester.scrollUntilVisible(
+        find.text(AppStrings.settingsRemindersTitle),
+        240,
+        scrollable: accountScrollable.first,
+        maxScrolls: 40,
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
       expect(
         find.text(AppStrings.settingsReminderMonthlyTitle),
         findsOneWidget,
@@ -349,18 +372,36 @@ void main() {
 
       await tester.scrollUntilVisible(
         find.text(AppStrings.settingsReminderFootnote),
-        200,
-        scrollable: find
-            .descendant(
-              of: find.byKey(const Key('account-list')),
-              matching: find.byType(Scrollable),
-            )
-            .first,
+        240,
+        scrollable: accountScrollable.first,
         maxScrolls: 40,
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.text(AppStrings.settingsReminderFootnote), findsOneWidget);
+
+      // Privasi & data: tampil dan dapat diakses dengan gulir.
+      await tester.scrollUntilVisible(
+        find.text(AppStrings.accountPrivacyTitle),
+        240,
+        scrollable: accountScrollable.first,
+        maxScrolls: 40,
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text(AppStrings.accountPrivacyTitle), findsOneWidget);
+      expect(find.text(AppStrings.accountPrivacyPhotoBody), findsOneWidget);
+
+      // Tentang aplikasi: heading + rujukan tampil.
+      await tester.scrollUntilVisible(
+        find.text(AppStrings.accountDisclaimerTitle),
+        240,
+        scrollable: accountScrollable.first,
+        maxScrolls: 40,
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text(AppStrings.accountDisclaimerTitle), findsOneWidget);
 
       // Tab Resep: empty state jujur (katalog belum dirilis).
       await tester.tap(find.text(AppStrings.navRecipe));

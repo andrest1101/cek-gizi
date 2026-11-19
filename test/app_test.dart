@@ -59,7 +59,7 @@ void main() {
   testWidgets('Beranda shows empty state when no children yet', (tester) async {
     final prefs = await _prefs({
       'onboarding_completed': true,
-      'consent_version_accepted': '1',
+      'consent_version_accepted': '2',
     });
     await tester.pumpWidget(
       ProviderScope(
@@ -90,7 +90,7 @@ void main() {
     final child = fakeChild();
     final prefs = await _prefs({
       'onboarding_completed': true,
-      'consent_version_accepted': '1',
+      'consent_version_accepted': '2',
     });
     await tester.pumpWidget(
       ProviderScope(

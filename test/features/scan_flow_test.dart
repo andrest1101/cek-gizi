@@ -85,7 +85,7 @@ Future<void> _pumpHome(
 }) async {
   final prefs = await _prefs({
     'onboarding_completed': true,
-    'consent_version_accepted': '1',
+    'consent_version_accepted': '2',
   });
 
   await tester.pumpWidget(
@@ -125,7 +125,7 @@ Future<void> _pumpSheet(
         localPrefsProvider.overrideWithValue(
           await _prefs({
             'onboarding_completed': true,
-            'consent_version_accepted': '1',
+            'consent_version_accepted': '2',
           }),
         ),
         childRepositoryProvider.overrideWithValue(FakeChildRepository([child])),

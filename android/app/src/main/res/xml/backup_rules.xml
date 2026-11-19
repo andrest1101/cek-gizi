@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Foto profil anak disimpan di `files/child_photos/` (getApplicationSupportDirectory).
+     Kecualikan dari backup otomatis agar tidak ikut ter-upload ke Google Drive
+     atau dipulihkan ke perangkat lain tanpa hak pengguna. -->
+<full-backup-content>
+    <exclude domain="file" path="child_photos/" />
+</full-backup-content>

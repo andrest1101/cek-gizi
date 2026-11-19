@@ -2,31 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:cekgizi/core/config/app_config.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
+import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/time/clock.dart';
+import 'package:cekgizi/features/account/presentation/widgets/account_about_section.dart';
+import 'package:cekgizi/features/account/presentation/widgets/account_child_strip.dart';
+import 'package:cekgizi/features/account/presentation/widgets/account_identity_card.dart';
+import 'package:cekgizi/features/account/presentation/widgets/account_privacy_card.dart';
 import 'package:cekgizi/features/account/presentation/widgets/reminder_settings_section.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/chat/presentation/widgets/tanya_bubble.dart';
-import 'package:cekgizi/shared/widgets/child_avatar.dart';
 import 'package:cekgizi/shared/widgets/screen_header.dart';
+import 'package:cekgizi/shared/widgets/section_heading.dart';
 
-/// Tab Akun (PRD §6.8): profil anak di perangkat ini + pengingat lokal.
+/// Tab Akun (PRD §6.8): identitas anak terpilih, foto profil lokal, daftar
+/// anak, pengingat, ringkasan privasi, dan sumber rujukan.
 ///
-/// Bagian yang butuh backend (kunci akun, ekspor, hapus akun) menyusul di
-/// batch Privasi & Akun. Layar ini hanya menampilkan yang benar-benar sudah
-/// berfungsi - tidak ada baris menu kosong.
+/// Bagian yang butuh backend tambahan (kunci akun, ekspor, hapus akun)
+/// menyusul di batch Privasi & Akun. Tidak ada baris menu kosong.
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = AppTheme.colorsOf(context);
     final child = ref.watch(selectedChildProvider).value;
+    final children = ref.watch(childrenListProvider).value ?? const [];
     final now = ref.watch(clockProvider)();
 
     return Scaffold(
@@ -38,7 +42,7 @@ class AccountScreen extends ConsumerWidget {
             AppSpacing.screenPadding,
             AppSpacing.md,
             AppSpacing.screenPadding,
-            AppSpacing.xxxl + AppSpacing.lg,
+            AppSpacing.xxxl * 3,
           ),
           children: [
             const ScreenHeader(
@@ -47,121 +51,38 @@ class AccountScreen extends ConsumerWidget {
               subtitle: AppStrings.accountSubtitle,
             ),
             const SizedBox(height: AppSpacing.lg),
-            Text(
-              AppStrings.accountChildSection,
-              style: AppTextStyles.titleMedium.copyWith(
-                color: colors.textPrimary,
+            SectionHeading(
+              title: AppStrings.accountChildSection,
+              action: TextButton(
+                onPressed: () => context.push('/children'),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, 48),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                  ),
+                ),
+                child: const Text(AppStrings.accountChildManage),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
             if (child == null)
               const _NoChildCard()
             else
-              _ChildCard(
-                nickname: child.nickname,
-                avatarKey: child.avatarKey,
-                age: child.ageLabel(now),
-              ),
+              AccountIdentityCard(child: child, now: now),
+            if (children.length > 1) ...[
+              const SizedBox(height: AppSpacing.md),
+              AccountChildStrip(children: children, now: now),
+            ],
             const SizedBox(height: AppSpacing.xxl),
             const ReminderSettingsSection(),
             const SizedBox(height: AppSpacing.xxl),
-            Divider(color: colors.outline),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              AppStrings.accountDisclaimerTitle,
-              style: AppTextStyles.titleMedium.copyWith(
-                color: colors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              AppStrings.accountDisclaimerBody,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: colors.textSecondary,
-              ),
-            ),
+            const SectionHeading(title: AppStrings.accountPrivacyTitle),
             const SizedBox(height: AppSpacing.md),
-            Text(
-              AppStrings.accountLocalNote,
-              style: AppTextStyles.label.copyWith(
-                color: colors.textSecondary,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              AppConfig.appName,
-              style: AppTextStyles.label.copyWith(
-                color: colors.textSecondary,
-                letterSpacing: 0.5,
-              ),
-            ),
+            const AccountPrivacyCard(),
+            const SizedBox(height: AppSpacing.xxl),
+            const AccountAboutSection(),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ChildCard extends StatelessWidget {
-  const _ChildCard({
-    required this.nickname,
-    required this.avatarKey,
-    required this.age,
-  });
-
-  final String nickname;
-  final String avatarKey;
-  final String age;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppTheme.colorsOf(context);
-    return Container(
-      decoration: AppSurfaces.card(context),
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              ChildAvatar(
-                avatarKey: avatarKey,
-                size: 52,
-                semanticLabel: nickname,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      nickname,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.titleMedium.copyWith(
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      age,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          OutlinedButton.icon(
-            onPressed: () => context.push('/children'),
-            icon: const Icon(Icons.manage_accounts_rounded, size: 18),
-            label: const Text(AppStrings.accountChildManage),
-          ),
-        ],
       ),
     );
   }
@@ -179,6 +100,16 @@ class _NoChildCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: colors.primaryContainer,
+              borderRadius: BorderRadius.circular(AppRadius.control),
+            ),
+            child: Icon(Icons.child_care_rounded, color: colors.primary),
+          ),
+          const SizedBox(height: AppSpacing.md),
           Text(
             AppStrings.accountChildEmptyTitle,
             style: AppTextStyles.titleMedium.copyWith(
@@ -190,6 +121,7 @@ class _NoChildCard extends StatelessWidget {
             AppStrings.accountChildEmptyBody,
             style: AppTextStyles.bodySmall.copyWith(
               color: colors.textSecondary,
+              height: 1.45,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -197,6 +129,7 @@ class _NoChildCard extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: FilledButton.icon(
               onPressed: () => context.push('/children/add'),
+              style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
               icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
               label: const Text(AppStrings.accountChildEmptyCta),
             ),

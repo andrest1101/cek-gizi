@@ -11,6 +11,10 @@ abstract final class AppConfig {
     defaultValue: 'CekGizi',
   );
 
+  /// Versi tampilan aplikasi. Selaraskan manual dengan `version:` di
+  /// `pubspec.yaml` setiap kali versi naik (tanpa menambah dependency).
+  static const String appVersion = '1.0.0';
+
   /// Versi referensi tabel Permenkes 2/2020 yang dipakai z-score.
   /// Diisi saat Batch 3 (tabel resmi disediakan pemilik proyek).
   static const String permenkesRefVersion = 'permenkes-2-2020';

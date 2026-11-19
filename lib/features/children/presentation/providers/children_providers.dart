@@ -5,6 +5,7 @@ import 'package:cekgizi/features/children/data/repositories/child_repository_imp
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/domain/repositories/child_repository.dart';
 import 'package:cekgizi/features/children/domain/use_cases/child_use_cases.dart';
+import 'package:cekgizi/features/children/presentation/providers/child_photo_providers.dart';
 import 'package:cekgizi/features/growth/domain/entities/sex.dart';
 
 final childRepositoryProvider = Provider<ChildRepository>(
@@ -13,8 +14,8 @@ final childRepositoryProvider = Provider<ChildRepository>(
 
 final childrenListProvider =
     AsyncNotifierProvider<ChildrenListNotifier, List<ChildProfile>>(
-  ChildrenListNotifier.new,
-);
+      ChildrenListNotifier.new,
+    );
 
 class ChildrenListNotifier extends AsyncNotifier<List<ChildProfile>> {
   @override
@@ -51,6 +52,14 @@ class ChildrenListNotifier extends AsyncNotifier<List<ChildProfile>> {
 
   Future<void> deleteChild(String id) async {
     await ref.read(childRepositoryProvider).deleteChild(id);
+    // Foto profil hanya lokal; hapus agar tidak tertinggal setelah profil
+    // anak dihapus. Kegagalan file tidak boleh membatalkan penghapusan data.
+    try {
+      await ref.read(childPhotoStoreProvider).delete(id);
+    } catch (_) {
+      // abaikan - file mungkin sudah tidak ada
+    }
+    ref.invalidate(childPhotoPathProvider(id));
     final current = state.value ?? const [];
     state = AsyncData([
       for (final child in current)
@@ -60,7 +69,9 @@ class ChildrenListNotifier extends AsyncNotifier<List<ChildProfile>> {
 }
 
 final selectedChildIdProvider =
-    NotifierProvider<SelectedChildIdNotifier, String?>(SelectedChildIdNotifier.new);
+    NotifierProvider<SelectedChildIdNotifier, String?>(
+      SelectedChildIdNotifier.new,
+    );
 
 class SelectedChildIdNotifier extends Notifier<String?> {
   @override
