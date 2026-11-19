@@ -151,10 +151,26 @@ void main() {
       await pumpApp(tester, await prefsFor({'onboarding_completed': true}));
       expect(tester.takeException(), isNull);
       expect(find.text(AppStrings.consentTitle), findsOneWidget);
+      expect(find.byKey(const Key('consent-footer')), findsOneWidget);
+      expect(find.text(AppStrings.consentSubmit), findsOneWidget);
 
-      // Gulir ke bawah: checkbox + tombol setuju tetap rapi.
+      // Footer tetap terlihat; checkbox mengaktifkan tombol tanpa scroll.
+      final submitBefore = tester.widget<FilledButton>(
+        find.byKey(const Key('consent-submit')),
+      );
+      expect(submitBefore.onPressed, isNull);
+
+      await tester.tap(find.byKey(const Key('consent-agree')));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final submitAfter = tester.widget<FilledButton>(
+        find.byKey(const Key('consent-submit')),
+      );
+      expect(submitAfter.onPressed, isNotNull);
+
+      // Rincian data & disclaimer tetap bisa digulir di belakang footer.
       await tester.scrollUntilVisible(
-        find.text(AppStrings.consentSubmit),
+        find.text(AppStrings.consentDisclaimerTitle),
         240,
         scrollable: find.byType(Scrollable).first,
         maxScrolls: 40,
