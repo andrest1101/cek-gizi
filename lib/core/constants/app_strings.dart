@@ -71,6 +71,34 @@ abstract final class AppStrings {
   static const consentDisclaimerTitle = 'Perlu kamu tahu';
   static const consentError =
       'Persetujuan belum tersimpan. Periksa koneksi internet kamu, lalu coba lagi.';
+  static const consentEyebrow = 'PERSETUJUAN & PRIVASI';
+  static const consentStepLabel = 'Langkah terakhir';
+  static const consentDataItems = <({String title, String body})>[
+    (
+      title: 'Profil anak',
+      body:
+          'Nama panggilan, tanggal lahir, jenis kelamin, berat, tinggi, dan '
+          'catatan perkembangannya.',
+    ),
+    (
+      title: 'Foto makanan',
+      body:
+          'Dikirim hanya untuk dikenali AI, lalu dihapus setelah dianalisis. '
+          'Foto tidak disimpan.',
+    ),
+    (
+      title: 'Akses terbatas',
+      body:
+          'Hanya kamu yang bisa mengakses data ini lewat pengamanan tingkat '
+          'baris di server.',
+    ),
+    (
+      title: 'Kendali penuh',
+      body:
+          'Ekspor data, hapus riwayat chat, atau hapus akun beserta seluruh '
+          'datanya kapan pun di Pengaturan.',
+    ),
+  ];
 
   // â”€â”€ Anak (profil) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const childAddTitle = 'Tambah anak';

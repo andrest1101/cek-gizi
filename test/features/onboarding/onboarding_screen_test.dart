@@ -7,6 +7,7 @@ import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:cekgizi/shared/widgets/app_logo_mark.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +37,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(AppConfig.appName), findsOneWidget);
+      expect(find.byType(AppLogoMark), findsOneWidget);
+      expect(find.byKey(const Key('onboarding-progress')), findsOneWidget);
+      expect(find.byKey(const Key('onboarding-cta')), findsOneWidget);
       expect(find.text(AppStrings.onboardingEyebrow1), findsOneWidget);
       expect(find.text(AppStrings.onboardingStep(1, 3)), findsOneWidget);
       expect(find.text(AppStrings.onboardingTitle1), findsOneWidget);

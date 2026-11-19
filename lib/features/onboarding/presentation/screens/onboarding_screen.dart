@@ -9,10 +9,17 @@ import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
-import 'package:cekgizi/shared/widgets/tonal_icon_circle.dart';
+import 'package:cekgizi/shared/illustrations/onboarding_guidance_illustration.dart';
+import 'package:cekgizi/shared/illustrations/onboarding_growth_illustration.dart';
+import 'package:cekgizi/shared/illustrations/plate_viewfinder_illustration.dart';
+import 'package:cekgizi/shared/widgets/app_logo_mark.dart';
+import 'package:cekgizi/shared/widgets/section_reveal.dart';
 
 /// Onboarding 3 layar (PRD §6.1). Setelah "Mulai", flag onboarding tersimpan
 /// lokal (offline-safe) dan lanjut ke consent.
+///
+/// Satu layar = satu cerita: panel ilustrasi penuh di atas, teks editorial
+/// rata kiri, lalu progress dan aksi utama yang selalu di jangkauan jempol.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key, required this.prefs});
 
@@ -27,21 +34,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _page = 0;
 
   static const _slides =
-      <({IconData icon, String eyebrow, String title, String body})>[
+      <({String eyebrow, String title, String body})>[
         (
-          icon: Icons.photo_camera_rounded,
           eyebrow: AppStrings.onboardingEyebrow1,
           title: AppStrings.onboardingTitle1,
           body: AppStrings.onboardingBody1,
         ),
         (
-          icon: Icons.show_chart_rounded,
           eyebrow: AppStrings.onboardingEyebrow2,
           title: AppStrings.onboardingTitle2,
           body: AppStrings.onboardingBody2,
         ),
         (
-          icon: Icons.favorite_rounded,
           eyebrow: AppStrings.onboardingEyebrow3,
           title: AppStrings.onboardingTitle3,
           body: AppStrings.onboardingBody3,
@@ -79,201 +83,142 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppTheme.colorsOf(context);
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
-
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.screenPadding,
-                AppSpacing.sm,
-                AppSpacing.md,
-                AppSpacing.xs,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: Column(
+            children: [
+              SafeArea(
+                bottom: false,
+                child: _OnboardingTopBar(onSkip: _finish),
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: colors.primaryContainer,
-                      borderRadius: BorderRadius.circular(AppRadius.control),
-                    ),
-                    child: Icon(
-                      Icons.eco_rounded,
-                      size: 20,
-                      color: colors.primary,
-                    ),
+              Expanded(
+                child: PageView.builder(
+                  controller: _controller,
+                  itemCount: _slides.length,
+                  onPageChanged: (index) => setState(() => _page = index),
+                  itemBuilder: (context, index) => _Slide(
+                    slide: _slides[index],
+                    index: index,
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      AppConfig.appName,
-                      style: AppTextStyles.titleMedium.copyWith(
-                        color: colors.textPrimary,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                  if (!_isLast)
-                    TextButton(
-                      onPressed: _finish,
-                      child: const Text(AppStrings.onboardingSkip),
-                    ),
-                ],
+                ),
               ),
-            ),
-            Expanded(
-              child: PageView.builder(
-                controller: _controller,
-                itemCount: _slides.length,
-                onPageChanged: (index) => setState(() => _page = index),
-                itemBuilder: (context, index) => _Slide(slide: _slides[index]),
+              _OnboardingFooter(
+                page: _page,
+                total: _slides.length,
+                isLast: _isLast,
+                onNext: _next,
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-              ),
-              child: Row(
-                children: [
-                  Semantics(
-                    label: AppStrings.onboardingPageSemantics(
-                      _page + 1,
-                      _slides.length,
-                    ),
-                    child: Row(
-                      children: [
-                        for (var i = 0; i < _slides.length; i++)
-                          AnimatedContainer(
-                            duration: reduceMotion
-                                ? Duration.zero
-                                : AppMotion.fast,
-                            curve: AppMotion.easeOutCubic,
-                            width: _page == i ? 26 : 7,
-                            height: 7,
-                            margin: const EdgeInsets.only(right: AppSpacing.xs),
-                            decoration: BoxDecoration(
-                              color: _page == i
-                                  ? colors.primary
-                                  : colors.outline,
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.pill,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    AppStrings.onboardingStep(_page + 1, _slides.length),
-                    style: AppTextStyles.label.copyWith(
-                      color: colors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.screenPadding,
-                AppSpacing.xl,
-                AppSpacing.screenPadding,
-                AppSpacing.lg,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  FilledButton(
-                    onPressed: _next,
-                    child: Text(
-                      _isLast
-                          ? AppStrings.onboardingStart
-                          : AppStrings.onboardingNext,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    AppStrings.disclaimer,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.label.copyWith(
-                      color: colors.textSecondary,
-                      fontSize: 11,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _Slide extends StatelessWidget {
-  const _Slide({required this.slide});
+class _OnboardingTopBar extends StatelessWidget {
+  const _OnboardingTopBar({required this.onSkip});
 
-  final ({IconData icon, String eyebrow, String title, String body}) slide;
+  final VoidCallback onSkip;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenPadding,
-            vertical: AppSpacing.lg,
-          ),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: (constraints.maxHeight - AppSpacing.xxl).clamp(
-                0.0,
-                double.infinity,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenPadding,
+        AppSpacing.sm,
+        AppSpacing.md,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          const AppLogoMark(size: 40),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              AppConfig.appName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.titleMedium.copyWith(
+                color: colors.textPrimary,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
               ),
             ),
+          ),
+          TextButton(
+            onPressed: onSkip,
+            style: TextButton.styleFrom(
+              foregroundColor: colors.textSecondary,
+              minimumSize: const Size(48, 48),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            ),
+            child: const Text(AppStrings.onboardingSkip),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Slide extends StatelessWidget {
+  const _Slide({required this.slide, required this.index});
+
+  final ({String eyebrow, String title, String body}) slide;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stageHeight = (constraints.maxHeight * 0.50).clamp(160.0, 320.0);
+        return SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _OnboardingIllustration(
-                  icon: slide.icon,
-                  semantics: slide.title,
-                ),
-                const SizedBox(height: AppSpacing.xxl),
-                Text(
-                  slide.eyebrow,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.label.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
+                _IllustrationStage(height: stageHeight, index: index),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.screenPadding,
+                    AppSpacing.xxl,
+                    AppSpacing.screenPadding,
+                    AppSpacing.sm,
                   ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  slide.title,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.titleLarge.copyWith(
-                    fontSize: 25,
-                    height: 1.25,
-                    color: colors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  slide.body,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.body.copyWith(
-                    color: colors.textSecondary,
+                  child: SectionReveal(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 480),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _EyebrowPill(text: slide.eyebrow),
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            slide.title,
+                            style: AppTextStyles.titleLarge.copyWith(
+                              fontSize: 26,
+                              height: 1.25,
+                              color: colors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            slide.body,
+                            style: AppTextStyles.body.copyWith(
+                              fontSize: 15,
+                              height: 1.5,
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -285,75 +230,242 @@ class _Slide extends StatelessWidget {
   }
 }
 
-class _OnboardingIllustration extends StatelessWidget {
-  const _OnboardingIllustration({required this.icon, required this.semantics});
+class _IllustrationStage extends StatelessWidget {
+  const _IllustrationStage({required this.height, required this.index});
 
-  final IconData icon;
-  final String semantics;
+  final double height;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
+    final illustrationSize = (height * 0.82).clamp(110.0, 230.0);
+    final illustration = switch (index) {
+      0 => PlateViewfinderIllustration(size: illustrationSize),
+      1 => OnboardingGrowthIllustration(size: illustrationSize),
+      _ => OnboardingGuidanceIllustration(size: illustrationSize),
+    };
 
-    return Semantics(
-      label: semantics,
-      image: true,
-      child: ExcludeSemantics(
-        child: SizedBox(
-          width: 208,
-          height: 196,
+    return ExcludeSemantics(
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(AppRadius.card),
+        ),
+        child: Container(
+          height: height,
+          width: double.infinity,
+          color: colors.surfaceVariant,
           child: Stack(
+            clipBehavior: Clip.hardEdge,
             alignment: Alignment.center,
             children: [
-              Container(
-                width: 184,
-                height: 184,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: colors.outline, width: 1),
+              Positioned(
+                left: -height * 0.34,
+                top: -height * 0.34,
+                child: _DecorativeRing(
+                  size: height * 0.94,
+                  color: colors.outline,
                 ),
-              ),
-              Container(
-                width: 152,
-                height: 152,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colors.surfaceVariant,
-                ),
-              ),
-              TonalIconCircle(
-                icon: icon,
-                iconSemantics: semantics,
-                size: 104,
-                iconSize: 48,
               ),
               Positioned(
-                top: 16,
-                right: 22,
+                right: -height * 0.16,
+                bottom: -height * 0.20,
+                child: _DecorativeRing(
+                  size: height * 0.62,
+                  color: colors.primaryContainer,
+                ),
+              ),
+              Positioned(
+                right: height * 0.12,
+                top: height * 0.12,
                 child: Container(
-                  width: 18,
-                  height: 18,
+                  width: 10,
+                  height: 10,
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
                     color: colors.accent,
-                    border: Border.all(color: colors.background, width: 3),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 22,
-                left: 16,
-                child: Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: colors.primary,
                   ),
                 ),
               ),
+              illustration,
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DecorativeRing extends StatelessWidget {
+  const _DecorativeRing({required this.size, required this.color});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: color),
+      ),
+    );
+  }
+}
+
+class _EyebrowPill extends StatelessWidget {
+  const _EyebrowPill({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs + 1,
+      ),
+      decoration: BoxDecoration(
+        color: colors.primaryContainer,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Text(
+        text,
+        style: AppTextStyles.label.copyWith(
+          color: colors.primary,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.9,
+        ),
+      ),
+    );
+  }
+}
+
+class _OnboardingFooter extends StatelessWidget {
+  const _OnboardingFooter({
+    required this.page,
+    required this.total,
+    required this.isLast,
+    required this.onNext,
+  });
+
+  final int page;
+  final int total;
+  final bool isLast;
+  final VoidCallback onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screenPadding,
+          AppSpacing.lg,
+          AppSpacing.screenPadding,
+          AppSpacing.lg,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Semantics(
+                    label: AppStrings.onboardingPageSemantics(page + 1, total),
+                    child: ExcludeSemantics(
+                      child: Row(
+                        key: const Key('onboarding-progress'),
+                        children: [
+                          for (var index = 0; index < total; index++)
+                            Expanded(
+                              child: AnimatedContainer(
+                                duration: reduceMotion
+                                    ? Duration.zero
+                                    : AppMotion.fast,
+                                curve: AppMotion.easeOutCubic,
+                                height: 4,
+                                margin: EdgeInsets.only(
+                                  right: index == total - 1
+                                      ? 0
+                                      : AppSpacing.xs + 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: index <= page
+                                      ? colors.primary
+                                      : colors.outline,
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.pill,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Text(
+                  AppStrings.onboardingStep(page + 1, total),
+                  style: AppTextStyles.label.copyWith(
+                    color: colors.textSecondary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                key: const Key('onboarding-cta'),
+                onPressed: onNext,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      isLast
+                          ? AppStrings.onboardingStart
+                          : AppStrings.onboardingNext,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Icon(
+                      isLast
+                          ? Icons.check_rounded
+                          : Icons.arrow_forward_rounded,
+                      size: 18,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              AppStrings.disclaimer,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.label.copyWith(
+                color: colors.textSecondary,
+                fontSize: 11,
+                height: 1.45,
+              ),
+            ),
+          ],
         ),
       ),
     );
