@@ -1164,3 +1164,43 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
 - Perlu uji perangkat: gesture zoom/pan crop, hasil crop sesuai lingkaran,
   dan tap titik grafik di light/dark.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-14 — Photo viewer ala profil, avatar aset, animasi grafik (2026-11-20)
+
+### UX-14A — Lihat & kelola foto profil
+- Badge kamera pada avatar diganti **pencil**. Avatar dan pencil sama-sama
+  bisa diketuk → `ChildPhotoViewerSheet` full-screen (token `background`,
+  foto lingkaran besar, animasi masuk halus).
+- Aksi viewer hanya **Atur** (crop ulang), **Hapus** (konfirmasi), **Selesai**
+  — sesuai keputusan pemilik: **tanpa "Perbarui"** (mengganti foto sudah
+  ada di form data anak lewat Ambil foto/Galeri) dan tanpa "Bingkai".
+- Form anak lebih bersih: tombol Atur/Hapus foto tidak lagi berjejer;
+  keduanya pindah ke viewer. Tombol Ambil foto/Galeri tetap ada.
+- Tab Akun: avatar + pencil → viewer yang sama; tombol "Ubah data anak"
+  kini memakai ikon `tune` agar tidak tertukar makna dengan pencil foto.
+- `adjustSavedChildPhoto` / `deleteSavedChildPhoto`: crop & hapus foto
+  tersimpan tetap lokal, lalu invalidate `childPhotoPathProvider`.
+
+### UX-14B — Avatar default dari aset pemilik
+- `assets/avatars/avatar_boy.png` & `avatar_girl.png` dibundel; `ChildAvatar`
+  memakai `Image.asset` berdasarkan jenis kelamin. `ChildAvatarFigurePainter`
+  tetap ada sebagai fallback bila aset gagal dimuat.
+- Catatan: PNG berlatar terang — perlu dicek visual kontras di dark theme.
+
+### UX-14C — Animasi overview grafik
+- Kartu detail titik grafik kini muncul/bersembunyi lewat `AnimatedSize`
+  (tinggi 250ms) + `AnimatedSwitcher` fade/slide (200ms) dengan
+  `AppMotion.easeOutCubic`; menghormati `disableAnimations` (durasi 0).
+- Indicator sentuh bawaan `fl_chart` dimatikan agar tidak ada feedback
+  instan yang bertabrakan; dot membesar + kartu beranimasi jadi satu-satunya
+  feedback.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **320/320 passed** (sebelumnya 317)
+- `flutter build apk --debug` → **✓ Built**
+- DoD grep: gradien = 0; `Colors.*` hanya `Colors.transparent`;
+  `GEMINI_API_KEY` di `lib/` = 0.
+- Perlu uji perangkat: pencil/viewer foto, crop & hapus dari Akun, avatar
+  default new di light/dark, dan kehalusan animasi kartu grafik.
+- Commit belum dijalankan (manual oleh pemilik).
