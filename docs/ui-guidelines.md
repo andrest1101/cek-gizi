@@ -1,4 +1,4 @@
-# CekGizi — Spesifikasi Visual (v2.8, Batch UX-14)
+# CekGizi — Spesifikasi Visual (v2.9, Batch UX-15)
 
 Dokumen ini adalah **kontrak visual** untuk seluruh layar. PRD v2.0 tetap
 sumber kebenaran fitur; dokumen ini hanya mengatur bagaimana fitur tampil.
@@ -175,6 +175,13 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
   "Catat tanpa foto") → panel ringkasan → tur singkat → checklist kelompok →
   catatan hari ini. Pita protein hewani memakai `accentContainer` bila belum
   ada, `primaryContainer` bila sudah ada — selalu ikon + teks.
+- **Sheet hasil scan** (v2.9): review editorial "Periksa isi piring" — item
+  tanpa kotak bertumpuk (logo kelompok, nama inline, badge "Perlu dicek",
+  pill kelompok, porsi), `showScanGroupPicker` grid 2 kolom maks. 3
+  kelompok, tile "+ Tambah makanan", `SegmentControl` jenis makan, dan
+  footer sticky dengan pratinjau Piring Hari Ini berbasis aturan (bukan AI).
+  Porsi memakai `Wrap` selebar konten — dilarang `Wrap` di dalam `Row`
+  (penyebab overflow 7,2 px).
 - **Resep**: empty state jujur sampai `recipes.json` tersedia.
 - **Tumbuh** (v2.3–v2.8): ringkasan `ZScoreSummaryStrip` (3 ubin, sekaligus
   pemilih indeks) → grafik pita SD **full-bleed** dengan judul sumbu + satuan
