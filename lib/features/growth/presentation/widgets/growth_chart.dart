@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
+import 'package:cekgizi/core/theme/app_motion.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
@@ -172,10 +173,33 @@ class _ChartBodyState extends State<_ChartBody> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (info != null) ...[
-          _PointDetail(info: info),
-          const SizedBox(height: AppSpacing.md),
-        ],
+        AnimatedSize(
+          duration: AppMotion.of(context, AppMotion.normal),
+          curve: AppMotion.easeOutCubic,
+          alignment: Alignment.topCenter,
+          child: AnimatedSwitcher(
+            duration: AppMotion.of(context, AppMotion.fast),
+            switchInCurve: AppMotion.easeOutCubic,
+            transitionBuilder: (child, animation) => SlideTransition(
+              position: animation.drive(
+                Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero),
+              ),
+              child: FadeTransition(opacity: animation, child: child),
+            ),
+            child: info == null
+                ? const SizedBox.shrink()
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _PointDetail(
+                        key: ValueKey(info.semanticsLabel),
+                        info: info,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                  ),
+          ),
+        ),
         Expanded(
           child: Semantics(
             label: widget.semanticsLabel,
@@ -240,6 +264,9 @@ class _ChartBodyState extends State<_ChartBody> {
                   lineTouchData: LineTouchData(
                     enabled: true,
                     touchSpotThreshold: 12,
+                    // Indicator bawaan muncul instan; feedback halus cukup
+                    // dari dot membesar + kartu detail beranimasi.
+                    getTouchedSpotIndicator: (barData, spotIndexes) => const [],
                     touchTooltipData: LineTouchTooltipData(
                       getTooltipItems: (spots) => const [],
                     ),
@@ -293,7 +320,7 @@ class _ChartBodyState extends State<_ChartBody> {
 
 /// Kartu ringkas yang muncul saat user mengetuk titik grafik.
 class _PointDetail extends StatelessWidget {
-  const _PointDetail({required this.info});
+  const _PointDetail({super.key, required this.info});
 
   final ChartPointInfo info;
 
