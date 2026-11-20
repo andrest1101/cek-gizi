@@ -9,6 +9,7 @@ import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/account/presentation/screens/account_screen.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/children/presentation/screens/child_form_screen.dart';
+import 'package:cekgizi/features/children/presentation/screens/child_photo_crop_screen.dart';
 import 'package:cekgizi/features/children/presentation/screens/children_screen.dart';
 import 'package:cekgizi/features/consent/presentation/screens/consent_screen.dart';
 import 'package:cekgizi/features/growth/presentation/screens/growth_screen.dart';
@@ -153,6 +154,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/children/add',
         name: '/children/add',
         builder: (context, state) => const ChildFormScreen(),
+      ),
+      // UX-13A: atur ulang area foto profil sebelum dipakai (lokal saja).
+      GoRoute(
+        path: '/children/photo-crop',
+        name: '/children/photo-crop',
+        builder: (context, state) =>
+            ChildPhotoCropScreen(args: state.extra! as ChildPhotoCropArgs),
       ),
       GoRoute(
         path: '/children/:id/edit',

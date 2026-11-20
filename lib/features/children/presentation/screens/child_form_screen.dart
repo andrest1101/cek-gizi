@@ -16,6 +16,7 @@ import 'package:cekgizi/features/children/data/services/child_photo_service.dart
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/domain/repositories/child_exceptions.dart';
 import 'package:cekgizi/features/children/presentation/providers/child_photo_providers.dart';
+import 'package:cekgizi/features/children/presentation/screens/child_photo_crop_screen.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/growth/domain/entities/sex.dart';
 import 'package:cekgizi/shared/widgets/child_avatar.dart';
@@ -101,6 +102,14 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
     return null;
   }
 
+  Future<Uint8List?> _crop(Uint8List source) async {
+    if (!mounted) return null;
+    return context.push<Uint8List>(
+      '/children/photo-crop',
+      extra: ChildPhotoCropArgs(bytes: source),
+    );
+  }
+
   Future<void> _pickPhoto(ChildPhotoSource source) async {
     if (_photoBusy || _busy) return;
     setState(() {
@@ -109,13 +118,13 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
     });
     try {
       final bytes = await ref.read(childPhotoPickerProvider).pick(source);
-      if (!mounted) return;
-      if (bytes != null) {
-        setState(() {
-          _pendingPhoto = bytes;
-          _photoRemoved = false;
-        });
-      }
+      if (!mounted || bytes == null) return;
+      final cropped = await _crop(bytes);
+      if (!mounted || cropped == null) return;
+      setState(() {
+        _pendingPhoto = cropped;
+        _photoRemoved = false;
+      });
     } on PlatformException {
       if (mounted) {
         setState(() => _photoError = AppStrings.childPhotoPermissionError);
@@ -158,6 +167,32 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
       _photoRemoved = true;
       _photoError = null;
     });
+  }
+
+  /// Buka ulang pemotong untuk foto yang sedang dipilih/pratinjau.
+  Future<void> _adjustPhoto() async {
+    if (_photoBusy || _busy) return;
+    setState(() => _photoError = null);
+    try {
+      Uint8List? source = _pendingPhoto;
+      if (source == null && widget.existing != null) {
+        final path = ref
+            .read(childPhotoPathProvider(widget.existing!.id))
+            .value;
+        if (path != null) source = await File(path).readAsBytes();
+      }
+      if (source == null || !mounted) return;
+      final cropped = await _crop(source);
+      if (!mounted || cropped == null) return;
+      setState(() {
+        _pendingPhoto = cropped;
+        _photoRemoved = false;
+      });
+    } on ChildPhotoException {
+      if (mounted) setState(() => _photoError = AppStrings.childPhotoError);
+    } catch (_) {
+      if (mounted) setState(() => _photoError = AppStrings.childPhotoError);
+    }
   }
 
   Future<void> _save() async {
@@ -444,6 +479,20 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
                           ),
                           label: const Text(AppStrings.childPhotoGallery),
                         ),
+                        if (hasPhoto)
+                          FilledButton.tonalIcon(
+                            onPressed: _photoBusy || _busy
+                                ? null
+                                : _adjustPhoto,
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(0, 48),
+                            ),
+                            icon: const Icon(
+                              Icons.crop_rotate_rounded,
+                              size: 18,
+                            ),
+                            label: const Text(AppStrings.childPhotoAdjust),
+                          ),
                         if (hasPhoto)
                           TextButton.icon(
                             onPressed: _photoBusy || _busy

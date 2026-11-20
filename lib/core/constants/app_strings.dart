@@ -140,6 +140,19 @@ abstract final class AppStrings {
   static String childPhotoPreviewSemantics(String label) =>
       'Pratinjau foto profil $label';
   static const childPhotoAddSemantics = 'Tambah atau ganti foto profil';
+  static const childPhotoAdjust = 'Atur foto';
+  static const childPhotoCropTitle = 'Atur foto profil';
+  static const childPhotoCropHint =
+      'Geser dan cubit foto agar bagian yang kamu mau berada di dalam '
+      'lingkaran.';
+  static const childPhotoCropUse = 'Pakai foto';
+  static const childPhotoCropReset = 'Atur ulang';
+  static const childPhotoCropZoomIn = 'Perbesar';
+  static const childPhotoCropZoomOut = 'Perkecil';
+  static const childPhotoCropCancel = 'Batal';
+  static const childPhotoCropError = 'Foto tidak bisa diproses. Coba lagi.';
+  static const childPhotoCropGuideSemantics =
+      'Area foto profil berbentuk lingkaran';
   static String childAvatarDefaultSemantics(String sexLabel) =>
       'Avatar ilustrasi $sexLabel';
   static const childSave = 'Simpan';
@@ -189,6 +202,21 @@ abstract final class AppStrings {
   static const growthHistoryTitle = 'Riwayat pengukuran';
   static const growthChartTitle = 'Grafik pertumbuhan';
   static const growthChartCaption = 'Tabel rujukan: Permenkes 2/2020';
+  static const growthChartTapHint =
+      'Ketuk titik di grafik untuk melihat detail ukuran.';
+  static const growthAxisXAge = 'Usia (bulan)';
+  static const growthAxisXHeight = 'Panjang/tinggi badan (cm)';
+  static const growthAxisYHeight = 'Tinggi badan (cm)';
+  static const growthAxisYWeight = 'Berat badan (kg)';
+  static const growthPointTitle = 'Detail ukuran';
+  static const growthPointDate = 'Tanggal';
+  static const growthPointAge = 'Usia';
+  static const growthPointValue = 'Nilai';
+  static const growthPointZScore = 'z-score';
+  static const growthPointMedianAbove = 'di atas median';
+  static const growthPointMedianBelow = 'di bawah median';
+  static const growthPointMedianEqual = 'sesuai median';
+  static String growthPointAgeValue(int months) => '$months bulan';
   static const growthTrendHint =
       'Belum cukup data untuk melihat tren. Tambah satu ukuran lagi.';
   static const growthLegendBand = 'Rentang wajar';
