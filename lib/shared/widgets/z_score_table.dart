@@ -20,26 +20,27 @@ class ZScoreTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
     final textTheme = Theme.of(context).textTheme;
-    final rows = <({String label, double z, String? status, AnthropometryIndex index})>[
-      (
-        label: AppStrings.hazLabel,
-        z: measurement.haz,
-        status: measurement.statusHaz,
-        index: AnthropometryIndex.haz,
-      ),
-      (
-        label: AppStrings.wazLabel,
-        z: measurement.waz,
-        status: measurement.statusWaz,
-        index: AnthropometryIndex.waz,
-      ),
-      (
-        label: AppStrings.whzLabel,
-        z: measurement.whz,
-        status: measurement.statusWhz,
-        index: AnthropometryIndex.whz,
-      ),
-    ];
+    final rows =
+        <({String label, double z, String? status, AnthropometryIndex index})>[
+          (
+            label: AppStrings.hazLabel,
+            z: measurement.haz,
+            status: measurement.statusHaz,
+            index: AnthropometryIndex.haz,
+          ),
+          (
+            label: AppStrings.wazLabel,
+            z: measurement.waz,
+            status: measurement.statusWaz,
+            index: AnthropometryIndex.waz,
+          ),
+          (
+            label: AppStrings.whzLabel,
+            z: measurement.whz,
+            status: measurement.statusWhz,
+            index: AnthropometryIndex.whz,
+          ),
+        ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -61,7 +62,7 @@ class _Row extends StatelessWidget {
   });
 
   final ({String label, double z, String? status, AnthropometryIndex index})
-      row;
+  row;
   final TextTheme textTheme;
   final AppColors colors;
 
@@ -70,51 +71,57 @@ class _Row extends StatelessWidget {
     final category = row.status == null
         ? AppStrings.statusOutOfRangeShort
         : GrowthStatusCopy.officialCategories(row.index)[row.status] ??
-            row.status!;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+              row.status!;
+    return Semantics(
+      container: true,
+      label:
+          '${row.label}. $category. '
+          '${AppStrings.statusDetailZScore}: ${GrowthStatusCopy.formatZ(row.z)}',
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  row.label,
+                  style: textTheme.labelMedium?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  category,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                row.label,
+                AppStrings.statusDetailZScore,
                 style: textTheme.labelMedium?.copyWith(
                   color: colors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                category,
-                style: textTheme.bodyMedium?.copyWith(
+                GrowthStatusCopy.formatZ(row.z),
+                style: textTheme.bodyLarge?.copyWith(
                   color: colors.textPrimary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ],
           ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              AppStrings.statusDetailZScore,
-              style: textTheme.labelMedium?.copyWith(
-                color: colors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              GrowthStatusCopy.formatZ(row.z),
-              style: textTheme.bodyLarge?.copyWith(
-                color: colors.textPrimary,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
