@@ -55,7 +55,17 @@ class ChildAvatar extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: photo == null
-            ? _DefaultFigure(sex: sex, size: size, colors: colors)
+            ? Image.asset(
+                sex == Sex.male
+                    ? 'assets/avatars/avatar_boy.png'
+                    : 'assets/avatars/avatar_girl.png',
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.medium,
+                errorBuilder: (context, error, stackTrace) =>
+                    _DefaultFigure(sex: sex, size: size, colors: colors),
+              )
             : Image(
                 image: photo!,
                 width: size,
