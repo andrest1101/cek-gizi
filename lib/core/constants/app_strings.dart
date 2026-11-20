@@ -153,6 +153,14 @@ abstract final class AppStrings {
   static const childPhotoCropError = 'Foto tidak bisa diproses. Coba lagi.';
   static const childPhotoCropGuideSemantics =
       'Area foto profil berbentuk lingkaran';
+  static const childPhotoViewerTitle = 'Foto profil';
+  static const childPhotoViewerAdjust = 'Atur';
+  static const childPhotoViewerRemove = 'Hapus';
+  static const childPhotoViewerDone = 'Selesai';
+  static const childPhotoViewerEmptyHint =
+      'Belum ada foto. Tambahkan dari form data anak.';
+  static String childPhotoViewerSemantics(String name) =>
+      'Foto profil $name. Ketuk untuk mengatur atau menghapus.';
   static String childAvatarDefaultSemantics(String sexLabel) =>
       'Avatar ilustrasi $sexLabel';
   static const childSave = 'Simpan';

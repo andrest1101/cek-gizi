@@ -79,28 +79,52 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
-    // Kembali ke form: pratinjau + tombol Atur foto + Hapus foto muncul.
-    expect(find.text(AppStrings.childPhotoAdjust), findsOneWidget);
-    expect(find.text(AppStrings.childPhotoRemove), findsOneWidget);
+    // Form kini bersih: tidak ada tombol Atur/Hapus foto berjejer.
+    expect(find.text(AppStrings.childPhotoAdjust), findsNothing);
+    expect(find.text(AppStrings.childPhotoRemove), findsNothing);
     expect(find.byType(Image), findsOneWidget);
 
-    // Atur ulang foto dari pratinjau.
-    await tester.tap(find.text(AppStrings.childPhotoAdjust));
+    // Ketuk avatar/pencil → viewer foto (Atur / Hapus / Selesai).
+    Future<void> openViewer() async {
+      await tester.tap(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Tooltip &&
+              widget.message ==
+                  AppStrings.childPhotoViewerSemantics(
+                    AppStrings.childAvatarLabel,
+                  ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(AppStrings.childPhotoViewerAdjust), findsOneWidget);
+      expect(find.text(AppStrings.childPhotoViewerRemove), findsOneWidget);
+      expect(find.text(AppStrings.childPhotoViewerDone), findsOneWidget);
+    }
+
+    await openViewer();
+
+    // Atur → crop → pakai → kembali ke form.
+    await tester.tap(find.text(AppStrings.childPhotoViewerAdjust));
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.childPhotoCropTitle), findsOneWidget);
-    await tester.tap(find.byTooltip(AppStrings.childPhotoCropCancel));
+    await tester.tap(find.text(AppStrings.childPhotoCropUse));
     await tester.pumpAndSettle();
-    expect(find.text(AppStrings.childPhotoAdjust), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
 
-    // Hapus foto → konfirmasi → pratinjau hilang.
-    await tester.tap(find.text(AppStrings.childPhotoRemove));
+    // Hapus dari viewer → konfirmasi → pratinjau hilang.
+    await openViewer();
+    await tester.tap(find.text(AppStrings.childPhotoViewerRemove));
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.childPhotoRemoveTitle), findsOneWidget);
     await tester.tap(find.text(AppStrings.childDeleteConfirm));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    expect(find.byType(Image), findsNothing);
-    expect(find.text(AppStrings.childPhotoRemove), findsNothing);
+    // Yang tersisa hanyalah avatar default (AssetImage), bukan foto use
+    // (MemoryImage).
+    final images = tester.widgetList<Image>(find.byType(Image));
+    expect(images.any((image) => image.image is MemoryImage), isFalse);
+    expect(images.any((image) => image.image is AssetImage), isTrue);
   });
 }
 

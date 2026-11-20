@@ -17,6 +17,7 @@ import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/domain/repositories/child_exceptions.dart';
 import 'package:cekgizi/features/children/presentation/providers/child_photo_providers.dart';
 import 'package:cekgizi/features/children/presentation/screens/child_photo_crop_screen.dart';
+import 'package:cekgizi/features/children/presentation/widgets/child_photo_viewer_sheet.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/growth/domain/entities/sex.dart';
 import 'package:cekgizi/shared/widgets/child_avatar.dart';
@@ -195,6 +196,33 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
     }
   }
 
+  /// Avatar + pencil → viewer foto (Atur / Hapus / Selesai).
+  void _openViewer(ImageProvider? preview, bool hasPhoto) {
+    if (_busy || _photoBusy) return;
+    final child = ChildProfile(
+      id: widget.existing?.id ?? 'new',
+      nickname: _displayName,
+      birthDate: _birthDate,
+      sex: _sex,
+      avatarKey: _sex == Sex.male ? 'boy' : 'girl',
+    );
+    showChildPhotoViewer(
+      context: context,
+      child: child,
+      photo: preview,
+      onAdjust: () {
+        Navigator.of(context).pop();
+        _adjustPhoto();
+      },
+      onRemove: hasPhoto
+          ? () {
+              Navigator.of(context).pop();
+              _removePhoto();
+            }
+          : null,
+    );
+  }
+
   Future<void> _save() async {
     if (_busy || !_formKey.currentState!.validate()) return;
     setState(() {
@@ -360,45 +388,60 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
                 decoration: AppSurfaces.sunken(context, radius: AppRadius.card),
                 child: Column(
                   children: [
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Semantics(
-                          label: AppStrings.childPhotoPreviewSemantics(
-                            _displayName,
-                          ),
-                          image: true,
-                          child: ChildAvatar(
-                            sex: _sex,
-                            photo: previewPhoto,
-                            size: 104,
-                            semanticLabel: _displayName,
-                          ),
-                        ),
-                        Positioned(
-                          right: -2,
-                          bottom: -2,
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: colors.primary,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: colors.surface,
-                                width: 2,
+                    Tooltip(
+                      message: AppStrings.childPhotoViewerSemantics(
+                        _displayName,
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: _busy
+                              ? null
+                              : () => _openViewer(previewPhoto, hasPhoto),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Semantics(
+                                label: AppStrings.childPhotoPreviewSemantics(
+                                  _displayName,
+                                ),
+                                image: true,
+                                child: ChildAvatar(
+                                  sex: _sex,
+                                  photo: previewPhoto,
+                                  size: 104,
+                                  semanticLabel: _displayName,
+                                ),
                               ),
-                            ),
-                            child: Icon(
-                              _photoBusy
-                                  ? Icons.hourglass_top_rounded
-                                  : Icons.photo_camera_rounded,
-                              size: 18,
-                              color: colors.onPrimary,
-                            ),
+                              Positioned(
+                                right: -2,
+                                bottom: -2,
+                                child: Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: colors.primary,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: colors.surface,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    _photoBusy
+                                        ? Icons.hourglass_top_rounded
+                                        : Icons.edit_rounded,
+                                    size: 18,
+                                    color: colors.onPrimary,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(
@@ -479,35 +522,6 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
                           ),
                           label: const Text(AppStrings.childPhotoGallery),
                         ),
-                        if (hasPhoto)
-                          FilledButton.tonalIcon(
-                            onPressed: _photoBusy || _busy
-                                ? null
-                                : _adjustPhoto,
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size(0, 48),
-                            ),
-                            icon: const Icon(
-                              Icons.crop_rotate_rounded,
-                              size: 18,
-                            ),
-                            label: const Text(AppStrings.childPhotoAdjust),
-                          ),
-                        if (hasPhoto)
-                          TextButton.icon(
-                            onPressed: _photoBusy || _busy
-                                ? null
-                                : _removePhoto,
-                            style: TextButton.styleFrom(
-                              minimumSize: const Size(0, 48),
-                              foregroundColor: colors.statusAlert,
-                            ),
-                            icon: const Icon(
-                              Icons.delete_outline_rounded,
-                              size: 18,
-                            ),
-                            label: const Text(AppStrings.childPhotoRemove),
-                          ),
                       ],
                     ),
                   ],
