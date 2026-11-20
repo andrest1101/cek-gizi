@@ -258,6 +258,26 @@ class GrowthChartCard extends ConsumerWidget {
                       );
                     },
                   ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.touch_app_outlined,
+                        size: 16,
+                        color: colors.textSecondary,
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Expanded(
+                        child: Text(
+                          AppStrings.growthChartTapHint,
+                          style: AppTextStyles.label.copyWith(
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: AppSpacing.md),
                   const _ChartLegend(),
                   const SizedBox(height: AppSpacing.sm),
@@ -559,7 +579,8 @@ class _MeasurementTileState extends ConsumerState<_MeasurementTile> {
           Semantics(
             button: true,
             expanded: _expanded,
-            label: '$value. $category. '
+            label:
+                '$value. $category. '
                 '${_expanded ? AppStrings.actionClose : AppStrings.growthHistoryTitle}',
             child: Material(
               color: Colors.transparent,

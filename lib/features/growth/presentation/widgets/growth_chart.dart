@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
+import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
@@ -11,13 +12,15 @@ import 'package:cekgizi/features/growth/domain/entities/anthropometry_index.dart
 import 'package:cekgizi/features/growth/domain/entities/growth_measurement.dart';
 import 'package:cekgizi/features/growth/presentation/chart/sd_series.dart';
 import 'package:cekgizi/features/growth/presentation/providers/growth_providers.dart';
+import 'package:cekgizi/features/growth/presentation/widgets/chart_point_info.dart';
+import 'package:cekgizi/features/growth/presentation/widgets/status_copy.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 
-/// Grafik pita SD (PRD §6.5).
+/// Grafik pita SD (PRD §6.5) yang bisa diketuk untuk ringkasan satu ukuran.
 ///
 /// Pita: −3…−2 SD & +2…+3 SD kuning lembut, −2…+1 SD (PB/U: +3) hijau
 /// lembut. Garis ±2 SD putus-putus, median solid, baris anak hijau tua.
-/// Warna tidak pernah jadi sinyal tunggal - legenda teks ada di kartu.
+/// Sumbu diberi judul + satuan; warna tidak pernah jadi sinyal tunggal.
 class GrowthChart extends ConsumerWidget {
   const GrowthChart({
     super.key,
@@ -54,7 +57,7 @@ class GrowthChart extends ConsumerWidget {
   }
 }
 
-class _ChartBody extends StatelessWidget {
+class _ChartBody extends StatefulWidget {
   const _ChartBody({
     required this.measurements,
     required this.index,
@@ -68,9 +71,19 @@ class _ChartBody extends StatelessWidget {
   final SdSeries series;
 
   @override
+  State<_ChartBody> createState() => _ChartBodyState();
+}
+
+class _ChartBodyState extends State<_ChartBody> {
+  int? _selectedIndex;
+
+  @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
     final secondary = colors.textSecondary;
+    final measurements = widget.measurements;
+    final index = widget.index;
+    final series = widget.series;
 
     final hasOuterUpper = series.outerUpper.isNotEmpty;
     final bandData = <BetweenBarsData>[
@@ -120,12 +133,13 @@ class _ChartBody extends StatelessWidget {
         isStrokeCapRound: true,
         dotData: FlDotData(
           show: true,
-          getDotPainter: (spot, percent, barData, i) => FlDotCirclePainter(
-            radius: 4.5,
-            color: colors.primary,
-            strokeWidth: 2,
-            strokeColor: colors.surface,
-          ),
+          getDotPainter: (spot, percent, barData, dotIndex) =>
+              FlDotCirclePainter(
+                radius: dotIndex == _selectedIndex ? 6.5 : 4.5,
+                color: colors.primary,
+                strokeWidth: dotIndex == _selectedIndex ? 3 : 2,
+                strokeColor: colors.surface,
+              ),
         ),
       ),
     ];
@@ -136,60 +150,126 @@ class _ChartBody extends StatelessWidget {
       fontSize: 11,
       color: secondary,
     );
+    final xName = index == AnthropometryIndex.whz
+        ? AppStrings.growthAxisXHeight
+        : AppStrings.growthAxisXAge;
+    final yName = index == AnthropometryIndex.haz
+        ? AppStrings.growthAxisYHeight
+        : AppStrings.growthAxisYWeight;
 
-    return Semantics(
-      label: semanticsLabel,
-      child: ExcludeSemantics(
-        child: LineChart(
-          LineChartData(
-            minX: series.minX,
-            maxX: series.maxX,
-            minY: minY,
-            maxY: maxY,
-            gridData: FlGridData(
-              show: true,
-              drawVerticalLine: false,
-              getDrawingHorizontalLine: (value) => FlLine(
-                color: colors.outline.withValues(alpha: 0.7),
-                strokeWidth: 1,
-              ),
+    final selected = _selectedIndex;
+    final info = selected != null && selected < measurements.length
+        ? ChartPointInfo.from(
+            measurement: measurements[selected],
+            index: index,
+            median: medianAt(
+              series.median,
+              measurements[selected].chartX(index),
             ),
-            borderData: FlBorderData(show: false),
-            titlesData: FlTitlesData(
-              topTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
-              rightTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  interval: series.xInterval,
-                  reservedSize: 26,
-                  getTitlesWidget: (value, meta) => Padding(
-                    padding: const EdgeInsets.only(top: AppSpacing.xs),
-                    child: Text(meta.formattedValue, style: axisStyle),
+          )
+        : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (info != null) ...[
+          _PointDetail(info: info),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        Expanded(
+          child: Semantics(
+            label: widget.semanticsLabel,
+            child: ExcludeSemantics(
+              child: LineChart(
+                LineChartData(
+                  minX: series.minX,
+                  maxX: series.maxX,
+                  minY: minY,
+                  maxY: maxY,
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: colors.outline.withValues(alpha: 0.7),
+                      strokeWidth: 1,
+                    ),
+                  ),
+                  borderData: FlBorderData(show: false),
+                  titlesData: FlTitlesData(
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    bottomTitles: AxisTitles(
+                      axisNameWidget: Text(
+                        xName,
+                        textAlign: TextAlign.center,
+                        style: axisStyle,
+                      ),
+                      axisNameSize: 22,
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: series.xInterval,
+                        reservedSize: 26,
+                        getTitlesWidget: (value, meta) => Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.xs),
+                          child: Text(meta.formattedValue, style: axisStyle),
+                        ),
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      axisNameWidget: Text(
+                        yName,
+                        textAlign: TextAlign.center,
+                        style: axisStyle,
+                      ),
+                      axisNameSize: 22,
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 36,
+                        interval: (maxY - minY) / 4,
+                        getTitlesWidget: (value, meta) =>
+                            Text(value.toStringAsFixed(0), style: axisStyle),
+                      ),
+                    ),
+                  ),
+                  lineBarsData: bars,
+                  betweenBarsData: bandData,
+                  lineTouchData: LineTouchData(
+                    enabled: true,
+                    touchSpotThreshold: 12,
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipItems: (spots) => const [],
+                    ),
+                    touchCallback: (event, response) {
+                      if (!event.isInterestedForInteractions ||
+                          response?.lineBarSpots == null ||
+                          response!.lineBarSpots!.isEmpty) {
+                        if (mounted) setState(() => _selectedIndex = null);
+                        return;
+                      }
+                      final childBar = bars.length - 1;
+                      final spot = response.lineBarSpots!.firstWhere(
+                        (item) => item.barIndex == childBar,
+                        orElse: () => response.lineBarSpots!.first,
+                      );
+                      final tapped = spot.spotIndex;
+                      if (tapped >= 0 &&
+                          tapped < measurements.length &&
+                          mounted) {
+                        setState(() => _selectedIndex = tapped);
+                      }
+                    },
                   ),
                 ),
-              ),
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 34,
-                  interval: (maxY - minY) / 4,
-                  getTitlesWidget: (value, meta) =>
-                      Text(value.toStringAsFixed(0), style: axisStyle),
-                ),
+                duration: Duration.zero,
               ),
             ),
-            lineBarsData: bars,
-            betweenBarsData: bandData,
-            lineTouchData: const LineTouchData(enabled: false),
           ),
-          duration: Duration.zero,
         ),
-      ),
+      ],
     );
   }
 
@@ -207,6 +287,109 @@ class _ChartBody extends StatelessWidget {
       barWidth: width,
       dashArray: dashArray,
       dotData: const FlDotData(show: false),
+    );
+  }
+}
+
+/// Kartu ringkas yang muncul saat user mengetuk titik grafik.
+class _PointDetail extends StatelessWidget {
+  const _PointDetail({required this.info});
+
+  final ChartPointInfo info;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    final (icon, toneColor) = switch (info.tone) {
+      StatusTone.good => (Icons.check_circle_rounded, colors.statusGood),
+      StatusTone.watch => (Icons.info_rounded, colors.statusWatchText),
+      StatusTone.alert => (Icons.warning_rounded, colors.statusAlert),
+    };
+    return Semantics(
+      label: info.semanticsLabel,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: AppSurfaces.sunken(context),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 18, color: toneColor),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  AppStrings.growthPointTitle,
+                  style: AppTextStyles.titleMedium.copyWith(
+                    color: colors.textPrimary,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.lg,
+              runSpacing: AppSpacing.xs,
+              children: [
+                _Detail(
+                  label: AppStrings.growthPointDate,
+                  value: info.dateLabel,
+                ),
+                _Detail(label: AppStrings.growthPointAge, value: info.ageLabel),
+                _Detail(
+                  label: AppStrings.growthPointValue,
+                  value: info.valueLabel,
+                ),
+                _Detail(
+                  label: AppStrings.growthPointZScore,
+                  value: info.zLabel,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              '${info.category} · ${info.medianLabel}',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: colors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Detail extends StatelessWidget {
+  const _Detail({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.label.copyWith(
+            color: colors.textSecondary,
+            fontSize: 11,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: colors.textPrimary,
+            fontWeight: FontWeight.w700,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+      ],
     );
   }
 }
