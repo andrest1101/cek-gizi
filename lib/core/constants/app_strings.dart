@@ -642,14 +642,40 @@ abstract final class AppStrings {
   static const scanNoFoodTitle = 'Makanan tidak terdeteksi';
   static const scanNoFoodBody =
       'Makanan tidak terdeteksi. Coba foto ulang dengan cahaya cukup.';
-  static const scanSheetTitle = 'Hasil pemindaian';
-  static const scanSheetSubtitle = 'Periksa lalu simpan ke catatan.';
-  static const scanConfidenceLow = 'kurang yakin';
-  static const scanAddSectionTitle = 'Tambah item';
+  static const scanSheetEyebrow = 'HASIL PEMINDAIAN';
+  static const scanSheetTitle = 'Periksa isi piring';
+  static const scanSheetSubtitle =
+      'Sesuaikan nama, kelompok, dan porsi sebelum disimpan.';
+  static String scanItemCount(int count) => '$count makanan';
+  static const scanConfidenceLow = 'Perlu dicek';
+  static const scanConfidenceLowSemantics =
+      'Keyakinan model rendah. Periksa lagi nama dan kelompoknya.';
   static const scanAddItemHint = 'Nama makanan';
   static const scanAddItemButton = 'Tambah';
+  static const scanAddItemCta = 'Tambah makanan';
+  static const scanAddItemEmpty = 'Tulis nama makanannya dulu.';
+  static const scanGroupEdit = 'Ubah';
   static const scanItemEmptyGroups =
       'Pilih minimal satu kelompok untuk item ini.';
+  static const scanEmptyTitle = 'Belum ada makanan';
+  static const scanEmptyBody =
+      'Tambah makanan secara manual, atau foto ulang piringnya.';
+  static const scanEmptySemantics = 'Belum ada makanan terdeteksi';
+  static const scanPortionOptional = '$portionLabel (opsional)';
+  static String scanFooterSummary(int items, int groups) =>
+      '$items makanan · $groups kelompok';
+  static const scanPrivacyNote =
+      'Foto tidak disimpan. Hanya catatan makan yang tersimpan.';
+  static String scanDiversityPreview(int met, int total) =>
+      'Setelah disimpan: $met dari $total kelompok hari ini.';
+  static const scanGroupPickerTitle = 'Kelompok makanan';
+  static const scanGroupPickerSubtitle = 'Pilih semua yang ada di porsi ini.';
+  static const scanGroupPickerDone = 'Selesai';
+  static const scanGroupPickerFull =
+      'Sudah 3 kelompok. Lepas satu untuk mengganti.';
+  static String scanGroupPickerCount(int selected, int max) =>
+      '$selected dari $max dipilih';
+  static String scanGroupPickerFor(String name) => 'Untuk $name';
   static const scanSave = 'Simpan ke catatan';
   static const scanSaved = 'Catatan tersimpan.';
   static const scanSaveError =

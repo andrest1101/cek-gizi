@@ -1204,3 +1204,46 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
 - Perlu uji perangkat: pencil/viewer foto, crop & hapus dari Akun, avatar
   default new di light/dark, dan kehalusan animasi kartu grafik.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-15 — Redesign sheet hasil scan & perbaikan overflow (2026-11-20)
+
+### Bug
+- Overflow 7,2 px pada baris **Porsi** berasal dari `Wrap` sebagai anak
+  non-flex dari `Row`: `Wrap` menerima lebar tak terbatas sehingga tidak
+  pernah membungkus. Pola tersebut dihapus; chip porsi memakai `Wrap`
+  selebar konten di bawah labelnya sendiri.
+
+### Desain
+- Sheet hasil scan jadi pengalaman "review" editorial: eyebrow **HASIL
+  PEMINDAIAN**, judul **Periksa isi piring**, subjudul, pill jumlah item,
+  tombol tutup 48dp. Menutup langsung tanpa dialog (hasil scan sementara).
+- Item tidak lagi berupa kotak dalam kotak: lingkaran tonal berisi logo
+  kelompok pertama, nama bisa diedit inline (underline saat fokus), badge
+  **Perlu dicek** (ikon + teks) bila keyakinan < 0,6, pill kelompok, dan
+  pemilih porsi 3 opsi. Pemisah antar item memakai hairline (PRD §7.1).
+- `showScanGroupPicker`: grid dua kolom 8 kelompok berlogo, maksimal 3
+  kelompok per item, counter "n dari 3 dipilih", pesan saat penuh, tombol
+  **Selesai** sticky.
+- Tile **+ Tambah makanan** membuka field + Batal/Tambah dengan `AnimatedSize`.
+- **Jenis makan** memakai `SegmentControl` 4 opsi (Sarapan/Siang/Malam/
+  Camilan), konsisten dengan sheet Catat manual dan aman di 360dp @1,3.
+- Footer sticky: ringkasan "n makanan · m kelompok", pratinjau **"Setelah
+  disimpan: x dari y kelompok hari ini"** dari `piringTodayProvider` +
+  `DietaryDiversity.evaluate` (berasal dari aturan usia, bukan model;
+  disembunyikan bila profil usia tidak tersedia), catatan foto tidak
+  disimpan, tombol **Simpan ke catatan** 52dp. Header/footer menyusut saat
+  keyboard terbuka agar sheet tetap muat di layar pendek.
+- Motion: `AnimatedSize`, `AnimatedSwitcher`, fade/slide, dan kontraksi chip
+  lewat `AppMotion` (durasi 0 saat reduce motion).
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **324/324 passed** (sebelumnya 320)
+- `flutter build apk --debug` → **✓ Built**
+- DoD grep: gradien = 0; `Colors.*` hanya `Colors.transparent`;
+  `GEMINI_API_KEY` di `lib/` = 0.
+- Tes regresi baru: 360dp @1,3 light & dark, 392dp @1,0 → tanpa overflow;
+  picker membatasi 3 kelompok; tombol simpan tetap dapat diketuk.
+- Perlu uji perangkat: alur scan nyata, keyboard saat mengedit nama,
+  tampilan dark mode, dan kehalusan animasi tambah/hapus item.
+- Commit belum dijalankan (manual oleh pemilik).
