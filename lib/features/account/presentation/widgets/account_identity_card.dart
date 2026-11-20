@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +12,10 @@ import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/utils/date_format.dart';
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
-import 'package:cekgizi/features/children/presentation/widgets/child_photo_avatar.dart';
+import 'package:cekgizi/features/children/presentation/child_photo_actions.dart';
+import 'package:cekgizi/features/children/presentation/providers/child_photo_providers.dart';
+import 'package:cekgizi/features/children/presentation/widgets/child_photo_viewer_sheet.dart';
+import 'package:cekgizi/shared/widgets/child_avatar.dart';
 import 'package:cekgizi/features/growth/domain/entities/growth_measurement.dart';
 import 'package:cekgizi/features/growth/domain/entities/sex.dart';
 import 'package:cekgizi/features/growth/presentation/growth_summary.dart';
@@ -40,6 +45,8 @@ class AccountIdentityCard extends ConsumerWidget {
     final sexLabel = child.sex == Sex.male
         ? AppStrings.childSexMale
         : AppStrings.childSexFemale;
+    final photoPath = ref.watch(childPhotoPathProvider(child.id)).value;
+    final photo = photoPath == null ? null : FileImage(File(photoPath));
 
     return Container(
       decoration: AppSurfaces.card(context),
@@ -52,10 +59,10 @@ class AccountIdentityCard extends ConsumerWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ChildPhotoAvatar(
+                _EditableAvatar(
                   child: child,
-                  size: 68,
-                  semanticLabel: child.nickname,
+                  photo: photo,
+                  onTap: () => _openPhotoViewer(context, ref, child, photo),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
@@ -94,7 +101,7 @@ class AccountIdentityCard extends ConsumerWidget {
                 IconButton(
                   onPressed: () => context.push('/children/${child.id}/edit'),
                   tooltip: AppStrings.accountChildEdit,
-                  icon: const Icon(Icons.edit_outlined),
+                  icon: const Icon(Icons.tune_rounded),
                 ),
               ],
             ),
@@ -106,6 +113,119 @@ class AccountIdentityCard extends ConsumerWidget {
             now: now,
           ),
         ],
+      ),
+    );
+  }
+
+  static void _openPhotoViewer(
+    BuildContext context,
+    WidgetRef ref,
+    ChildProfile child,
+    ImageProvider? photo,
+  ) {
+    final messenger = ScaffoldMessenger.of(context);
+    showChildPhotoViewer(
+      context: context,
+      child: child,
+      photo: photo,
+      onAdjust: () async {
+        Navigator.of(context).pop();
+        try {
+          await adjustSavedChildPhoto(context, ref, child: child);
+        } catch (_) {
+          messenger.showSnackBar(
+            SnackBar(content: Text(AppStrings.childPhotoError)),
+          );
+        }
+      },
+      onRemove: photo == null
+          ? null
+          : () async {
+              Navigator.of(context).pop();
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text(AppStrings.childPhotoRemoveTitle),
+                  content: const Text(AppStrings.childPhotoRemoveBody),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text(AppStrings.childDeleteCancel),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text(AppStrings.childDeleteConfirm),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed == true) {
+                try {
+                  await deleteSavedChildPhoto(ref, child.id);
+                } catch (_) {
+                  messenger.showSnackBar(
+                    SnackBar(content: Text(AppStrings.childPhotoError)),
+                  );
+                }
+              }
+            },
+    );
+  }
+}
+
+/// Avatar di Akun jadi tombol: ketuk foto atau pencil untuk membuka viewer.
+class _EditableAvatar extends StatelessWidget {
+  const _EditableAvatar({
+    required this.child,
+    required this.photo,
+    required this.onTap,
+  });
+
+  final ChildProfile child;
+  final ImageProvider? photo;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return Tooltip(
+      message: AppStrings.childPhotoViewerSemantics(child.nickname),
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ChildAvatar(
+                sex: child.sex,
+                photo: photo,
+                size: 68,
+                semanticLabel: child.nickname,
+              ),
+              Positioned(
+                right: -2,
+                bottom: -2,
+                child: Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: colors.primary,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: colors.surface, width: 2),
+                  ),
+                  child: Icon(
+                    Icons.edit_rounded,
+                    size: 14,
+                    color: colors.onPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -85,6 +85,8 @@ flutter:
     # saat generate ikon launcher (tidak perlu ikut ke dalam APK).
     - assets/logo/logo_cek-gizi_mark.png
     - assets/logo_kelompok_norm/
+    # Dua avatar default (ilustrasi milik pemilik) untuk anak tanpa foto.
+    - assets/avatars/
 
   fonts:
     - family: PlusJakartaSans

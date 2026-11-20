@@ -93,6 +93,25 @@ void main() {
     },
   );
 
+  testWidgets('Akun: ketuk foto profil membuka viewer foto', (tester) async {
+    final arka = fakeChild(id: 'child-1', nickname: 'Arka', sex: Sex.male);
+    await pumpAccount(tester, [arka]);
+
+    await tester.tap(
+      find.byTooltip(AppStrings.childPhotoViewerSemantics('Arka')),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text(AppStrings.childPhotoViewerTitle), findsOneWidget);
+    // Tanpa foto tersimpan: hanya Selesai yang tampil.
+    expect(find.text(AppStrings.childPhotoViewerDone), findsOneWidget);
+    expect(find.text(AppStrings.childPhotoViewerAdjust), findsNothing);
+
+    await tester.tap(find.text(AppStrings.childPhotoViewerDone));
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.childPhotoViewerTitle), findsNothing);
+  });
+
   testWidgets('Mengetuk chip anak mengubah kartu identitas', (tester) async {
     final arka = fakeChild(id: 'child-1', nickname: 'Arka', sex: Sex.male);
     final bila = fakeChild(id: 'child-2', nickname: 'Bila', sex: Sex.female);

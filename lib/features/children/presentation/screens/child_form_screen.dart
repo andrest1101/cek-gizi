@@ -16,6 +16,8 @@ import 'package:cekgizi/features/children/data/services/child_photo_service.dart
 import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/domain/repositories/child_exceptions.dart';
 import 'package:cekgizi/features/children/presentation/providers/child_photo_providers.dart';
+import 'package:cekgizi/features/children/presentation/screens/child_photo_crop_screen.dart';
+import 'package:cekgizi/features/children/presentation/widgets/child_photo_viewer_sheet.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/growth/domain/entities/sex.dart';
 import 'package:cekgizi/shared/widgets/child_avatar.dart';
@@ -101,6 +103,14 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
     return null;
   }
 
+  Future<Uint8List?> _crop(Uint8List source) async {
+    if (!mounted) return null;
+    return context.push<Uint8List>(
+      '/children/photo-crop',
+      extra: ChildPhotoCropArgs(bytes: source),
+    );
+  }
+
   Future<void> _pickPhoto(ChildPhotoSource source) async {
     if (_photoBusy || _busy) return;
     setState(() {
@@ -109,13 +119,13 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
     });
     try {
       final bytes = await ref.read(childPhotoPickerProvider).pick(source);
-      if (!mounted) return;
-      if (bytes != null) {
-        setState(() {
-          _pendingPhoto = bytes;
-          _photoRemoved = false;
-        });
-      }
+      if (!mounted || bytes == null) return;
+      final cropped = await _crop(bytes);
+      if (!mounted || cropped == null) return;
+      setState(() {
+        _pendingPhoto = cropped;
+        _photoRemoved = false;
+      });
     } on PlatformException {
       if (mounted) {
         setState(() => _photoError = AppStrings.childPhotoPermissionError);
@@ -158,6 +168,59 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
       _photoRemoved = true;
       _photoError = null;
     });
+  }
+
+  /// Buka ulang pemotong untuk foto yang sedang dipilih/pratinjau.
+  Future<void> _adjustPhoto() async {
+    if (_photoBusy || _busy) return;
+    setState(() => _photoError = null);
+    try {
+      Uint8List? source = _pendingPhoto;
+      if (source == null && widget.existing != null) {
+        final path = ref
+            .read(childPhotoPathProvider(widget.existing!.id))
+            .value;
+        if (path != null) source = await File(path).readAsBytes();
+      }
+      if (source == null || !mounted) return;
+      final cropped = await _crop(source);
+      if (!mounted || cropped == null) return;
+      setState(() {
+        _pendingPhoto = cropped;
+        _photoRemoved = false;
+      });
+    } on ChildPhotoException {
+      if (mounted) setState(() => _photoError = AppStrings.childPhotoError);
+    } catch (_) {
+      if (mounted) setState(() => _photoError = AppStrings.childPhotoError);
+    }
+  }
+
+  /// Avatar + pencil → viewer foto (Atur / Hapus / Selesai).
+  void _openViewer(ImageProvider? preview, bool hasPhoto) {
+    if (_busy || _photoBusy) return;
+    final child = ChildProfile(
+      id: widget.existing?.id ?? 'new',
+      nickname: _displayName,
+      birthDate: _birthDate,
+      sex: _sex,
+      avatarKey: _sex == Sex.male ? 'boy' : 'girl',
+    );
+    showChildPhotoViewer(
+      context: context,
+      child: child,
+      photo: preview,
+      onAdjust: () {
+        Navigator.of(context).pop();
+        _adjustPhoto();
+      },
+      onRemove: hasPhoto
+          ? () {
+              Navigator.of(context).pop();
+              _removePhoto();
+            }
+          : null,
+    );
   }
 
   Future<void> _save() async {
@@ -325,45 +388,60 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
                 decoration: AppSurfaces.sunken(context, radius: AppRadius.card),
                 child: Column(
                   children: [
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Semantics(
-                          label: AppStrings.childPhotoPreviewSemantics(
-                            _displayName,
-                          ),
-                          image: true,
-                          child: ChildAvatar(
-                            sex: _sex,
-                            photo: previewPhoto,
-                            size: 104,
-                            semanticLabel: _displayName,
-                          ),
-                        ),
-                        Positioned(
-                          right: -2,
-                          bottom: -2,
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: colors.primary,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: colors.surface,
-                                width: 2,
+                    Tooltip(
+                      message: AppStrings.childPhotoViewerSemantics(
+                        _displayName,
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: _busy
+                              ? null
+                              : () => _openViewer(previewPhoto, hasPhoto),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Semantics(
+                                label: AppStrings.childPhotoPreviewSemantics(
+                                  _displayName,
+                                ),
+                                image: true,
+                                child: ChildAvatar(
+                                  sex: _sex,
+                                  photo: previewPhoto,
+                                  size: 104,
+                                  semanticLabel: _displayName,
+                                ),
                               ),
-                            ),
-                            child: Icon(
-                              _photoBusy
-                                  ? Icons.hourglass_top_rounded
-                                  : Icons.photo_camera_rounded,
-                              size: 18,
-                              color: colors.onPrimary,
-                            ),
+                              Positioned(
+                                right: -2,
+                                bottom: -2,
+                                child: Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: colors.primary,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: colors.surface,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    _photoBusy
+                                        ? Icons.hourglass_top_rounded
+                                        : Icons.edit_rounded,
+                                    size: 18,
+                                    color: colors.onPrimary,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(
@@ -444,21 +522,6 @@ class _ChildFormScreenState extends ConsumerState<ChildFormScreen> {
                           ),
                           label: const Text(AppStrings.childPhotoGallery),
                         ),
-                        if (hasPhoto)
-                          TextButton.icon(
-                            onPressed: _photoBusy || _busy
-                                ? null
-                                : _removePhoto,
-                            style: TextButton.styleFrom(
-                              minimumSize: const Size(0, 48),
-                              foregroundColor: colors.statusAlert,
-                            ),
-                            icon: const Icon(
-                              Icons.delete_outline_rounded,
-                              size: 18,
-                            ),
-                            label: const Text(AppStrings.childPhotoRemove),
-                          ),
                       ],
                     ),
                   ],

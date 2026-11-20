@@ -50,6 +50,24 @@ final class SdSeries {
   final bool upperIsPos3;
 }
 
+/// Nilai median (dalam satuan sumbu Y) pada posisi [x] dengan interpolasi
+/// linear antar dua titik tabel resmi terdekat. Di luar rentang, pakai titik
+/// ujung. Murni & deterministik — mudah diuji (PRD §3.3/§6.5).
+double medianAt(List<SdPoint> median, double x) {
+  if (median.isEmpty) return double.nan;
+  if (x <= median.first.x) return median.first.y;
+  if (x >= median.last.x) return median.last.y;
+  for (var i = 1; i < median.length; i++) {
+    final a = median[i - 1];
+    final b = median[i];
+    if (x <= b.x) {
+      final t = (x - a.x) / (b.x - a.x);
+      return a.y + (b.y - a.y) * t;
+    }
+  }
+  return median.last.y;
+}
+
 /// Membangun [SdSeries] dari tabel Permenkes 2/2020 (PRD §6.5).
 abstract final class SdSeriesBuilder {
   const SdSeriesBuilder._();
@@ -105,10 +123,7 @@ abstract final class SdSeriesBuilder {
       maxX = _hazWazMaxMonth;
     } else {
       final ageMonthsForTable = useTbTable ? 30 : 12;
-      final info = tables.whzTableInfo(
-        sex: sex,
-        ageMonths: ageMonthsForTable,
-      );
+      final info = tables.whzTableInfo(sex: sex, ageMonths: ageMonthsForTable);
       final lastCm = info.start + (info.length - 1) * info.step;
       for (var cm = info.start; cm <= lastCm + 1e-9; cm += info.step) {
         final step = double.parse(cm.toStringAsFixed(1));
@@ -142,22 +157,22 @@ abstract final class SdSeriesBuilder {
 /// Pemetaan satu pengukuran ke titik grafik (dengan koreksi 0,7 cm).
 extension GrowthMeasurementChartPoint on GrowthMeasurement {
   double chartX(AnthropometryIndex index) => switch (index) {
-        AnthropometryIndex.haz => ageMonths.toDouble(),
-        AnthropometryIndex.waz => ageMonths.toDouble(),
-        AnthropometryIndex.whz => MeasureCorrection.corrected(
-            lengthHeightCm: lengthHeightCm,
-            mode: measureMode,
-            ageMonths: ageMonths,
-          ),
-      };
+    AnthropometryIndex.haz => ageMonths.toDouble(),
+    AnthropometryIndex.waz => ageMonths.toDouble(),
+    AnthropometryIndex.whz => MeasureCorrection.corrected(
+      lengthHeightCm: lengthHeightCm,
+      mode: measureMode,
+      ageMonths: ageMonths,
+    ),
+  };
 
   double chartY(AnthropometryIndex index) => switch (index) {
-        AnthropometryIndex.haz => MeasureCorrection.corrected(
-            lengthHeightCm: lengthHeightCm,
-            mode: measureMode,
-            ageMonths: ageMonths,
-          ),
-        AnthropometryIndex.waz => weightKg,
-        AnthropometryIndex.whz => weightKg,
-      };
+    AnthropometryIndex.haz => MeasureCorrection.corrected(
+      lengthHeightCm: lengthHeightCm,
+      mode: measureMode,
+      ageMonths: ageMonths,
+    ),
+    AnthropometryIndex.waz => weightKg,
+    AnthropometryIndex.whz => weightKg,
+  };
 }
