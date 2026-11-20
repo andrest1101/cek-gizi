@@ -8,7 +8,10 @@ import 'package:cekgizi/shared/widgets/settings_tile.dart';
 /// Ringkasan privasi yang jujur: apa yang tersimpan di server, apa yang
 /// hanya ada di perangkat, dan apa yang dibuang setelah dipakai.
 class AccountPrivacyCard extends StatelessWidget {
-  const AccountPrivacyCard({super.key});
+  const AccountPrivacyCard({super.key, this.onDelete});
+
+  /// Callback keterbukaan dialog hapus akun.
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +44,14 @@ class AccountPrivacyCard extends StatelessWidget {
             icon: Icons.notifications_active_outlined,
             title: AppStrings.accountPrivacyReminderTitle,
             subtitle: AppStrings.accountPrivacyReminderBody,
+          ),
+          Divider(height: 1, indent: 68, color: colors.outline),
+          SettingsTile(
+            icon: Icons.delete_forever_outlined,
+            iconColor: colors.statusAlert,
+            title: AppStrings.accountDeleteTitle,
+            subtitle: AppStrings.accountDeleteTileSubtitle,
+            onTap: onDelete,
           ),
         ],
       ),

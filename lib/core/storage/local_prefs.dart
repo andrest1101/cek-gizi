@@ -46,6 +46,10 @@ final class LocalPrefs {
 
   Future<void> setPiringTourSeen() => _prefs.setBool(_keyPiringTourSeen, true);
 
+  /// Hapus SEMUA flag lokal (first-run, consent, tur singkat, reminder).
+  /// Dipakai saat akun dihapus (UX-5): pengguna kembali ke mulai pertama.
+  Future<void> clearAll() => _prefs.clear();
+
   /// Untuk tes: tulis flag mentah.
   Future<void> debugSetOnboardingCompleted(bool value) =>
       _prefs.setBool(_keyOnboardingCompleted, value);
