@@ -838,6 +838,18 @@ abstract final class AppStrings {
   static const accountPrivacyReminderTitle = 'Pengingat';
   static const accountPrivacyReminderBody =
       'Hanya di perangkat ini dan bisa dimatikan kapan saja.';
+  static const accountDeleteTitle = 'Hapus akun';
+  static const accountDeleteBody =
+      'Data anak, pengukuran, catatan makan, dan chat akan dihapus permanen '
+      'dari server dan dari perangkat ini (termasuk foto profil anak). '
+      'Tindakan ini tidak bisa dibatalkan.';
+  static const accountDeleteConfirm = 'Hapus akun';
+  static const accountDeleteStarted = 'Akun sedang dihapus…';
+  static const accountDeleteDone = 'Akun dan semua datanya telah dihapus.';
+  static const accountDeleteError = 'Gagal menghapus akun. Coba lagi.';
+  static const accountDeleteCancel = 'Batal';
+  static const accountDeleteTileSubtitle =
+      'Semua data anak dan data terkait ikut dihapus permanen.';
   static const accountReferenceTitle = 'Sumber rujukan';
   static const accountReferenceSubtitle = 'Permenkes 2/2020 & WHO';
   static const accountReferenceSheetTitle = 'Sumber rujukan';

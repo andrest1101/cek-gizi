@@ -187,7 +187,9 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
   anak; state terpilih `primaryContainer` + border `primary`, plus chip
   "+ Tambah") → `ReminderSettingsSection` bergaya `SettingsTile` → seksi
   **Privasi & data** (`AccountPrivacyCard`: profil anak, foto profil, foto
-  makanan, pengingat — jujur, tanpa klaim berlebihan) → seksi **Tentang
+  makanan, pengingat — jujur, tanpa klaim berlebihan, plus baris **Hapus akun**
+  yang membuka dialog konfirmasi 48dp: server → foto lokal → prefs → logout →
+  `/opening`) → seksi **Tentang
   aplikasi** (`AccountAboutSection`: sumber rujukan dalam sheet — Permenkes
   2/2020 & WHO — versi app, disclaimer).
 - **Formatir anak** (v2.5): preview besar 104dp + badge kamera; aksi **Ambil
@@ -224,8 +226,11 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
 
 - Tidak overflow di lebar 360dp pada text scale 1,3, light & dark
   (`test/features/layout_scale_test.dart`).
-- Target sentuh ≥ 48dp; teks kontras ≥ 4,5:1.
-- Setiap grafik/ikon punya `Semantics` (mis. ring: "3 dari 8 kelompok").
+- Target sentuh ≥ 48dp; teks kontras ≥ 4,5:1. `WeekStrip` memakai sel 48dp
+  dalam scroll horizontal (7 hari tidak muat di 360dp tanpa digeser).
+- Setiap grafik/ikon punya `Semantics` (mis. ring: "3 dari 8 kelompok");
+  `ZScoreTable` memberi label pembaca layar per baris (indeks + kategori +
+  z-score).
 - Status tidak pernah hanya warna.
 - Hormati `MediaQuery.disableAnimations`.
 

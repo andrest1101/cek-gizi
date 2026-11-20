@@ -1072,3 +1072,57 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
   pengecualian backup, tampilan light/dark Akun, dan hero baru di Beranda.
 - Commit belum dijalankan (manual oleh pemilik). Lihat pemisahan commit yang
   disarankan di percakapan (UX-11 masih uncommitted).
+
+## UX-5 — Hapus Akun penuh + UX-6 — Audit a11y ringan (2026-11-20)
+
+### UX-5 — Hapus Akun
+- **Supabase**:
+  - `supabase/migrations/20261110000005_delete_account.sql` — fungsi
+    `public.delete_account(p_user uuid)` (`security definer`, service_role),
+    menghapus `chat_messages`, `user_consents`, `ai_usage`,
+    `growth_measurements`, `food_logs`, `children` milik user; `revoke` dari
+    public/anon/authenticated, `grant execute` hanya ke service_role.
+  - `supabase/functions/delete-account/index.ts` — verifikasi JWT
+    (`auth.getUser`), RPC `delete_account`, lalu `auth.admin.deleteUser(uid)`.
+    Deploy: dashboard, **Verify JWT = ON**.
+- **Flutter (Clean Architecture)**:
+  - Domain: `AccountRepository`, `AccountException`, use case `DeleteAccount`.
+  - Data: `AccountRepositoryImpl` + `AccountEdgeFunctions` (injectable agar
+    error `FunctionException` teruji); semua kegagalan → `AccountException`.
+  - Presentation: `account_providers.dart` (`DeleteAccountNotifier`, state
+    `idle → deleting → done | error`), `AccountDeleteDialog`, dan baris
+    "Hapus akun" di `AccountPrivacyCard` (ikon `statusAlert` + teks).
+  - Cleanup setelah server mengonfirmasi: hapus semua foto lokal per anak
+    via `ChildPhotoStore.delete` (best-effort), `LocalPrefs.clearAll()`
+    (onboarding, consent, tur, reminder), `auth.signOut()` (di-seam via
+    `accountSignOutProvider`), lalu snackbar "Akun dan semua datanya telah
+    dihapus." dan `context.go('/opening')`.
+  - Kegagalan server → snackbar "Gagal menghapus akun. Coba lagi.", data lokal
+    **tidak** dihapus (urutan: server dulu, baru cleanup).
+- **Tes baru**: `account_repository_impl_test` (3: sukses, FunctionException,
+  galat jaringan), `account_delete_test` (2: cleanup lengkap / gagal tanpa
+  efek lokal). Tes provider murni dipakai karena `pumpAndSettle()` setelah
+  navigasi ke `/opening` menggantung pada Lottie splash (masalah tes, bukan
+  aplikasi).
+
+### UX-6 — Audit a11y (perbaikan minor)
+- `WeekStrip`: 7 sel × 48dp tetap (target sentuh ≥ 48dp PRD §7.7) dalam
+  `SingleChildScrollView` horizontal — aman di 360dp tanpa overflow; pola
+  sama dengan `HomeWeekChips`.
+- `ZScoreTable`: tiap baris kini punya `Semantics` lengkap
+  ("PB/U atau TB/U. Gizi baik. z-score: −0,53") — sebelumnya hanya teks
+  visual tanpa label pembaca layar.
+- Grafik `GrowthChart` sudah punya `Semantics(label)` + `ExcludeSemantics`
+  pada `LineChart` (dicek ulang; tidak diubah).
+- `layout_scale_test` (360dp @1,3 light & dark) tetap lulus setelah perubahan.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **308/308 passed** (sebelumnya 303)
+- `flutter build apk --debug` → **✓ Built**
+- DoD grep: gradien = 0; `Colors.*` hanya `Colors.transparent`;
+  `GEMINI_API_KEY` di `lib/` = 0.
+- Belum bisa diverifikasi lokal: `deno check` (deno tidak tersedia). Migrasi
+  SQL + Edge Function wajib di-deploy pemilik sebelum tombol Hapus akun
+  dipakai di perangkat.
+- Commit belum dijalankan (manual oleh pemilik).

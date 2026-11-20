@@ -40,24 +40,32 @@ class WeekStrip extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final ordered = days.reversed.toList();
 
-    return Row(
-      children: [
-        for (final day in ordered)
-          Expanded(
-            child: _DayCell(
-              key: ValueKey(
-                'week-day-${day.day.year}-${day.day.month}-${day.day.day}',
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      // PRD §7.7: target sentuh ≥ 48dp. Tujuh sel × 48dp tidak muat di
+      // 360dp tanpa scroll, jadi strip digeser (pola sama seperti
+      // `HomeWeekChips` di Beranda).
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final day in ordered)
+            SizedBox(
+              width: 48,
+              child: _DayCell(
+                key: ValueKey(
+                  'week-day-${day.day.year}-${day.day.month}-${day.day.day}',
+                ),
+                day: day,
+                isToday: _isSameDay(day.day, today),
+                isSelected:
+                    selectedDay != null && _isSameDay(day.day, selectedDay!),
+                colors: colors,
+                textTheme: textTheme,
+                onTap: () => onSelect(day.day),
               ),
-              day: day,
-              isToday: _isSameDay(day.day, today),
-              isSelected:
-                  selectedDay != null && _isSameDay(day.day, selectedDay!),
-              colors: colors,
-              textTheme: textTheme,
-              onTap: () => onSelect(day.day),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -92,13 +100,13 @@ class _DayCell extends StatelessWidget {
     final circleColor = isSelected
         ? colors.primary
         : day.hasLogs
-            ? colors.primaryContainer
-            : colors.surfaceVariant;
+        ? colors.primaryContainer
+        : colors.surfaceVariant;
     final numberColor = isSelected
         ? colors.onPrimary
         : day.hasLogs
-            ? colors.primary
-            : colors.textSecondary;
+        ? colors.primary
+        : colors.textSecondary;
 
     return Semantics(
       button: true,
@@ -162,15 +170,15 @@ class _DayCell extends StatelessWidget {
                           color: colors.primary,
                         )
                       : day.hasLogs
-                          ? Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: colors.primary,
-                                shape: BoxShape.circle,
-                              ),
-                            )
-                          : const SizedBox.shrink(),
+                      ? Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: colors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
               ],
             ),
@@ -234,7 +242,11 @@ class HomeWeekChips extends ConsumerWidget {
           loading: () => const Skeleton(height: 76, radius: AppRadius.card),
           error: (error, stackTrace) => Row(
             children: [
-              Icon(Icons.cloud_off_rounded, size: 18, color: colors.textSecondary),
+              Icon(
+                Icons.cloud_off_rounded,
+                size: 18,
+                color: colors.textSecondary,
+              ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
@@ -280,10 +292,12 @@ class HomeWeekChips extends ConsumerWidget {
                 itemCount: days.length,
                 itemBuilder: (context, index) {
                   final day = days[index];
-                  final isToday = day.day.year == now.year &&
+                  final isToday =
+                      day.day.year == now.year &&
                       day.day.month == now.month &&
                       day.day.day == now.day;
-                  final isSelected = selectedDay != null &&
+                  final isSelected =
+                      selectedDay != null &&
                       selectedDay.year == day.day.year &&
                       selectedDay.month == day.day.month &&
                       selectedDay.day == day.day.day;
@@ -295,11 +309,7 @@ class HomeWeekChips extends ConsumerWidget {
                       day: day,
                       isToday: isToday,
                       isSelected: isSelected,
-                      onTap: () => openWeekHistory(
-                        context,
-                        ref,
-                        day: day.day,
-                      ),
+                      onTap: () => openWeekHistory(context, ref, day: day.day),
                     ),
                   );
                 },
@@ -332,9 +342,7 @@ class _HomeWeekChip extends StatelessWidget {
     final label = isToday
         ? AppStrings.homeWeekToday
         : IdDateFormat.weekdayShort(day.day);
-    final fill = isSelected
-        ? colors.primaryContainer
-        : colors.surfaceVariant;
+    final fill = isSelected ? colors.primaryContainer : colors.surfaceVariant;
 
     return Semantics(
       button: true,
@@ -397,15 +405,15 @@ class _HomeWeekChip extends StatelessWidget {
                           color: colors.primary,
                         )
                       : day.hasLogs
-                          ? Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: colors.primary,
-                                shape: BoxShape.circle,
-                              ),
-                            )
-                          : const SizedBox.shrink(),
+                      ? Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: colors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
               ],
             ),
@@ -452,7 +460,11 @@ class HomeWeekStrip extends ConsumerWidget {
           loading: () => const Skeleton(height: 76, radius: AppRadius.card),
           error: (error, stackTrace) => Row(
             children: [
-              Icon(Icons.cloud_off_rounded, size: 18, color: colors.textSecondary),
+              Icon(
+                Icons.cloud_off_rounded,
+                size: 18,
+                color: colors.textSecondary,
+              ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(

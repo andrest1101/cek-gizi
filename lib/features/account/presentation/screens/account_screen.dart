@@ -9,8 +9,10 @@ import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/time/clock.dart';
+import 'package:cekgizi/features/account/presentation/providers/account_providers.dart';
 import 'package:cekgizi/features/account/presentation/widgets/account_about_section.dart';
 import 'package:cekgizi/features/account/presentation/widgets/account_child_strip.dart';
+import 'package:cekgizi/features/account/presentation/widgets/account_delete_dialog.dart';
 import 'package:cekgizi/features/account/presentation/widgets/account_identity_card.dart';
 import 'package:cekgizi/features/account/presentation/widgets/account_privacy_card.dart';
 import 'package:cekgizi/features/account/presentation/widgets/reminder_settings_section.dart';
@@ -32,6 +34,22 @@ class AccountScreen extends ConsumerWidget {
     final child = ref.watch(selectedChildProvider).value;
     final children = ref.watch(childrenListProvider).value ?? const [];
     final now = ref.watch(clockProvider)();
+
+    // Hapus Akun (UX-5): snackbar + pindah ke /opening setelah sukses atau
+    // sana snackbar error di riwayat notifikasi.
+    ref.listen(deleteAccountProvider, (_, next) {
+      if (!context.mounted) return;
+      if (next.isDone) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(AppStrings.accountDeleteDone)));
+        context.go('/opening');
+      } else if (next.error) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(AppStrings.accountDeleteError)));
+      }
+    });
 
     return Scaffold(
       floatingActionButton: const TanyaBubble(),
@@ -78,7 +96,9 @@ class AccountScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.xxl),
             const SectionHeading(title: AppStrings.accountPrivacyTitle),
             const SizedBox(height: AppSpacing.md),
-            const AccountPrivacyCard(),
+            AccountPrivacyCard(
+              onDelete: () => confirmAccountDelete(context, ref),
+            ),
             const SizedBox(height: AppSpacing.xxl),
             const AccountAboutSection(),
           ],
