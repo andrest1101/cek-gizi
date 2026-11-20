@@ -176,8 +176,11 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
   catatan hari ini. Pita protein hewani memakai `accentContainer` bila belum
   ada, `primaryContainer` bila sudah ada — selalu ikon + teks.
 - **Resep**: empty state jujur sampai `recipes.json` tersedia.
-- **Tumbuh** (v2.3): ringkasan `ZScoreSummaryStrip` (3 ubin, sekaligus
-  pemilih indeks) → grafik pita SD **full-bleed** → riwayat berbentuk
+- **Tumbuh** (v2.3–v2.7): ringkasan `ZScoreSummaryStrip` (3 ubin, sekaligus
+  pemilih indeks) → grafik pita SD **full-bleed** dengan judul sumbu + satuan
+  (X: usia/panjang-tinggi, Y: tinggi/berat), **tap titik** → kartu detail
+  (tanggal, usia, nilai, z-score, kategori + ikon, selisih ke median) dan
+  hint ketuk → riwayat berbentuk
   accordion (ringkasan selalu tampil, z-score & aksi dibuka saat diketuk).
 - **Akun** (v2.5): `ScreenHeader` → seksi **Profil anak** (`SectionHeading` +
   aksi "Kelola anak") → `AccountIdentityCard` (foto/avatar 68dp, nama 20 w700,
@@ -192,8 +195,10 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
   `/opening`) → seksi **Tentang
   aplikasi** (`AccountAboutSection`: sumber rujukan dalam sheet — Permenkes
   2/2020 & WHO — versi app, disclaimer).
-- **Formatir anak** (v2.5): preview besar 104dp + badge kamera; aksi **Ambil
-  foto** / **Galeri** / **Hapus foto**; hint jujur "hanya tersimpan di
+- **Formatir anak** (v2.5–v2.7): preview besar 104dp + badge kamera; aksi
+  **Ambil foto** / **Galeri** / **Atur foto** / **Hapus foto**; photo picker →
+  `ChildPhotoCropScreen` (drag/pinch zoom, panduan lingkaran, tombol
+  zoom/reset/pakai ≥48dp) sebelum disimpan; hint jujur "hanya tersimpan di
   perangkat ini"; error izin/kompresi tampil inline di kartu.
 - **Tanya**: banner disclaimer tetap, area pesan, input bar, chip cepat.
 - **Onboarding** (v2.4): 3 halaman geser. Top bar merek (`AppLogoMark` 40dp

@@ -1126,3 +1126,41 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
   SQL + Edge Function wajib di-deploy pemilik sebelum tombol Hapus akun
   dipakai di perangkat.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-13 — Atur foto profil (crop lingkaran) + grafik pertumbuhan interaktif (2026-11-20)
+
+### UX-13A — Crop foto profil
+- Alur baru: pilih kamera/galeri → route `/children/photo-crop` → atur
+  (drag + pinch zoom, panduan lingkaran) → `Pakai foto` → bytes hasil crop
+  disimpan lokal seperti sebelumnya. Tombol **Atur foto** muncul bila foto
+  sudah ada (bisa mengubah foto tersimpan maupun foto yang baru dipilih).
+- `ChildPhotoCropScreen` (baru): `InteractiveViewer` (1×–4×), overlay
+  `CircleCropGuidePainter` (area luar lingkaran diredupkan, garis tepi token),
+  tombol zoom/reset/pakai/batal ≥ 48dp + `Semantics`.
+- `ChildPhotoEditor` (data): tangkap `RepaintBoundary` → `toImage` →
+  `flutter_image_compress` JPEG 512px q82 `keepExif: false`. **Tanpa
+  dependency baru**; foto tetap tidak pernah meninggalkan perangkat.
+- Tests: `child_form_photo_test` diperbarui (pick → crop → pakai → atur
+  ulang → hapus), `child_photo_editor_test`.
+
+### UX-13B — Grafik pertumbuhan lebih mudah dipahami
+- **Sumbu diberi judul + satuan**: X = `Usia (bulan)` / `Panjang/tinggi
+  badan (cm)`; Y = `Tinggi badan (cm)` / `Berat badan (kg)` menurut indeks.
+- **Tap titik grafik** → kartu ringkas: tanggal, usia, nilai + satuan,
+  z-score, kategori resmi + ikon status, serta perbandingan ke median
+  ("di atas/di bawah/sesuai median" + selisih). Titik terpilih ditandai
+  dot lebih besar. Hint "Ketuk titik di grafik…" ditambahkan.
+- Fungsi murni baru & teruji: `medianAt` (interpolasi tabel resmi) dan
+  `ChartPointInfo.from` (format + tone). Tidak ada data gizi baru.
+- `GrowthChart` dibungkus `Expanded` agar `LineChart` mendapat tinggi
+  terikat saat kartu detail tampil.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **317/317 passed** (sebelumnya 308)
+- `flutter build apk --debug` → **✓ Built**
+- DoD grep: gradien = 0; `Colors.*` hanya `Colors.transparent`;
+  `GEMINI_API_KEY` di `lib/` = 0.
+- Perlu uji perangkat: gesture zoom/pan crop, hasil crop sesuai lingkaran,
+  dan tap titik grafik di light/dark.
+- Commit belum dijalankan (manual oleh pemilik).
