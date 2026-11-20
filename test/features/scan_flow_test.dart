@@ -272,58 +272,51 @@ void main() {
     final repo = FakeFoodLogRepository();
     await _pumpSheet(tester, result: _twoItemResult, child: child, repo: repo);
 
-    // Item baru tanpa kelompok -> Simpan tetap dinonaktifkan.
-    // Gulir ke bawah terlebih dahulu agar kolom tambah item terlihat.
-    await tester.drag(
-      find.byType(SingleChildScrollView),
-      const Offset(0, -220),
-    );
+    // Buka tile tambah item, isi nama, lalu tambahkan.
+    final toggle = find.byKey(const Key('scan-add-item-toggle'));
+    await tester.ensureVisible(toggle);
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField).last, 'Pisang');
-    await tester.tap(
-      find.text(AppStrings.scanAddItemButton),
-      warnIfMissed: false,
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('scan-add-item-field')),
+      'Pisang',
     );
+    await tester.tap(find.byKey(const Key('scan-add-item-submit')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('scan-item-card-2')), findsOneWidget);
+
+    // Item baru tanpa kelompok -> Simpan tetap dinonaktifkan.
     final disabledSave = tester.widget<FilledButton>(
-      find
-          .ancestor(
-            of: find.text(AppStrings.scanSave),
-            matching: find.byWidgetPredicate(
-              (widget) => widget is FilledButton,
-            ),
-          )
-          .first,
+      find.byKey(const Key('scan-save')),
     );
     expect(disabledSave.onPressed, isNull);
 
-    // Pilih kelompok untuk item terakhir (index 2), lalu Simpan aktif.
+    // Pilih kelompok lewat sheet pemilih kelompok.
+    final editGroups = find.descendant(
+      of: find.byKey(const ValueKey('scan-item-card-2')),
+      matching: find.text(AppStrings.scanGroupEdit),
+    );
+    await tester.ensureVisible(editGroups);
+    await tester.pumpAndSettle();
+    await tester.tap(editGroups);
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.scanGroupPickerTitle), findsOneWidget);
+
     await tester.tap(
-      find.descendant(
-        of: find.byKey(const ValueKey('scan-item-card-2')),
-        matching: find.text(AppStrings.groupOtherFruitVegShort),
-      ),
+      find.byKey(const ValueKey('scan-group-tile-other_fruit_veg')),
     );
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('scan-group-done')));
+    await tester.pumpAndSettle();
+
     final enabledSave = tester.widget<FilledButton>(
-      find
-          .ancestor(
-            of: find.text(AppStrings.scanSave),
-            matching: find.byWidgetPredicate(
-              (widget) => widget is FilledButton,
-            ),
-          )
-          .first,
+      find.byKey(const Key('scan-save')),
     );
     expect(enabledSave.onPressed, isNotNull);
 
-    await tester.drag(
-      find.byType(SingleChildScrollView),
-      const Offset(0, -160),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text(AppStrings.scanSave), warnIfMissed: false);
+    await tester.tap(find.byKey(const Key('scan-save')));
     await tester.pumpAndSettle();
     expect(repo.logCount, 1);
     final log = repo.logs(child.id).single;
