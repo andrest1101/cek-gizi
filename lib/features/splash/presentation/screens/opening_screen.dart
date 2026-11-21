@@ -7,23 +7,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 
-import 'package:cekgizi/core/bootstrap/backend_ready_provider.dart';
 import 'package:cekgizi/core/config/app_config.dart';
-import 'package:cekgizi/core/constants/app_strings.dart';
-import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 
 /// Satu-satunya layar pra-aplikasi: Lottie CekGizi sebagai page loading.
 ///
-/// Alur: native splash (solid #145C45) → Lottie (satu page) → aplikasi.
-/// Backend berjalan di latar; layar ini menampilkan animasi selagi backend
-/// disiapkan. Bila Lottie selesai lebih dulu, layar menahan frame terakhir
-/// dengan progres halus sampai backend siap; bila backend selesai lebih dulu,
-/// aplikasi langsung masuk begitu animasi kelar.
+/// Alur: splash sistem Android (solid #145C45, tanpa ikon) → Lottie (satu
+/// page) → onboarding/consent/beranda. Backend tetap disiapkan di latar oleh
+/// `main()`, tetapi TIDAK menghalangi perpindahan layar: begitu animasi selesai
+/// aplikasi langsung lanjut. Ini membuat startup ±3 detik, bukan 13 detik.
 ///
-/// Lottie diubah ke **0,65× speed** (bukan 0,5× = terlalu pelan, bukan 1,0× =
-/// sedang tayang terlalu cepat). Reduce-motion dihormati, dan ada batas keras
+/// Reduce-motion dihormati (langsung lanjut, tanpa suara), dan ada batas keras
 /// [_fallbackDelay] agar aplikasi tidak pernah berhenti di sini.
 class OpeningScreen extends ConsumerStatefulWidget {
   const OpeningScreen({super.key, required this.nextLocation});
@@ -36,17 +31,17 @@ class OpeningScreen extends ConsumerStatefulWidget {
 
 class _OpeningScreenState extends ConsumerState<OpeningScreen>
     with SingleTickerProviderStateMixin {
-  /// Kecepatan animasi 0,65× (frame asli 60fps → terasa lebih tenang).
-  static const double _speed = 0.65;
+  /// Kecepatan asli 1×: durasi Lottie 3 detik (180 frame @60fps).
+  static const double _speed = 1.0;
 
-  /// Batas keras total; lebih longgar dari durasi backend terburuk
-  /// (lihat `startup_guard.dart`) supaya tidak pernah macet.
-  static const Duration _fallbackDelay = Duration(seconds: 20);
+  /// Laju suara mengikuti animasi 1× (audio diproduksi untuk 0,65×).
+  static const double _soundRate = 1.5;
+
+  /// Batas keras: cukup untuk animasi 3 dtk + margin muat aset.
+  static const Duration _fallbackDelay = Duration(seconds: 6);
 
   late final AnimationController _controller;
   AudioPlayer? _player;
-  bool _animationDone = false;
-  bool _backendDone = false;
   bool _navigated = false;
   Timer? _fallback;
 
@@ -54,10 +49,6 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen>
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this);
-    ref
-        .read(backendReadyProvider)
-        .then((_) => _noteBackendDone())
-        .catchError((_) => _noteBackendDone());
     // Tunggu frame pertama agar MediaQuery & GoRouter siap.
     WidgetsBinding.instance.addPostFrameCallback((_) => _startOpening());
   }
@@ -86,22 +77,9 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen>
 
     if (MediaQuery.disableAnimationsOf(context)) {
       _controller.value = 1;
-      _animationDone = true;
-      _maybeGo();
-      return;
+      _goNext();
     }
     // Durasi belum diketahui sampai onLoaded; forward dipanggil dari sana.
-  }
-
-  void _noteBackendDone() {
-    if (!mounted) return;
-    _backendDone = true;
-    _maybeGo();
-  }
-
-  void _maybeGo() {
-    if (_navigated || !_animationDone || !_backendDone) return;
-    _goNext();
   }
 
   void _finishAnyway() {
@@ -126,9 +104,7 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen>
     } catch (_) {
       // Ticker bisa dibatalkan sistem (app masuk latar) - diabaikan.
     }
-    if (!mounted) return;
-    _animationDone = true;
-    _maybeGo();
+    _goNext();
   }
 
   /// Suara khas logo — diputar bersamaan dengan animasi Lottie.
@@ -140,6 +116,7 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen>
       _player = player;
       await player.setReleaseMode(ReleaseMode.stop);
       await player.setVolume(0.35);
+      await player.setPlaybackRate(_soundRate);
       await player.play(AssetSource('audio/cek-gizi_audio.wav'));
     } catch (_) {
       // bisu - splash tetap berjalan
@@ -149,14 +126,11 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen>
   @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final waitingForBackend = _animationDone && !_backendDone;
 
     return Scaffold(
       backgroundColor: AppSurfaces.splashSurface,
       body: Semantics(
-        label: waitingForBackend
-            ? '${AppConfig.appName} — ${AppStrings.startupLoading}'
-            : AppConfig.appName,
+        label: AppConfig.appName,
         liveRegion: true,
         child: Center(
           child: LayoutBuilder(
@@ -167,46 +141,28 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen>
                 constraints.maxHeight,
               );
               final size = (shortSide * 0.80).clamp(220.0, 330.0);
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: size,
-                    height: size,
-                    child: Lottie.asset(
-                      'assets/animations/cekgizi_opening.json',
-                      controller: _controller,
-                      repeat: false,
-                      fit: BoxFit.contain,
-                      onLoaded: (composition) {
-                        if (!mounted || _navigated) return;
-                        _controller.duration = _scaled(composition.duration);
-                        if (reduceMotion) {
-                          _controller.value = 1;
-                          _animationDone = true;
-                          _maybeGo();
-                        } else {
-                          unawaited(_playLogoSound(reduceMotion));
-                          unawaited(_play());
-                        }
-                      },
-                      errorBuilder: (context, error, stackTrace) =>
-                          const _Wordmark(),
-                    ),
-                  ),
-                  if (waitingForBackend) ...[
-                    const SizedBox(height: AppSpacing.lg),
-                    SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppSurfaces.onSplashSurfaceMuted,
-                      ),
-                    ),
-                  ],
-                ],
+              return SizedBox(
+                width: size,
+                height: size,
+                child: Lottie.asset(
+                  'assets/animations/cekgizi_opening.json',
+                  controller: _controller,
+                  repeat: false,
+                  fit: BoxFit.contain,
+                  onLoaded: (composition) {
+                    if (!mounted || _navigated) return;
+                    _controller.duration = _scaled(composition.duration);
+                    if (reduceMotion) {
+                      _controller.value = 1;
+                      _goNext();
+                    } else {
+                      unawaited(_playLogoSound(reduceMotion));
+                      unawaited(_play());
+                    }
+                  },
+                  errorBuilder: (context, error, stackTrace) =>
+                      const _Wordmark(),
+                ),
               );
             },
           ),

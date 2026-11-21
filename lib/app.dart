@@ -8,8 +8,8 @@ import 'core/theme/app_theme.dart';
 /// Root widget aplikasi. Navigasi go_router; tema light/dark (PRD §7).
 /// Gate: onboarding & consent wajib lebih dulu (PRD §6.1).
 ///
-/// Satu-satunya layar pra-aplikasi adalah `/opening` (satu page Lottie) yang
-/// menunggu backend siap (`backendReadyProvider`) bersama animasi.
+/// Satu-satunya layar pra-aplikasi adalah `/opening` (satu page Lottie ±3 dtk).
+/// Backend disiapkan di latar oleh `main()` tanpa menghalangi navigasi.
 class CekGiziApp extends ConsumerWidget {
   const CekGiziApp({super.key});
 
