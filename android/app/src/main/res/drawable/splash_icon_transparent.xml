@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="240"
+    android:viewportHeight="240">
+    <!-- Android 12+ splash sistem sengaja tanpa ikon: logo pertama dan
+         satu-satunya muncul di Lottie OpeningScreen. -->
+    <path
+        android:pathData="M0,0 L240,0 L240,240 L0,240 Z"
+        android:fillColor="#00000000" />
+</vector>
