@@ -29,9 +29,7 @@ Widget _app(GoRouter router, {bool reduceMotion = false}) {
       darkTheme: AppTheme.dark(),
       routerConfig: router,
       builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(
-          context,
-        ).copyWith(disableAnimations: reduceMotion),
+        data: MediaQuery.of(context).copyWith(disableAnimations: reduceMotion),
         child: child!,
       ),
     ),
@@ -67,6 +65,23 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets('opening selesai ±3 dtk tanpa menunggu backend', (tester) async {
+    await tester.pumpWidget(_app(_router()));
+
+    // 45 × 100 ms = 4,5 dtk. Cukup untuk Lottie 1× (3 dtk) + margin muat aset,
+    // tapi lebih cepat dari batas pengaman 6 dtk.
+    var reached = false;
+    for (var i = 0; i < 45 && !reached; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      reached = find.text('layar-berikut').evaluate().isNotEmpty;
+    }
+
+    expect(reached, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel(AppConfig.appName), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('opening tetap lanjut saat animasi dimatikan', (tester) async {
     await tester.pumpWidget(_app(_router(), reduceMotion: true));
