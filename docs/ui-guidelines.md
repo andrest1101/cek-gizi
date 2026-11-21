@@ -1,4 +1,4 @@
-# CekGizi — Spesifikasi Visual (v2.9, Batch UX-15)
+# CekGizi — Spesifikasi Visual (v3.0, Batch UX-16)
 
 Dokumen ini adalah **kontrak visual** untuk seluruh layar. PRD v2.0 tetap
 sumber kebenaran fitur; dokumen ini hanya mengatur bagaimana fitur tampil.
@@ -225,16 +225,16 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
   checkbox (state terpilih `primaryContainer` + border `primary`), CTA 52dp
   (disabled sampai dicentang), dan hint penolakan. Checkbox + CTA tidak pernah
   butuh scroll. Error tampil di atas checkbox dengan `liveRegion`.
-- **Splash / opening** (v2.3): **satu page** — native Android & frame
-  pertama Flutter solid `#145C45` (`AppSurfaces.splashSurface`), lalu
-  `OpeningScreen` memutar Lottie `assets/animations/cekgizi_opening.json`
-  (1080×1080, 3 detik, latar konstan, **0,65× speed**, terpusat eksplisit)
+- **Splash / opening** (v3.0): **satu layar bermerek** — splash sistem Android
+  solid `#145C45` dengan ikon transparan (`splash_icon_transparent.xml`),
+  lalu `OpeningScreen` memutar Lottie `assets/animations/cekgizi_opening.json`
+  (1080×1080, 3 detik, latar konstan, **1× speed**, terpusat eksplisit)
   **+ suara khas `assets/audio/cek-gizi_audio.wav`** (volume 0,35, sekali,
-  sinkron dengan `forward()`; reduce-motion = bisu). Lottie ∧
-  `backendReadyProvider` bersamaan: bila animasi selesai lebih dulu, frame
-  terakhir ditahan + progres halus. Reduce-motion dihormati; ada timeout
-  pengaman 20 dtk; tidak ada logo ganda. Launcher icon Android dibuat dari
-  `logo_cek-gizi.png`; logo di dalam app memakai `AppLogoMark`.
+  laju 1,5× agar sinkron; reduce-motion = bisu). Animasi selesai → langsung
+  lanjut; backend berjalan di latar dan tidak menghalangi navigasi. Reduce
+  motion dihormati; timeout pengaman 6 dtk; tidak ada logo ganda. Launcher
+  icon Android dibuat dari `logo_cek-gizi.png`; logo di dalam app memakai
+  `AppLogoMark`.
 
 ## 9. Aksesibilitas (PRD §7.7)
 

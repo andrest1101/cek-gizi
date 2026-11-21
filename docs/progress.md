@@ -1247,3 +1247,33 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
 - Perlu uji perangkat: alur scan nyata, keyboard saat mengedit nama,
   tampilan dark mode, dan kehalusan animasi tambah/hapus item.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-16 — Satu splash, startup ±3 detik (2026-11-21)
+
+### Masalah
+- Splash sistem Android 12+ menampilkan ikon launcher + nama aplikasi karena
+  `windowSplashScreenAnimatedIcon` tidak didefinisikan — muncul "splash logo"
+  sebelum Lottie.
+- `OpeningScreen` memperlambat Lottie jadi 0,65× (~4,6 dtk) **dan** menunggu
+  backend (Supabase 8 dtk + sesi anonim 5 dtk) sebelum pindah → worst case
+  ~13 dtk di logo.
+
+### Perubahan
+- Android `values-v31` & `values-night-v31`: `windowSplashScreenAnimatedIcon`
+  = `@drawable/splash_icon_transparent` (vektor transparan 240dp). Latar tetap
+  `#145C45` → tidak ada logo kedua; transisi ke Lottie mulus.
+- `OpeningScreen`: `_speed = 1.0` (Lottie 3 dtk), `_soundRate = 1.5` agar suara
+  tetap sinkron, `_fallbackDelay = 6 dtk`. Gate `backendReadyProvider`
+  dihapus: navigasi begitu animasi selesai. Progress "Menyiapkan aplikasi…"
+  dan string `startupLoading` dihapus. Reduce-motion tetap langsung + bisu.
+- `main.dart`: `unawaited(bootstrapBackend())` di latar; `backend_ready_provider.dart`
+  dan override-nya dihapus (semua layar sudah punya state loading/retry).
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **325/325 passed** (sebelumnya 324)
+- `flutter build apk --debug` → **✓ Built**
+- Tes regresi baru: splash selesai dalam 4,5 dtk tanpa menunggu backend.
+- Perlu uji perangkat: urutan hijau → Lottie → onboarding, suara sinkron,
+  light/dark, dan mode pesawat (tetap masuk aplikasi, tidak macet di logo).
+- Commit belum dijalankan (manual oleh pemilik).
