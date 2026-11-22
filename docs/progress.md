@@ -1277,3 +1277,34 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
 - Perlu uji perangkat: urutan hijau → Lottie → onboarding, suara sinkron,
   light/dark, dan mode pesawat (tetap masuk aplikasi, tidak macet di logo).
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-17 — Tanya Gizi: deploy `ask-nutrition` & error jujur (2026-11-22)
+
+### Diagnosis
+- Probe live: `health` = 200, `analyze-meal` = 401, `delete-account` = 401,
+  **`ask-nutrition` = 404** (fungsi belum di-deploy). Variasi nama juga 404.
+- UI menampilkan "Layanan sedang sibuk" karena 404 Supabase berisi
+  `{"message":"Function not found"}` (tanpa field `error`) → `_codeOf` jatuh
+  ke default `ai_unavailable`.
+
+### Perubahan
+- Pemilik melakukan deploy manual `ask-nutrition` (Verify JWT = ON, secret
+  `GEMINI_API_KEY` + `GEMINI_MODEL=gemini-3.8-flash`). Probe ulang: **401** ✅.
+- `ChatErrorMapper` (data layer, murni Dart): 404 → `function_unavailable`,
+  500 `misconfigured` → `misconfigured`, 401/429/504/400 sesuai PRD; kode
+  asing dilewatkan; tidak lagi menyamarkan semua galat jadi `ai_unavailable`.
+- `ChatRepositoryImpl`: pakai mapper, `debugPrint` metadata (status + kode,
+  tanpa isi pesan), serta `ensureAnonymousSession()` sebelum invoke — menjaga
+  chat tetap jalan walau splash UX-16 tidak lagi menunggu backend.
+- `AppStrings.tanyaError`: copy baru untuk `function_unavailable` &
+  `misconfigured` (jujur, bukan "sedang sibuk").
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **330/330 passed** (sebelumnya 325; +4 mapper, +1 guard sesi)
+- `flutter build apk --debug` → **✓ Built**
+- DoD grep: gradien 0; `GEMINI_API_KEY` di `lib/` = 0.
+- Probe live ulang: `ask-nutrition` = 401 (ter-deploy, butuh JWT).
+- Perlu uji perangkat: tanya saat aplikasi baru dibuka (sesi belum siap) dan
+  pastikan kartu error memakai copy baru bila fungsi/secret bermasalah.
+- Commit belum dijalankan (manual oleh pemilik).
