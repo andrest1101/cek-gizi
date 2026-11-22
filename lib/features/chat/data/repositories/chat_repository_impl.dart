@@ -1,8 +1,9 @@
-import 'dart:convert';
-
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:cekgizi/features/auth/auth_bootstrap.dart';
 import 'package:cekgizi/features/chat/data/models/chat_message_model.dart';
+import 'package:cekgizi/features/chat/data/services/chat_error_mapper.dart';
 import 'package:cekgizi/features/chat/domain/entities/assistant_reply.dart';
 import 'package:cekgizi/features/chat/domain/entities/chat_message.dart';
 import 'package:cekgizi/features/chat/domain/repositories/chat_repository.dart';
@@ -13,9 +14,11 @@ import 'package:cekgizi/features/chat/domain/repositories/chat_repository.dart';
 /// Riwayat disimpan di `chat_messages` (RLS: hanya baris milik pengguna);
 /// `safety_flag` dari server disimpan apa adanya untuk kartu khusus.
 final class ChatRepositoryImpl implements ChatRepository {
-  const ChatRepositoryImpl(this._client);
+  ChatRepositoryImpl(this._client, {Future<bool> Function()? ensureSession})
+    : _ensureSession = ensureSession ?? ensureAnonymousSession;
 
   final SupabaseClient _client;
+  final Future<bool> Function() _ensureSession;
 
   static const _columns = 'id, role, content, safety_flag, created_at';
 
@@ -39,6 +42,9 @@ final class ChatRepositoryImpl implements ChatRepository {
     required String sex,
   }) async {
     try {
+      // Splash tidak lagi menunggu backend (UX-16). Pastikan sesi anonim ada
+      // sebelum invoke; tidak ada request tambahan bila sesi sudah aktif.
+      await _ensureSession();
       final response = await _client.functions.invoke(
         'ask-nutrition',
         body: {
@@ -58,16 +64,22 @@ final class ChatRepositoryImpl implements ChatRepository {
         try {
           return AskNutritionResult.fromJson(Map<String, dynamic>.from(data));
         } on FormatException {
-          throw const ChatException('ai_unavailable');
+          throw const ChatException(ChatErrorMapper.aiUnavailable);
         }
       }
-      throw const ChatException('ai_unavailable');
+      throw const ChatException(ChatErrorMapper.aiUnavailable);
     } on ChatException {
       rethrow;
     } on FunctionException catch (exception) {
-      throw ChatException(_codeOf(exception));
+      final code = ChatErrorMapper.map(
+        status: exception.status,
+        details: exception.details,
+      );
+      // Metadata saja - tidak ada isi pesan, jawaban, atau data anak.
+      debugPrint('chat: ask-nutrition status=${exception.status} code=$code');
+      throw ChatException(code);
     } catch (_) {
-      throw const ChatException('offline');
+      throw const ChatException(ChatErrorMapper.offline);
     }
   }
 
@@ -100,7 +112,7 @@ final class ChatRepositoryImpl implements ChatRepository {
   Future<void> clearMessages() async {
     final uid = _client.auth.currentUser?.id;
     if (uid == null) {
-      throw const ChatException('unauthorized');
+      throw const ChatException(ChatErrorMapper.unauthorized);
     }
     // RLS tetap menyaring; filter eksplisit diperlukan PostgREST.
     await _client.from('chat_messages').delete().eq('user_id', uid);
@@ -126,31 +138,5 @@ final class ChatRepositoryImpl implements ChatRepository {
       // Badge kuota bersifat opsional; kuota tetap ditegakkan server.
       return null;
     }
-  }
-
-  static String _codeOf(FunctionException exception) {
-    final details = exception.details;
-    if (details is Map) {
-      final code = details['error'];
-      if (code is String && code.trim().isNotEmpty) return code.trim();
-      return 'ai_unavailable';
-    }
-    if (details is String) {
-      try {
-        final decoded = jsonDecode(details);
-        if (decoded is Map && decoded['error'] is String) {
-          return (decoded['error'] as String).trim();
-        }
-      } catch (_) {
-        // bukan JSON - jatuh ke default di bawah
-      }
-    }
-    return switch (exception.status) {
-      429 => 'quota_daily',
-      400 => 'invalid_input',
-      401 => 'unauthorized',
-      504 => 'timeout',
-      _ => 'ai_unavailable',
-    };
   }
 }

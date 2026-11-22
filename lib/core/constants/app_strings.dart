@@ -762,6 +762,9 @@ abstract final class AppStrings {
     'offline' => 'Tidak ada koneksi internet. Tanya Gizi membutuhkan internet.',
     'unauthorized' => 'Sesi berakhir. Tutup lalu buka aplikasi lagi.',
     'invalid_input' => 'Pertanyaan tidak bisa diproses. Coba tulis ulang.',
+    'function_unavailable' =>
+      'Layanan Tanya Gizi belum tersedia. Coba lagi nanti.',
+    'misconfigured' => 'Tanya Gizi belum siap digunakan. Coba lagi nanti.',
     _ => 'Layanan sedang sibuk, coba lagi sebentar.',
   };
 
