@@ -1,3 +1,7 @@
+# Arsip foto resep resolusi penuh (sumber tool/optimize_recipe_images.py).
+# Yang dibundel hanya hasil optimasi di assets/recipes/images/.
+assets/recipes/recipes_image/
+
 # Miscellaneous
 *.class
 *.log
