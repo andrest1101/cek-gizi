@@ -3,27 +3,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
-import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
-import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
-import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
+import 'package:cekgizi/core/time/chat_dates.dart';
 import 'package:cekgizi/features/chat/domain/entities/chat_message.dart';
 import 'package:cekgizi/features/chat/presentation/providers/chat_providers.dart';
-import 'package:cekgizi/features/chat/presentation/widgets/chat_bubble.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/chat_composer.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/chat_day_divider.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/chat_empty_state.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/chat_followups.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/chat_header.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/chat_message_tile.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/chat_notice.dart';
 import 'package:cekgizi/features/chat/presentation/widgets/safety_card.dart';
 import 'package:cekgizi/features/chat/presentation/widgets/typing_indicator.dart';
-import 'package:cekgizi/shared/illustrations/chat_illustration.dart';
+import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
-import 'package:cekgizi/shared/widgets/screen_header.dart';
 import 'package:cekgizi/shared/widgets/skeleton.dart';
 
-/// Tanya Gizi (PRD §6.7): chat edukasi umum dengan batas aman tegas.
+/// Tanya Gizi (PRD §6.7): ruang konsultasi edukasi dengan batas aman tegas.
 ///
-/// Tidak ada logika bisnis di widget: pengiriman, optimistic UI, kuota,
-/// dan sinkronisasi riwayat dikelola [ChatNotifier]. Penegakan keamanan
-/// (red flag, kuota) ada di Edge Function `ask-nutrition`.
+/// Tidak ada logika bisnis di widget: pengiriman, optimistic UI, kuota, dan
+/// sinkronisasi riwayat dikelola [ChatNotifier]. Penegakan keamanan (red
+/// flag, kuota) ada di Edge Function `ask-nutrition`.
+///
+/// Tata letak v3.1: header ringkas → percakapan editorial → disclaimer tetap
+/// → kotak tulis dengan konteks anak dan sisa kuota.
 class TanyaScreen extends ConsumerStatefulWidget {
   const TanyaScreen({super.key});
 
@@ -36,11 +42,16 @@ class _TanyaScreenState extends ConsumerState<TanyaScreen> {
   final _focusNode = FocusNode();
   final _scrollController = ScrollController();
   bool _canSend = false;
+  bool _showJumpToLatest = false;
+
+  /// Jarak gulir (dari bawah) yang dianggap "pengguna sedang membaca ke atas".
+  static const double _jumpThreshold = 240;
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(_syncCanSend);
+    _scrollController.addListener(_onScroll);
   }
 
   @override
@@ -49,7 +60,9 @@ class _TanyaScreenState extends ConsumerState<TanyaScreen> {
       ..removeListener(_syncCanSend)
       ..dispose();
     _focusNode.dispose();
-    _scrollController.dispose();
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
     super.dispose();
   }
 
@@ -58,12 +71,21 @@ class _TanyaScreenState extends ConsumerState<TanyaScreen> {
     if (can != _canSend) setState(() => _canSend = can);
   }
 
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final show = _scrollController.offset > _jumpThreshold;
+    if (show != _showJumpToLatest) {
+      setState(() => _showJumpToLatest = show);
+    }
+  }
+
   void _send([String? preset]) {
     final text = (preset ?? _controller.text).trim();
     if (text.isEmpty) return;
     if (preset == null) _controller.clear();
     ref.read(chatMessagesProvider.notifier).sendQuestion(text);
     _focusNode.unfocus();
+    _scrollToBottom();
   }
 
   void _scrollToBottom() {
@@ -116,7 +138,6 @@ class _TanyaScreenState extends ConsumerState<TanyaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppTheme.colorsOf(context);
     final chatAsync = ref.watch(chatMessagesProvider);
     final child = ref.watch(selectedChildProvider).value;
     final quotaAsync = ref.watch(remainingChatQuotaProvider);
@@ -126,163 +147,95 @@ class _TanyaScreenState extends ConsumerState<TanyaScreen> {
       orElse: () => null,
     );
 
-    // Gulir ke bawah saat jumlah pesan bertambah.
+    // Gulir otomatis hanya bila pengguna sedang dekat dasar percakapan.
     ref.listen(chatMessagesProvider, (previous, next) {
       final previousCount = previous?.value?.messages.length ?? 0;
       final nextCount = next.value?.messages.length ?? 0;
-      if (nextCount > previousCount) _scrollToBottom();
+      if (nextCount <= previousCount) return;
+      final offset = _scrollController.hasClients
+          ? _scrollController.offset
+          : 0.0;
+      if (offset < 120) _scrollToBottom();
     });
 
     final hasMessages = chatAsync.value?.messages.isNotEmpty ?? false;
+    final sending = chatAsync.value?.sending ?? false;
+    final childLabel = child == null
+        ? null
+        : AppStrings.tanyaComposerContext(
+            child.nickname,
+            child.ageLabel(DateTime.now()),
+          );
 
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.screenPadding,
-                AppSpacing.md,
-                AppSpacing.screenPadding,
-                0,
-              ),
-              child: ScreenHeader(
-                eyebrow: AppStrings.tanyaEyebrow,
-                title: AppStrings.tanyaTitle,
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (hasMessages)
-                      IconButton(
-                        tooltip: AppStrings.tanyaDeleteHistory,
-                        onPressed: _confirmClear,
-                        icon: Icon(
-                          Icons.delete_outline_rounded,
-                          color: colors.textSecondary,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              children: [
+                ChatHeader(
+                  onClose: () => context.pop(),
+                  onClearHistory: _confirmClear,
+                  canClear: hasMessages,
+                ),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: child == null
+                            ? _NoChildBody(
+                                onAddChild: () => context.push('/children/add'),
+                              )
+                            : chatAsync.when(
+                                loading: _ChatSkeleton.new,
+                                error: (error, stackTrace) => Center(
+                                  child: SingleChildScrollView(
+                                    padding: const EdgeInsets.all(
+                                      AppSpacing.xl,
+                                    ),
+                                    child: ErrorCard(
+                                      message: AppStrings.tanyaError('offline'),
+                                      onRetry: () =>
+                                          ref.invalidate(chatMessagesProvider),
+                                    ),
+                                  ),
+                                ),
+                                data: (state) => _ChatBody(
+                                  state: state,
+                                  onSend: _send,
+                                  scrollController: _scrollController,
+                                ),
+                              ),
+                      ),
+                      if (child != null && _showJumpToLatest)
+                        Positioned(
+                          right: AppSpacing.screenPadding,
+                          bottom: AppSpacing.md,
+                          child: _JumpToLatest(onPressed: _scrollToBottom),
                         ),
-                        // Semantics: tooltip jadi label otomatis.
-                      ),
-                    // Tanya adalah route penuh (bukan tab) - sediakan jalan
-                    // pulang yang jelas, bukan hanya gestur sistem.
-                    IconButton(
-                      tooltip: AppStrings.tanyaClose,
-                      onPressed: () => context.pop(),
-                      icon: Icon(
-                        Icons.close_rounded,
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            _DisclaimerBanner(),
-            if (quotaText != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.screenPadding,
-                  0,
-                  AppSpacing.screenPadding,
-                  AppSpacing.xs,
-                ),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Semantics(
-                    label: '${AppStrings.tanyaQuotaSemantics}: $quotaText',
-                    child: Text(
-                      quotaText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.label.copyWith(
-                        color: colors.textSecondary,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
+                    ],
                   ),
                 ),
-              ),
-            Expanded(
-              child: child == null
-                  ? _NoChildBody(
-                      onAddChild: () => context.push('/children/add'),
-                    )
-                  : chatAsync.when(
-                      loading: _ChatSkeleton.new,
-                      error: (error, stackTrace) => Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.xl),
-                          child: ErrorCard(
-                            message: AppStrings.tanyaError('offline'),
-                            onRetry: () => ref.invalidate(chatMessagesProvider),
-                          ),
-                        ),
-                      ),
-                      data: (state) => _ChatBody(
-                        state: state,
-                        onSend: _send,
-                        scrollController: _scrollController,
-                      ),
-                    ),
+                if (child != null &&
+                    (chatAsync.value?.historySyncFailed ?? false))
+                  ChatSyncNotice(
+                    onRetry: () =>
+                        ref.read(chatMessagesProvider.notifier).retrySync(),
+                  ),
+                const ChatDisclaimer(),
+                if (child != null)
+                  ChatComposer(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    canSend: _canSend && !sending,
+                    onSend: () => _send(),
+                    childLabel: childLabel,
+                    quotaText: quotaText,
+                  ),
+              ],
             ),
-            if (child != null) ...[
-              if (chatAsync.value?.historySyncFailed ?? false)
-                _SyncFailedBanner(
-                  onRetry: () =>
-                      ref.read(chatMessagesProvider.notifier).retrySync(),
-                ),
-              _InputBar(
-                controller: _controller,
-                focusNode: _focusNode,
-                canSend: _canSend && !(chatAsync.value?.sending ?? false),
-                onSend: () => _send(),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Banner tetap (PRD §6.7): selalu terlihat, tidak bisa ditutup.
-class _DisclaimerBanner extends StatelessWidget {
-  const _DisclaimerBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppTheme.colorsOf(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenPadding,
-        AppSpacing.sm,
-        AppSpacing.screenPadding,
-        AppSpacing.sm,
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: colors.surfaceVariant,
-          borderRadius: BorderRadius.circular(AppRadius.control),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.info_outline_rounded,
-              size: 16,
-              color: colors.textSecondary,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Text(
-                AppStrings.tanyaDisclaimerBanner,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -321,20 +274,20 @@ class _ChatSkeleton extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.screenPadding),
       children: const [
+        Skeleton(width: 90, height: 12, radius: 6),
+        SizedBox(height: AppSpacing.lg),
+        Skeleton(width: 250, height: 16),
+        SizedBox(height: AppSpacing.sm),
+        Skeleton(width: 210, height: 16),
+        SizedBox(height: AppSpacing.xxl),
         Align(
           alignment: Alignment.centerRight,
-          child: Skeleton(width: 220, height: 52, radius: 16),
+          child: Skeleton(width: 180, height: 48, radius: 18),
         ),
-        SizedBox(height: AppSpacing.md),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Skeleton(width: 260, height: 84, radius: 16),
-        ),
-        SizedBox(height: AppSpacing.md),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Skeleton(width: 180, height: 52, radius: 16),
-        ),
+        SizedBox(height: AppSpacing.xxl),
+        Skeleton(width: 240, height: 16),
+        SizedBox(height: AppSpacing.sm),
+        Skeleton(width: 190, height: 16),
       ],
     );
   }
@@ -356,52 +309,72 @@ class _ChatBody extends ConsumerWidget {
     final isEmpty =
         state.messages.isEmpty && !state.sending && state.sendError == null;
 
-    if (isEmpty) {
-      return ListView(
-        key: const Key('tanya-empty-list'),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.screenPadding,
-          vertical: AppSpacing.xl,
+    if (isEmpty) return ChatEmptyState(onAsk: onSend);
+
+    final now = DateTime.now();
+    // State menyimpan pesan terbaru lebih dulu; bangun kronologis agar
+    // pembatas hari dan pengelompokan pesan konsisten.
+    final chronological = state.messages.reversed.toList();
+    final items = <Widget>[];
+
+    for (var index = 0; index < chronological.length; index++) {
+      final message = chronological[index];
+      final previous = index > 0 ? chronological[index - 1] : null;
+      final next = index + 1 < chronological.length
+          ? chronological[index + 1]
+          : null;
+
+      final startsNewDay =
+          previous == null ||
+          !isSameChatDay(previous.createdAt, message.createdAt);
+      if (startsNewDay) {
+        items.add(ChatDayDivider(at: message.createdAt, now: now));
+      }
+
+      if (message.role == ChatRole.assistant &&
+          message.safetyFlag != ChatSafetyFlag.none) {
+        items.add(
+          SafetyCard(
+            key: ValueKey('safety-${message.createdAt.microsecondsSinceEpoch}'),
+            flag: message.safetyFlag,
+          ),
+        );
+      }
+
+      final groupedWithPrevious =
+          previous != null &&
+          previous.role == message.role &&
+          !startsNewDay &&
+          message.createdAt.difference(previous.createdAt).inMinutes.abs() <= 5;
+      final groupedWithNext =
+          next != null &&
+          next.role == message.role &&
+          isSameChatDay(next.createdAt, message.createdAt) &&
+          next.createdAt.difference(message.createdAt).inMinutes.abs() <= 5;
+
+      items.add(
+        Padding(
+          padding: EdgeInsets.only(
+            top: groupedWithPrevious ? AppSpacing.sm : AppSpacing.lg,
+          ),
+          child: ChatMessageTile(message: message, showTime: !groupedWithNext),
         ),
-        children: [
-          const SizedBox(height: AppSpacing.lg),
-          EmptyState(
-            icon: Icons.chat_bubble_outline_rounded,
-            illustration: const ChatIllustration(size: 112),
-            title: AppStrings.tanyaEmptyTitle,
-            body: AppStrings.tanyaEmptyBody,
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          Text(
-            AppStrings.tanyaQuickChipsTitle,
-            style: AppTextStyles.label.copyWith(
-              color: AppTheme.colorsOf(context).textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: const [
-              _QuickChip(label: AppStrings.tanyaChipMpasi),
-              _QuickChip(label: AppStrings.tanyaChipPickyEater),
-              _QuickChip(label: AppStrings.tanyaChipSnack),
-              _QuickChip(label: AppStrings.tanyaChipMilk),
-            ],
-          ),
-        ],
       );
     }
 
-    // Item terbalik: index 0 = paling bawah (dekat input).
-    final items = <Widget>[];
+    final newest = state.messages.isEmpty ? null : state.messages.first;
+    if (!state.sending &&
+        newest != null &&
+        state.followups.isNotEmpty &&
+        newest.role == ChatRole.assistant) {
+      items.add(ChatFollowups(followups: state.followups, onSend: onSend));
+    }
+
     if (state.sendError != null) {
       items.add(
         Padding(
           padding: const EdgeInsets.only(top: AppSpacing.md),
-          child: ErrorCard(
+          child: ChatInlineError(
             message: AppStrings.tanyaError(state.sendError!),
             onRetry: () => ref.read(chatMessagesProvider.notifier).retrySend(),
           ),
@@ -410,211 +383,50 @@ class _ChatBody extends ConsumerWidget {
     } else if (state.sending) {
       items.add(
         const Padding(
-          padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+          padding: EdgeInsets.only(top: AppSpacing.lg),
           child: TypingIndicator(),
         ),
       );
     }
 
-    for (var index = 0; index < state.messages.length; index++) {
-      final message = state.messages[index];
-      final isAssistant = message.role == ChatRole.assistant;
-      final isNewest = index == 0;
-
-      if (isAssistant &&
-          isNewest &&
-          !state.sending &&
-          state.followups.isNotEmpty) {
-        items.add(_FollowupsRow(followups: state.followups, onSend: onSend));
-      }
-      if (isAssistant && message.safetyFlag != ChatSafetyFlag.none) {
-        items.add(SafetyCard(flag: message.safetyFlag));
-      }
-      items.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-          child: ChatBubble(message: message),
-        ),
-      );
-    }
-
+    final reversed = items.reversed.toList(growable: false);
     return ListView.builder(
       controller: scrollController,
       reverse: true,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenPadding,
-        vertical: AppSpacing.md,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) => items[index],
-    );
-  }
-}
-
-class _QuickChip extends ConsumerWidget {
-  const _QuickChip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colors = AppTheme.colorsOf(context);
-    return ActionChip(
-      label: Text(label),
-      onPressed: () =>
-          ref.read(chatMessagesProvider.notifier).sendQuestion(label),
-      labelStyle: AppTextStyles.label.copyWith(color: colors.textPrimary),
-      backgroundColor: colors.surfaceVariant,
-      side: BorderSide(color: colors.outline, width: 1),
-      shape: const StadiumBorder(),
-      visualDensity: VisualDensity.standard,
-      materialTapTargetSize: MaterialTapTargetSize.padded,
-    );
-  }
-}
-
-class _FollowupsRow extends StatelessWidget {
-  const _FollowupsRow({required this.followups, required this.onSend});
-
-  final List<String> followups;
-  final void Function(String question) onSend;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppTheme.colorsOf(context);
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xs),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppStrings.tanyaFollowupsTitle,
-            style: AppTextStyles.label.copyWith(color: colors.textSecondary),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.xs,
-            children: [
-              for (final followup in followups)
-                ActionChip(
-                  label: Text(followup),
-                  onPressed: () => onSend(followup),
-                  labelStyle: AppTextStyles.label.copyWith(
-                    color: colors.textPrimary,
-                  ),
-                  backgroundColor: colors.surfaceVariant,
-                  side: BorderSide(color: colors.outline, width: 1),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SyncFailedBanner extends StatelessWidget {
-  const _SyncFailedBanner({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppTheme.colorsOf(context);
-    return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenPadding,
-        AppSpacing.xs,
+        AppSpacing.md,
         AppSpacing.screenPadding,
-        0,
+        AppSpacing.md,
       ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.cloud_off_rounded,
-            size: 18,
-            color: colors.statusWatchText,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              AppStrings.tanyaSyncFailed,
-              style: AppTextStyles.label.copyWith(color: colors.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: onRetry,
-            child: const Text(AppStrings.tanyaSyncRetry),
-          ),
-        ],
-      ),
+      itemCount: reversed.length,
+      itemBuilder: (context, index) => reversed[index],
     );
   }
 }
 
-class _InputBar extends StatelessWidget {
-  const _InputBar({
-    required this.controller,
-    required this.focusNode,
-    required this.canSend,
-    required this.onSend,
-  });
+class _JumpToLatest extends StatelessWidget {
+  const _JumpToLatest({required this.onPressed});
 
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final bool canSend;
-  final VoidCallback onSend;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    return DecoratedBox(
+    return Container(
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
         color: colors.surface,
-        border: Border(top: BorderSide(color: colors.outline, width: 1)),
+        shape: BoxShape.circle,
+        border: Border.all(color: colors.outline, width: 1),
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.screenPadding,
-          AppSpacing.sm,
-          AppSpacing.screenPadding,
-          AppSpacing.sm,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: Semantics(
-                label: AppStrings.tanyaInputSemantics,
-                textField: true,
-                child: TextField(
-                  controller: controller,
-                  focusNode: focusNode,
-                  minLines: 1,
-                  maxLines: 4,
-                  keyboardType: TextInputType.multiline,
-                  textInputAction: TextInputAction.send,
-                  textCapitalization: TextCapitalization.sentences,
-                  onSubmitted: (_) => canSend ? onSend() : null,
-                  decoration: const InputDecoration(
-                    hintText: AppStrings.tanyaInputHint,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            IconButton.filled(
-              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-              onPressed: canSend ? onSend : null,
-              tooltip: AppStrings.tanyaSendSemantics,
-              icon: const Icon(Icons.send_rounded),
-            ),
-          ],
+      child: IconButton(
+        tooltip: AppStrings.tanyaScrollToLatest,
+        onPressed: onPressed,
+        icon: Icon(
+          Icons.keyboard_arrow_down_rounded,
+          color: colors.textSecondary,
         ),
       ),
     );
