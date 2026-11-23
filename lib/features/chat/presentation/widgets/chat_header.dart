@@ -5,6 +5,7 @@ import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
+import 'package:cekgizi/features/chat/presentation/widgets/tanya_ai_mark.dart';
 
 /// Header ringkas Tanya Gizi: identitas asisten, aksi menu, dan tombol tutup.
 ///
@@ -49,7 +50,7 @@ class ChatHeader extends StatelessWidget {
                   color: colors.primaryContainer,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.spa_rounded, size: 18, color: colors.primary),
+                child: Center(child: const TanyaAiMark(size: 24)),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
