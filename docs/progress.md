@@ -1373,3 +1373,52 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
 - Perlu uji perangkat: rasa gulir saat jawaban panjang, long-press salin,
   keyboard saat composer multi-baris, dan tampilan dark mode.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## Resep — Katalog terkurasi dari recipes.json (2026-11-23)
+
+### Konteks
+- Pemilik menyediakan `assets/recipes/recipes.json`: 24 resep, 6 per rentang
+  usia (6–8, 9–11, 12–23, 24+), id unik, kelompok resmi PRD §3.7, catatan
+  tekstur & alergen. `reviewed_by`/`reviewed_on` masih null → konten BELUM
+  ditinjau ahli gizi/bidan, sehingga UI wajib menampilkan penanda (PRD §9.1).
+- Tidak ada resep/bahan/langkah yang dikarang kode; semua dari berkas pemilik.
+
+### Perubahan
+- **Domain** (`features/recipes/domain`): entity `Recipe` + `RecipeAgeBand`,
+  `RecipeRepository` (kontrak lokal offline), `RecipeCatalog` (filter usia,
+  pencarian judul/bahan, saring protein hewani, urut stabil), dan
+  `RecipeUseCases.toFoodLog` (resep → satu `food_logs` `source=recipe`, union
+  kelompok canonical). Semua murni Dart, 100% unit-tested.
+- **Data**: `RecipeCatalogLoader` validasi ketat (tolak akar non-array, katalog
+  kosong, id duplikat/bukan slug, age_band asing, minutes tak valid, bahan/
+  langkah kosong, kelompok tak dikenal/duplikat, protein hewani tak konsisten,
+  field wajib kosong). `RecipeRepositoryImpl` membaca asset sekali + cache.
+- **Presentasi**: `RecipesScreen` (header + ChildSwitcher, penanda tinjauan,
+  pencarian, chip usia horizontal default mengikuti usia anak, saring protein
+  hewani + jumlah hasil, kartu resep dengan sampul kolase logo kelompok,
+  empty state + atur ulang, kartu galat + coba lagi, catatan ASI <6 bulan,
+  ajakan tambah anak). `RecipeDetailScreen` (`/recipes/:id`, layar penuh):
+  hero tonal, bahan berhairline, langkah bernomor, catatan keamanan (tekstur +
+  alergen), status tinjauan, disclaimer, footer sticky "Catat sebagai makan".
+  `RecipeLogSheet` pilih jenis makan → simpan + snackbar Urungkan.
+- **Integrasi makan**: `FoodLogsNotifier.addRecipeLog` (metode baru) menyimpan
+  draft resep lalu menyegarkan state hari ini + riwayat agar Piring Hari Ini
+  langsung menghitung kelompok resep. Tidak mengubah perilaku metode lama.
+- **Aset/config**: daftarkan `assets/recipes/` di `pubspec.yaml` (tanpa
+  dependency baru). Route `/recipes/:id` di `go_router`. Copy terpusat di
+  `AppStrings` (bagian Resep ditulis ulang; string "pending" lama dihapus).
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **410/410 passed** (sebelumnya 354; +56: katalog/filter,
+  loader valid+korup, use case, konten aset asli PRD §9.1, alur UI, layout
+  360dp @1,3 light/dark untuk katalog & detail).
+- `flutter build apk --debug` → **OK Built**
+- DoD grep: gradien 0; `Colors.*` di fitur Resep hanya `Colors.transparent`;
+  `GEMINI_API_KEY` 0.
+- Pratinjau render nyata (light & dark): sampul logo kelompok tampil, kartu &
+  detail rapi, tanpa overflow. Judul `ScreenHeader` memakai font platform
+  default (artefak tes saja; konsisten dengan tab lain).
+- Perlu uji perangkat: gulir katalog panjang, keyboard saat pencarian,
+  sheet catat + Urungkan, dan tampilan dark mode.
+- Commit belum dijalankan (manual oleh pemilik).

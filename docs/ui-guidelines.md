@@ -1,4 +1,4 @@
-# CekGizi — Spesifikasi Visual (v3.1, Batch UX-18)
+# CekGizi — Spesifikasi Visual (v3.2, Batch Resep)
 
 Dokumen ini adalah **kontrak visual** untuk seluruh layar. PRD v2.0 tetap
 sumber kebenaran fitur; dokumen ini hanya mengatur bagaimana fitur tampil.
@@ -182,7 +182,25 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
   footer sticky dengan pratinjau Piring Hari Ini berbasis aturan (bukan AI).
   Porsi memakai `Wrap` selebar konten — dilarang `Wrap` di dalam `Row`
   (penyebab overflow 7,2 px).
-- **Resep**: empty state jujur sampai `recipes.json` tersedia.
+- **Resep** (v3.2): katalog terkurasi dari `assets/recipes/recipes.json`
+  (offline, tanpa jaringan). `ScreenHeader` + `ChildSwitcherButton` →
+  penanda jujur **belum ditinjau ahli gizi/bidan** bila `reviewed_by` null
+  (PRD §9.1, tidak bisa ditutup) → pencarian (judul/bahan) → chip usia
+  horizontal (Semua · 6–8 · 9–11 · 12–23 · 24+ bln, target 48dp; default
+  mengikuti usia anak) → saring **Protein hewani** + jumlah hasil.
+  - Kartu resep: sampul **kolase logo kelompok pangan** (aset yang sudah ada,
+    bukan foto karangan), judul 2 baris, meta jam + pil usia + pil protein
+    hewani (ikon + teks), lalu chip kelompok. Seluruh kartu = satu tombol.
+  - Detail (`/recipes/:id`, layar penuh tanpa nav bawah): blok hero tonal
+    (sampul + judul + meta) → **Bahan** (kartu berhairline, takaran rata
+    kanan) → **Langkah memasak** (lingkaran nomor tonal) → **Catatan keamanan**
+    (tekstur + alergen, selalu ikon + teks) → status tinjauan → disclaimer.
+    Footer sticky **Catat sebagai makan** → sheet pilih jenis makan →
+    satu `food_logs` `source=recipe` (union kelompok masuk Piring Hari Ini)
+    + snackbar Urungkan. Tanpa anak: CTA nonaktif + ajakan tambah profil.
+  - Anak < 6 bulan: catatan ASI eksklusif; katalog tetap bisa dijelajahi.
+    Empty state filter punya tombol "Atur ulang filter"; galat memuat punya
+    kartu Coba lagi.
 - **Tumbuh** (v2.3–v2.8): ringkasan `ZScoreSummaryStrip` (3 ubin, sekaligus
   pemilih indeks) → grafik pita SD **full-bleed** dengan judul sumbu + satuan
   (X: usia/panjang-tinggi, Y: tinggi/berat), **tap titik** → kartu detail
