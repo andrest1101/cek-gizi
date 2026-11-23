@@ -81,6 +81,7 @@ flutter:
     - assets/audio/
     - assets/reference/
     - assets/rules/
+    - assets/recipes/
     # Hanya versi mark yang dibundel; master & foreground hanya dipakai
     # saat generate ikon launcher (tidak perlu ikut ke dalam APK).
     - assets/logo/logo_cek-gizi_mark.png

@@ -1,0 +1,663 @@
+[
+  {
+    "id": "bubur-saring-hati-ayam-wortel",
+    "title": "Bubur Saring Hati Ayam dan Wortel",
+    "age_band": "6-8",
+    "minutes": 35,
+    "ingredients": [
+      {"name": "Beras putih (dicuci bersih)", "amount": "2 sdm"},
+      {"name": "Hati ayam (buang urat dan bagian yang berdarah)", "amount": "20 gram"},
+      {"name": "Wortel (dikupas)", "amount": "30 gram"},
+      {"name": "Air matang", "amount": "250 ml"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1/2 sdt"}
+    ],
+    "steps": [
+      "Rebus beras dengan air matang sambil sesekali diaduk sampai menjadi bubur lunak, sekitar 25 menit.",
+      "Di panci terpisah, rebus hati ayam dan wortel sampai matang sempurna dan sangat empuk. Pastikan tidak ada bagian hati yang masih merah.",
+      "Masukkan hati ayam dan wortel ke dalam bubur, lalu haluskan dengan saringan kawat atau blender sampai lumat dan kental.",
+      "Tambahkan minyak, aduk rata. Jika terlalu kental, encerkan sedikit dengan air matang atau ASI perah.",
+      "Dinginkan sebentar, cek suhu, lalu sajikan. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["grains_tubers", "flesh", "vit_a_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Lumat dan kental seperti puree. Jika sendok dimiringkan, bubur tidak mudah tumpah. Tidak boleh ada butiran kasar.",
+    "allergen_note": "Catatan keamanan: hati ayam kaya zat besi dan vitamin A, berikan dalam porsi kecil dan variasikan dengan protein hewani lain seperti telur, ikan, dan daging.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "bubur-saring-ikan-kembung-bayam",
+    "title": "Bubur Saring Ikan Kembung dan Bayam",
+    "age_band": "6-8",
+    "minutes": 35,
+    "ingredients": [
+      {"name": "Beras putih (dicuci bersih)", "amount": "2 sdm"},
+      {"name": "Ikan kembung segar (fillet tanpa duri)", "amount": "30 gram"},
+      {"name": "Daun bayam (ambil daunnya saja)", "amount": "15 gram"},
+      {"name": "Bawang putih (digeprek)", "amount": "1/2 siung"},
+      {"name": "Air matang", "amount": "250 ml"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1/2 sdt"}
+    ],
+    "steps": [
+      "Rebus beras dengan air matang dan bawang putih sampai menjadi bubur lunak, sekitar 25 menit. Angkat bawang putih.",
+      "Kukus ikan kembung sampai matang sempurna. Periksa dan buang seluruh duri dengan teliti, termasuk duri halus.",
+      "Rebus daun bayam sebentar sampai layu dan empuk.",
+      "Campurkan ikan dan bayam ke dalam bubur, lalu haluskan dengan saringan kawat atau blender sampai lumat.",
+      "Tambahkan minyak, aduk rata, cek suhu, lalu sajikan. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["grains_tubers", "flesh", "vit_a_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Lumat dan kental seperti puree, tanpa serpihan ikan atau serat bayam yang kasar.",
+    "allergen_note": "Mengandung ikan (alergen umum). Perkenalkan dengan porsi kecil dan perhatikan reaksi seperti ruam, bengkak, atau muntah.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "puree-tempe-labu-kuning-beras",
+    "title": "Puree Tempe, Labu Kuning, dan Beras",
+    "age_band": "6-8",
+    "minutes": 30,
+    "ingredients": [
+      {"name": "Beras putih (dicuci bersih)", "amount": "2 sdm"},
+      {"name": "Tempe (dipotong kecil)", "amount": "20 gram"},
+      {"name": "Labu kuning (dikupas, biji dibuang)", "amount": "40 gram"},
+      {"name": "Air matang", "amount": "250 ml"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1/2 sdt"}
+    ],
+    "steps": [
+      "Rebus beras dengan air matang sampai menjadi bubur lunak, sekitar 25 menit.",
+      "Kukus tempe dan labu kuning sekitar 15 menit sampai sangat empuk.",
+      "Campurkan tempe dan labu ke dalam bubur, lalu haluskan dengan saringan kawat atau blender sampai lumat.",
+      "Tambahkan minyak, aduk rata. Encerkan dengan sedikit air matang jika terlalu kental.",
+      "Cek suhu lalu sajikan. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["grains_tubers", "legumes_nuts", "vit_a_fruit_veg"],
+    "animal_protein": false,
+    "texture_note": "Lumat dan kental seperti puree, tanpa butiran tempe yang kasar.",
+    "allergen_note": "Mengandung kedelai (tempe). Perkenalkan dengan porsi kecil dan perhatikan reaksi.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "bubur-ubi-jalar-telur-wortel",
+    "title": "Bubur Ubi Jalar, Telur, dan Wortel",
+    "age_band": "6-8",
+    "minutes": 25,
+    "ingredients": [
+      {"name": "Ubi jalar (dikupas)", "amount": "50 gram"},
+      {"name": "Wortel (dikupas)", "amount": "30 gram"},
+      {"name": "Telur ayam", "amount": "1 butir"},
+      {"name": "Air matang", "amount": "100 ml"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1/2 sdt"}
+    ],
+    "steps": [
+      "Kukus ubi jalar dan wortel sekitar 15 menit sampai sangat empuk.",
+      "Rebus telur sampai matang sempurna, sekitar 10 menit, lalu kupas. Telur tidak boleh setengah matang.",
+      "Haluskan ubi jalar, wortel, dan telur (kuning dan putih) bersama air matang sampai lumat dan tidak ada gumpalan.",
+      "Tambahkan minyak, aduk rata, cek suhu, lalu sajikan. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["grains_tubers", "eggs", "vit_a_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Lumat dan lembut seperti puree. Pastikan tidak ada gumpalan telur.",
+    "allergen_note": "Mengandung telur (alergen umum). Telur harus matang sempurna. Perkenalkan dengan porsi kecil dan perhatikan reaksi.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "puree-tahu-brokoli-kentang",
+    "title": "Puree Tahu, Brokoli, dan Kentang",
+    "age_band": "6-8",
+    "minutes": 25,
+    "ingredients": [
+      {"name": "Tahu putih", "amount": "30 gram"},
+      {"name": "Brokoli (bagian kuntum)", "amount": "30 gram"},
+      {"name": "Kentang (dikupas)", "amount": "40 gram"},
+      {"name": "Air kukusan atau air matang", "amount": "3-4 sdm"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1/2 sdt"}
+    ],
+    "steps": [
+      "Kukus kentang, brokoli, dan tahu sekitar 15-20 menit sampai sangat empuk.",
+      "Haluskan semuanya dengan saringan kawat atau blender, tambahkan air kukusan sedikit demi sedikit sampai kental dan lumat.",
+      "Tambahkan minyak, aduk rata, cek suhu, lalu sajikan. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["grains_tubers", "legumes_nuts", "other_fruit_veg"],
+    "animal_protein": false,
+    "texture_note": "Lumat dan kental. Saring jika masih ada serat brokoli yang kasar.",
+    "allergen_note": "Mengandung kedelai (tahu). Perkenalkan dengan porsi kecil dan perhatikan reaksi.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "puree-ayam-kentang-labu-siam",
+    "title": "Puree Ayam, Kentang, dan Labu Siam",
+    "age_band": "6-8",
+    "minutes": 30,
+    "ingredients": [
+      {"name": "Daging dada ayam tanpa kulit", "amount": "30 gram"},
+      {"name": "Kentang (dikupas)", "amount": "40 gram"},
+      {"name": "Labu siam (dikupas, biji dibuang)", "amount": "40 gram"},
+      {"name": "Air matang untuk merebus", "amount": "150 ml"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1/2 sdt"}
+    ],
+    "steps": [
+      "Rebus ayam, kentang, dan labu siam dengan air matang sampai matang sempurna. Ayam harus sangat empuk dan tidak berwarna merah muda di bagian dalam.",
+      "Angkat semua bahan. Haluskan dengan saringan kawat atau blender, tambahkan air rebusan sedikit demi sedikit sampai kental dan lumat.",
+      "Tambahkan minyak, aduk rata, cek suhu, lalu sajikan. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["flesh", "grains_tubers", "other_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Lumat dan kental. Serat daging ayam harus benar-benar halus, saring jika perlu.",
+    "allergen_note": "",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "nasi-tim-sapi-wortel-buncis",
+    "title": "Nasi Tim Daging Sapi, Wortel, dan Buncis",
+    "age_band": "9-11",
+    "minutes": 45,
+    "ingredients": [
+      {"name": "Beras putih (dicuci bersih)", "amount": "3 sdm"},
+      {"name": "Daging sapi giling", "amount": "30 gram"},
+      {"name": "Wortel (dikupas, dicincang halus)", "amount": "30 gram"},
+      {"name": "Buncis (dicincang halus)", "amount": "20 gram"},
+      {"name": "Bawang putih (dicincang halus)", "amount": "1/2 siung"},
+      {"name": "Air matang", "amount": "300 ml"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1 sdt"}
+    ],
+    "steps": [
+      "Tumis bawang putih dengan minyak sebentar sampai harum, masukkan daging giling dan masak sampai berubah warna dan matang sempurna.",
+      "Tambahkan beras, wortel, buncis, dan air matang.",
+      "Masak dengan api kecil sekitar 35-40 menit sambil sesekali diaduk sampai nasi sangat lunak dan sayuran empuk.",
+      "Tekan-tekan dengan garpu sampai bertekstur lembik dan sedikit kasar sesuai kemampuan mengunyah anak.",
+      "Cek suhu lalu sajikan. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["grains_tubers", "flesh", "vit_a_fruit_veg", "other_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Nasi tim lembik dengan lauk cincang halus sampai kasar. Tidak ada potongan besar. Naikkan kekasarannya bertahap.",
+    "allergen_note": "",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "bubur-beras-kacang-hijau-pisang",
+    "title": "Bubur Beras Kacang Hijau dan Pisang",
+    "age_band": "9-11",
+    "minutes": 55,
+    "ingredients": [
+      {"name": "Kacang hijau (direndam 2 jam)", "amount": "3 sdm"},
+      {"name": "Beras putih (dicuci bersih)", "amount": "1 sdm"},
+      {"name": "Pisang matang", "amount": "1/2 buah"},
+      {"name": "Santan encer", "amount": "3 sdm"},
+      {"name": "Air matang", "amount": "300 ml"},
+      {"name": "Daun pandan (opsional)", "amount": "1 lembar"}
+    ],
+    "steps": [
+      "Rebus kacang hijau dan beras dengan air matang dan daun pandan sampai kacang pecah dan sangat empuk, sekitar 40 menit. Tambahkan air jika mengering.",
+      "Buang daun pandan, tambahkan santan, aduk dan didihkan sebentar.",
+      "Lumatkan bubur dengan garpu atau blender kasar sampai bertekstur kental dan sedikit kasar.",
+      "Lumatkan pisang dengan garpu, campurkan ke dalam bubur.",
+      "Cek suhu lalu sajikan. Tanpa gula, rasa manis dari pisang."
+    ],
+    "groups": ["legumes_nuts", "grains_tubers", "other_fruit_veg"],
+    "animal_protein": false,
+    "texture_note": "Kental dan lembik dengan sedikit tekstur kasar. Kacang hijau harus sangat empuk dan tidak ada kulit yang keras.",
+    "allergen_note": "",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "nasi-tim-telur-orak-arik-bayam",
+    "title": "Nasi Tim Telur Orak-arik dan Bayam",
+    "age_band": "9-11",
+    "minutes": 35,
+    "ingredients": [
+      {"name": "Beras putih (dicuci bersih)", "amount": "3 sdm"},
+      {"name": "Telur ayam", "amount": "1 butir"},
+      {"name": "Daun bayam (dicincang halus)", "amount": "20 gram"},
+      {"name": "Bawang putih (dicincang halus)", "amount": "1/2 siung"},
+      {"name": "Air matang", "amount": "300 ml"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1 sdt"}
+    ],
+    "steps": [
+      "Masak beras dengan air matang sampai menjadi nasi tim yang sangat lunak, sekitar 30 menit.",
+      "Panaskan minyak, tumis bawang putih sebentar, lalu masukkan telur kocok dan orak-arik sampai matang sempurna dan tidak ada bagian yang basah.",
+      "Masukkan bayam ke dalam orak-arik dan masak sampai layu dan empuk.",
+      "Campurkan dengan nasi tim, lalu tekan-tekan dengan garpu sampai lembik dan sedikit kasar.",
+      "Cek suhu lalu sajikan. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["grains_tubers", "eggs", "vit_a_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Nasi tim lembik dengan telur dan bayam cincang halus. Tidak ada potongan besar.",
+    "allergen_note": "Mengandung telur (alergen umum). Telur harus matang sempurna.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "nasi-tim-ikan-nila-tomat-labu-siam",
+    "title": "Nasi Tim Ikan Nila, Tomat, dan Labu Siam",
+    "age_band": "9-11",
+    "minutes": 40,
+    "ingredients": [
+      {"name": "Beras putih (dicuci bersih)", "amount": "3 sdm"},
+      {"name": "Ikan nila (fillet tanpa duri)", "amount": "40 gram"},
+      {"name": "Tomat (kulit dan biji dibuang)", "amount": "1/2 buah"},
+      {"name": "Labu siam (dikupas, dicincang halus)", "amount": "30 gram"},
+      {"name": "Bawang putih (digeprek)", "amount": "1/2 siung"},
+      {"name": "Air matang", "amount": "300 ml"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1 sdt"}
+    ],
+    "steps": [
+      "Masak beras dengan air matang dan bawang putih sampai menjadi nasi tim yang sangat lunak, sekitar 30 menit. Angkat bawang putih.",
+      "Kukus ikan nila sampai matang sempurna. Suwir halus dan periksa seluruh duri dengan teliti.",
+      "Rebus labu siam dan tomat sampai empuk, lalu cincang halus.",
+      "Campurkan ikan, labu siam, tomat, dan minyak ke dalam nasi tim. Tekan-tekan dengan garpu sampai lembik.",
+      "Cek suhu lalu sajikan. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["grains_tubers", "flesh", "other_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Nasi tim lembik dengan ikan suwir halus dan sayur cincang halus. Pastikan bebas duri.",
+    "allergen_note": "Mengandung ikan (alergen umum). Perhatikan reaksi seperti ruam, bengkak, atau muntah.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "nasi-tim-hati-ayam-tahu-wortel",
+    "title": "Nasi Tim Hati Ayam, Tahu, dan Wortel",
+    "age_band": "9-11",
+    "minutes": 45,
+    "ingredients": [
+      {"name": "Beras putih (dicuci bersih)", "amount": "3 sdm"},
+      {"name": "Hati ayam (buang urat dan bagian yang berdarah)", "amount": "20 gram"},
+      {"name": "Tahu putih", "amount": "25 gram"},
+      {"name": "Wortel (dikupas)", "amount": "30 gram"},
+      {"name": "Bawang putih (digeprek)", "amount": "1/2 siung"},
+      {"name": "Air matang", "amount": "300 ml"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1 sdt"}
+    ],
+    "steps": [
+      "Masak beras dengan air matang dan bawang putih sampai menjadi nasi tim yang sangat lunak, sekitar 30 menit. Angkat bawang putih.",
+      "Rebus hati ayam sampai matang sempurna dan tidak ada bagian yang merah, lalu cincang sangat halus.",
+      "Kukus tahu dan wortel sampai empuk, lalu cincang halus.",
+      "Campurkan semua bahan dan minyak ke dalam nasi tim, tekan-tekan dengan garpu sampai lembik dan sedikit kasar.",
+      "Cek suhu lalu sajikan. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["grains_tubers", "flesh", "legumes_nuts", "vit_a_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Nasi tim lembik dengan lauk cincang sangat halus. Tidak ada potongan besar.",
+    "allergen_note": "Mengandung kedelai (tahu). Catatan keamanan: hati ayam kaya zat besi dan vitamin A, berikan dalam porsi kecil dan variasikan dengan protein hewani lain.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "bubur-oat-pisang-yogurt-plain",
+    "title": "Bubur Oat, Pisang, dan Yogurt Plain",
+    "age_band": "9-11",
+    "minutes": 15,
+    "ingredients": [
+      {"name": "Oat instan atau oat gulung halus", "amount": "3 sdm"},
+      {"name": "Air matang", "amount": "150 ml"},
+      {"name": "Pisang matang", "amount": "1/2 buah"},
+      {"name": "Yogurt plain tanpa gula dan tanpa perisa", "amount": "2 sdm"}
+    ],
+    "steps": [
+      "Masak oat dengan air matang sampai lembut dan kental, sekitar 5-8 menit sambil diaduk.",
+      "Angkat dan dinginkan sebentar.",
+      "Lumatkan pisang dengan garpu, campurkan ke dalam oat.",
+      "Tambahkan yogurt plain di akhir, aduk rata, lalu sajikan. Tanpa gula atau madu."
+    ],
+    "groups": ["grains_tubers", "other_fruit_veg", "dairy"],
+    "animal_protein": true,
+    "texture_note": "Kental dan lumat kasar. Pisang dilumatkan dengan garpu, tidak berupa potongan besar.",
+    "allergen_note": "Mengandung susu (yogurt). Oat dapat mengandung jejak gluten. Pilih yogurt plain tanpa gula dan pemanis. Perkenalkan dengan porsi kecil dan perhatikan reaksi.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "perkedel-ayam-tahu-panggang",
+    "title": "Perkedel Ayam dan Tahu Panggang",
+    "age_band": "12-23",
+    "minutes": 40,
+    "ingredients": [
+      {"name": "Daging dada ayam giling", "amount": "60 gram"},
+      {"name": "Tahu putih", "amount": "50 gram"},
+      {"name": "Wortel (diparut halus)", "amount": "30 gram"},
+      {"name": "Telur ayam", "amount": "1 butir"},
+      {"name": "Bawang putih (dihaluskan)", "amount": "1 siung"},
+      {"name": "Tepung beras", "amount": "1 sdm"},
+      {"name": "Minyak kelapa atau minyak sayur untuk olesan", "amount": "1 sdt"}
+    ],
+    "steps": [
+      "Hancurkan tahu dengan garpu, lalu campurkan dengan ayam giling, wortel parut, telur, bawang putih, dan tepung beras sampai rata.",
+      "Bentuk adonan menjadi bulatan pipih kecil.",
+      "Panggang di oven atau masak di teflon antilengket dengan sedikit minyak dan api kecil, balik sesekali, sampai matang sempurna di dalam dan luar, sekitar 20 menit.",
+      "Dinginkan, lalu potong kecil sesuai kemampuan mengunyah anak.",
+      "Sajikan sebagai finger food. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["flesh", "legumes_nuts", "vit_a_fruit_veg", "eggs"],
+    "animal_protein": true,
+    "texture_note": "Finger food yang empuk. Potong kecil seukuran suapan dan hindari potongan keras atau bulat utuh.",
+    "allergen_note": "Mengandung telur dan kedelai (tahu). Perhatikan reaksi pada anak dengan riwayat alergi.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "omelet-gulung-nasi-wortel-bayam",
+    "title": "Omelet Gulung Nasi, Wortel, dan Bayam",
+    "age_band": "12-23",
+    "minutes": 20,
+    "ingredients": [
+      {"name": "Telur ayam", "amount": "1 butir"},
+      {"name": "Nasi putih matang", "amount": "3 sdm"},
+      {"name": "Wortel (diparut halus)", "amount": "20 gram"},
+      {"name": "Daun bayam (dicincang halus)", "amount": "15 gram"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1/2 sdt"}
+    ],
+    "steps": [
+      "Kocok telur, lalu campurkan nasi, wortel, dan bayam.",
+      "Panaskan teflon antilengket dengan sedikit minyak dan api kecil.",
+      "Tuang adonan tipis-tipis dan masak sampai matang sempurna di kedua sisi, tidak ada bagian yang basah.",
+      "Gulung selagi hangat, lalu potong menjadi potongan kecil sesuai kemampuan mengunyah anak.",
+      "Sajikan sebagai finger food. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["eggs", "grains_tubers", "vit_a_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Lembut dan mudah digenggam. Potong kecil dan pastikan sayuran cincang halus.",
+    "allergen_note": "Mengandung telur (alergen umum). Telur harus matang sempurna.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "nugget-ikan-kembung-brokoli-panggang",
+    "title": "Nugget Ikan Kembung dan Brokoli Panggang",
+    "age_band": "12-23",
+    "minutes": 40,
+    "ingredients": [
+      {"name": "Ikan kembung (fillet tanpa duri)", "amount": "80 gram"},
+      {"name": "Kentang (dikupas)", "amount": "50 gram"},
+      {"name": "Brokoli (dicincang halus)", "amount": "30 gram"},
+      {"name": "Bawang putih (dihaluskan)", "amount": "1/2 siung"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1 sdt"}
+    ],
+    "steps": [
+      "Kukus ikan kembung dan kentang sampai matang dan empuk. Periksa dan buang seluruh duri dengan teliti.",
+      "Haluskan ikan dan kentang bersama, lalu campurkan brokoli dan bawang putih sampai rata.",
+      "Bentuk adonan menjadi potongan kotak kecil.",
+      "Panggang di oven atau masak di teflon antilengket dengan sedikit minyak dan api kecil sampai matang dan agak kecokelatan di kedua sisi.",
+      "Dinginkan, potong sesuai kemampuan mengunyah anak, lalu sajikan. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["flesh", "grains_tubers", "other_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Empuk dan mudah digenggam sebagai finger food. Pastikan tidak ada duri dan tidak ada potongan keras.",
+    "allergen_note": "Mengandung ikan (alergen umum). Perhatikan reaksi pada anak dengan riwayat alergi.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "bola-nasi-tempe-labu-kuning",
+    "title": "Bola Nasi Tempe dan Labu Kuning",
+    "age_band": "12-23",
+    "minutes": 35,
+    "ingredients": [
+      {"name": "Nasi putih matang yang lembut", "amount": "4 sdm"},
+      {"name": "Tempe", "amount": "40 gram"},
+      {"name": "Labu kuning (dikupas)", "amount": "40 gram"},
+      {"name": "Bawang putih (dihaluskan)", "amount": "1/2 siung"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1 sdt"}
+    ],
+    "steps": [
+      "Kukus tempe dan labu kuning sekitar 15 menit sampai empuk, lalu haluskan kasar dengan garpu.",
+      "Campurkan dengan nasi dan bawang putih sampai adonan bisa dipadatkan.",
+      "Bentuk menjadi bola kecil yang dipipihkan.",
+      "Panggang di oven atau masak di teflon antilengket dengan sedikit minyak dan api kecil sekitar 10 menit sampai matang di kedua sisi.",
+      "Dinginkan, potong kecil, lalu sajikan sebagai finger food. Jangan memberikan bola utuh. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["grains_tubers", "legumes_nuts", "vit_a_fruit_veg"],
+    "animal_protein": false,
+    "texture_note": "Empuk dan mudah digenggam. Selalu potong kecil untuk mengurangi risiko tersedak.",
+    "allergen_note": "Mengandung kedelai (tempe). Perhatikan reaksi pada anak dengan riwayat alergi.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "sup-ayam-sayur-nasi-lembut",
+    "title": "Sup Ayam Sayur dengan Nasi Lembut",
+    "age_band": "12-23",
+    "minutes": 40,
+    "ingredients": [
+      {"name": "Daging dada ayam", "amount": "50 gram"},
+      {"name": "Kentang (dadu kecil)", "amount": "40 gram"},
+      {"name": "Wortel (dadu kecil)", "amount": "30 gram"},
+      {"name": "Buncis (diiris tipis)", "amount": "20 gram"},
+      {"name": "Bawang putih (digeprek)", "amount": "1 siung"},
+      {"name": "Air matang", "amount": "400 ml"},
+      {"name": "Nasi putih lembut", "amount": "5 sdm"}
+    ],
+    "steps": [
+      "Rebus ayam dengan air matang dan bawang putih sampai matang sempurna dan empuk, sekitar 20 menit.",
+      "Angkat ayam, lalu suwir halus. Buang bawang putih.",
+      "Masukkan kentang, wortel, dan buncis ke dalam kaldu, masak sampai sangat empuk.",
+      "Kembalikan ayam suwir ke dalam sup, didihkan sebentar.",
+      "Sajikan hangat dengan nasi lembut. Pastikan sayuran dipotong kecil. Tanpa garam, gula, dan penyedap rasa."
+    ],
+    "groups": ["flesh", "grains_tubers", "vit_a_fruit_veg", "other_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Sayuran dan ayam empuk dalam potongan kecil. Naikkan ukuran potongan bertahap sesuai kemampuan mengunyah.",
+    "allergen_note": "",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "pancake-pisang-telur-oat-dip-yogurt",
+    "title": "Pancake Pisang, Telur, dan Oat dengan Dip Yogurt",
+    "age_band": "12-23",
+    "minutes": 20,
+    "ingredients": [
+      {"name": "Pisang matang", "amount": "1 buah"},
+      {"name": "Telur ayam", "amount": "1 butir"},
+      {"name": "Oat halus (diblender)", "amount": "3 sdm"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1/2 sdt"},
+      {"name": "Yogurt plain tanpa gula dan tanpa perisa", "amount": "3 sdm"}
+    ],
+    "steps": [
+      "Lumatkan pisang dengan garpu sampai halus, lalu campurkan telur dan oat halus sampai rata.",
+      "Panaskan teflon antilengket dengan sedikit minyak dan api kecil.",
+      "Tuang adonan sedikit-sedikit membentuk pancake mini, masak sampai matang di kedua sisi dan bagian tengahnya tidak basah.",
+      "Dinginkan, potong sesuai kemampuan mengunyah anak.",
+      "Sajikan dengan yogurt plain sebagai dip. Tanpa gula, madu, atau sirup."
+    ],
+    "groups": ["eggs", "grains_tubers", "other_fruit_veg", "dairy"],
+    "animal_protein": true,
+    "texture_note": "Lembut dan mudah digenggam sebagai finger food. Potong sesuai ukuran suapan.",
+    "allergen_note": "Mengandung telur dan susu (yogurt). Oat dapat mengandung jejak gluten. Perhatikan reaksi pada anak dengan riwayat alergi.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "pepes-ikan-kembung-sayur-bening-bayam",
+    "title": "Pepes Ikan Kembung dengan Sayur Bening Bayam dan Nasi",
+    "age_band": "24+",
+    "minutes": 50,
+    "ingredients": [
+      {"name": "Ikan kembung (dibersihkan)", "amount": "1 ekor kecil, sekitar 100 gram"},
+      {"name": "Tomat (diiris)", "amount": "1/2 buah"},
+      {"name": "Bawang merah (diiris)", "amount": "2 siung"},
+      {"name": "Bawang putih (diiris)", "amount": "1 siung"},
+      {"name": "Daun kemangi", "amount": "5 lembar"},
+      {"name": "Daun pisang untuk membungkus", "amount": "secukupnya"},
+      {"name": "Bayam", "amount": "50 gram"},
+      {"name": "Bawang putih untuk sayur bening (digeprek)", "amount": "1 siung"},
+      {"name": "Air untuk sayur bening", "amount": "300 ml"},
+      {"name": "Nasi putih", "amount": "1/2 mangkuk (sekitar 100 gram)"},
+      {"name": "Garam (opsional)", "amount": "sejumput kecil"}
+    ],
+    "steps": [
+      "Lumuri ikan dengan irisan bawang merah, bawang putih, tomat, dan kemangi (garam hanya sejumput kecil jika dipakai). Tidak memakai cabai.",
+      "Bungkus ikan dengan daun pisang, lalu kukus sekitar 25-30 menit sampai matang sempurna.",
+      "Didihkan air dengan bawang putih geprek, masukkan bayam dan masak sebentar sampai layu dan empuk.",
+      "Buka pepes, periksa dan buang duri besar, lalu suwir ikan sesuai kemampuan mengunyah anak.",
+      "Sajikan ikan dan sayur bening dengan nasi. Tanpa penyedap rasa."
+    ],
+    "groups": ["grains_tubers", "flesh", "vit_a_fruit_veg", "other_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Makanan keluarga yang empuk. Suwir ikan kecil-kecil dan pastikan bebas duri. Sayuran dipotong sesuai kemampuan mengunyah.",
+    "allergen_note": "Mengandung ikan (alergen umum). Perhatikan reaksi pada anak dengan riwayat alergi.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "ayam-bumbu-kuning-kentang-wortel",
+    "title": "Ayam Bumbu Kuning, Kentang, dan Wortel",
+    "age_band": "24+",
+    "minutes": 45,
+    "ingredients": [
+      {"name": "Paha ayam tanpa kulit", "amount": "80 gram"},
+      {"name": "Kentang (dipotong dadu)", "amount": "60 gram"},
+      {"name": "Wortel (dipotong dadu)", "amount": "40 gram"},
+      {"name": "Bawang merah", "amount": "2 siung"},
+      {"name": "Bawang putih", "amount": "1 siung"},
+      {"name": "Kunyit", "amount": "1 ruas kecil, sekitar 1 cm"},
+      {"name": "Daun salam", "amount": "1 lembar"},
+      {"name": "Air", "amount": "300 ml"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1 sdt"},
+      {"name": "Nasi putih", "amount": "1/2 mangkuk (sekitar 100 gram)"},
+      {"name": "Garam (opsional)", "amount": "sejumput kecil"}
+    ],
+    "steps": [
+      "Haluskan bawang merah, bawang putih, dan kunyit, lalu tumis dengan minyak sampai harum.",
+      "Masukkan ayam, aduk sampai berubah warna, lalu tambahkan air dan daun salam. Masak sekitar 15 menit.",
+      "Masukkan kentang dan wortel, masak sampai empuk dan ayam matang sempurna (garam hanya sejumput kecil jika dipakai).",
+      "Suwir atau potong ayam kecil-kecil sesuai kemampuan mengunyah anak.",
+      "Sajikan dengan nasi. Tidak memakai cabai, penyedap rasa, atau kecap manis."
+    ],
+    "groups": ["flesh", "grains_tubers", "vit_a_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Makanan keluarga yang empuk. Potong ayam dan sayuran kecil-kecil, bukan potongan besar.",
+    "allergen_note": "",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "tumis-tempe-tahu-sayuran-nasi",
+    "title": "Tumis Tempe, Tahu, dan Sayuran dengan Nasi",
+    "age_band": "24+",
+    "minutes": 25,
+    "ingredients": [
+      {"name": "Tempe (dadu kecil)", "amount": "40 gram"},
+      {"name": "Tahu putih (dadu kecil)", "amount": "40 gram"},
+      {"name": "Wortel (diiris tipis)", "amount": "30 gram"},
+      {"name": "Buncis (diiris tipis)", "amount": "30 gram"},
+      {"name": "Bawang putih (dicincang halus)", "amount": "1 siung"},
+      {"name": "Minyak kelapa atau minyak sayur", "amount": "1 sdt"},
+      {"name": "Air", "amount": "50 ml"},
+      {"name": "Nasi putih", "amount": "1/2 mangkuk (sekitar 100 gram)"},
+      {"name": "Garam (opsional)", "amount": "sejumput kecil"}
+    ],
+    "steps": [
+      "Tumis bawang putih dengan minyak sampai harum.",
+      "Masukkan tempe dan tahu, tumis sebentar.",
+      "Tambahkan wortel, buncis, dan air, lalu tutup dan masak sampai sayuran empuk (garam hanya sejumput kecil jika dipakai).",
+      "Potong sesuai kemampuan mengunyah anak bila perlu.",
+      "Sajikan dengan nasi. Tidak memakai kecap manis atau penyedap rasa."
+    ],
+    "groups": ["legumes_nuts", "vit_a_fruit_veg", "other_fruit_veg", "grains_tubers"],
+    "animal_protein": false,
+    "texture_note": "Makanan keluarga yang empuk. Iris sayuran tipis dan pastikan mudah dikunyah.",
+    "allergen_note": "Mengandung kedelai (tempe dan tahu). Perhatikan reaksi pada anak dengan riwayat alergi.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "soto-ayam-bening-telur-nasi",
+    "title": "Soto Ayam Bening dengan Telur dan Nasi",
+    "age_band": "24+",
+    "minutes": 45,
+    "ingredients": [
+      {"name": "Daging dada ayam", "amount": "60 gram"},
+      {"name": "Telur ayam", "amount": "1 butir"},
+      {"name": "Kol (diiris tipis)", "amount": "30 gram"},
+      {"name": "Wortel (diiris tipis)", "amount": "30 gram"},
+      {"name": "Bawang putih (dihaluskan)", "amount": "2 siung"},
+      {"name": "Kunyit (dihaluskan)", "amount": "1 ruas kecil, sekitar 1 cm"},
+      {"name": "Serai (dimemarkan)", "amount": "1 batang"},
+      {"name": "Daun salam", "amount": "1 lembar"},
+      {"name": "Air", "amount": "500 ml"},
+      {"name": "Nasi putih", "amount": "1/2 mangkuk (sekitar 100 gram)"},
+      {"name": "Garam (opsional)", "amount": "sejumput kecil"}
+    ],
+    "steps": [
+      "Didihkan air dengan bawang putih, kunyit, serai, dan daun salam. Masukkan ayam dan rebus sampai matang sempurna, sekitar 20 menit.",
+      "Angkat ayam, lalu suwir halus.",
+      "Masukkan wortel dan kol ke dalam kuah, masak sampai empuk (garam hanya sejumput kecil jika dipakai).",
+      "Rebus telur sampai matang sempurna, sekitar 10 menit, lalu kupas dan belah.",
+      "Sajikan kuah bening dengan nasi, ayam suwir, sayuran, dan telur. Tidak memakai cabai atau penyedap rasa."
+    ],
+    "groups": ["flesh", "eggs", "grains_tubers", "vit_a_fruit_veg", "other_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Makanan keluarga yang empuk. Iris sayuran tipis dan suwir ayam kecil-kecil.",
+    "allergen_note": "Mengandung telur (alergen umum). Telur harus matang sempurna.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "gado-gado-mini-bumbu-kacang-ringan",
+    "title": "Gado-gado Mini Bumbu Kacang Ringan",
+    "age_band": "24+",
+    "minutes": 35,
+    "ingredients": [
+      {"name": "Kacang tanah sangrai tanpa garam (dihaluskan)", "amount": "2 sdm"},
+      {"name": "Tahu putih", "amount": "40 gram"},
+      {"name": "Telur ayam", "amount": "1 butir"},
+      {"name": "Kentang (dikupas)", "amount": "40 gram"},
+      {"name": "Wortel (diiris tipis)", "amount": "30 gram"},
+      {"name": "Bayam", "amount": "20 gram"},
+      {"name": "Tauge", "amount": "20 gram"},
+      {"name": "Bawang putih", "amount": "1/2 siung"},
+      {"name": "Air hangat untuk saus", "amount": "4 sdm"},
+      {"name": "Garam (opsional)", "amount": "sejumput kecil"}
+    ],
+    "steps": [
+      "Rebus kentang, wortel, bayam, dan tauge sampai empuk dan matang sempurna.",
+      "Rebus telur sampai matang sempurna, sekitar 10 menit, lalu kupas dan belah. Kukus atau panggang tahu sebentar.",
+      "Rebus bawang putih sampai empuk, lalu haluskan bersama kacang tanah dan air hangat sampai menjadi saus halus yang encer (garam hanya sejumput kecil jika dipakai). Tidak memakai cabai dan gula.",
+      "Potong semua bahan kecil-kecil sesuai kemampuan mengunyah anak.",
+      "Tata di piring dan siram dengan saus kacang yang halus dan encer."
+    ],
+    "groups": ["legumes_nuts", "eggs", "grains_tubers", "vit_a_fruit_veg", "other_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Makanan keluarga yang empuk. Saus harus halus dan encer, tidak ada kacang utuh atau butiran kasar.",
+    "allergen_note": "Mengandung kacang tanah, kedelai (tahu), dan telur (alergen umum). Gunakan saus yang halus, bukan kacang utuh atau potongan kasar karena berisiko tersedak. Perhatikan reaksi pada anak dengan riwayat alergi.",
+    "reviewed_by": null,
+    "reviewed_on": null
+  },
+  {
+    "id": "sup-daging-sapi-kentang-wortel-buncis",
+    "title": "Sup Daging Sapi, Kentang, Wortel, dan Buncis",
+    "age_band": "24+",
+    "minutes": 60,
+    "ingredients": [
+      {"name": "Daging sapi (dipotong kecil)", "amount": "80 gram"},
+      {"name": "Kentang (dikupas, dipotong dadu)", "amount": "60 gram"},
+      {"name": "Wortel (dipotong dadu)", "amount": "40 gram"},
+      {"name": "Buncis (diiris tipis)", "amount": "30 gram"},
+      {"name": "Bawang putih (digeprek)", "amount": "2 siung"},
+      {"name": "Daun bawang (opsional)", "amount": "1 batang"},
+      {"name": "Air", "amount": "500 ml"},
+      {"name": "Nasi putih", "amount": "1/2 mangkuk (sekitar 100 gram)"},
+      {"name": "Garam (opsional)", "amount": "sejumput kecil"}
+    ],
+    "steps": [
+      "Rebus daging sapi dengan air dan bawang putih menggunakan api kecil sampai sangat empuk, sekitar 40 menit.",
+      "Masukkan kentang dan wortel, masak sampai empuk, lalu tambahkan buncis dan masak sebentar (garam hanya sejumput kecil jika dipakai).",
+      "Angkat daging, lalu potong atau suwir kecil-kecil sesuai kemampuan mengunyah anak. Masukkan kembali ke dalam sup.",
+      "Taburkan daun bawang bila dipakai.",
+      "Sajikan hangat dengan nasi. Tidak memakai penyedap rasa."
+    ],
+    "groups": ["flesh", "grains_tubers", "vit_a_fruit_veg", "other_fruit_veg"],
+    "animal_protein": true,
+    "texture_note": "Makanan keluarga yang empuk. Daging harus sangat empuk dan dipotong atau disuwir kecil.",
+    "allergen_note": "",
+    "reviewed_by": null,
+    "reviewed_on": null
+  }
+]
