@@ -18,6 +18,7 @@ import 'package:cekgizi/features/home/presentation/home_screen.dart';
 import 'package:cekgizi/features/meals/presentation/screens/makan_screen.dart';
 import 'package:cekgizi/features/meals/presentation/screens/scan_screen.dart';
 import 'package:cekgizi/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:cekgizi/features/recipes/presentation/screens/recipe_detail_screen.dart';
 import 'package:cekgizi/features/recipes/presentation/screens/recipes_screen.dart';
 import 'package:cekgizi/features/chat/presentation/screens/tanya_screen.dart';
 import 'package:cekgizi/features/splash/presentation/screens/opening_screen.dart';
@@ -83,6 +84,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/tanya',
         name: '/tanya',
         builder: (context, state) => const TanyaScreen(),
+      ),
+      // Detail resep: layar penuh di atas tab Resep (tanpa nav bawah).
+      GoRoute(
+        path: '/recipes/:id',
+        name: '/recipes/detail',
+        builder: (context, state) =>
+            RecipeDetailScreen(recipeId: state.pathParameters['id']!),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

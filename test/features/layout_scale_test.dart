@@ -403,11 +403,11 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text(AppStrings.accountDisclaimerTitle), findsOneWidget);
 
-      // Tab Resep: empty state jujur (katalog belum dirilis).
+      // Tab Resep: katalog terkurasi tampil tanpa overflow.
       await tester.tap(find.text(AppStrings.navRecipe));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(find.text(AppStrings.recipesPendingTitle), findsOneWidget);
+      expect(find.text(AppStrings.recipesSubtitle), findsOneWidget);
     });
   }
 }

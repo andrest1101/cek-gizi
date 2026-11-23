@@ -20,18 +20,19 @@ final foodLogRepositoryProvider = Provider<FoodLogRepository>(
 );
 
 /// Aturan keragaman pangan dari asset (offline-safe).
-final nutritionRulesProvider =
-    FutureProvider<NutritionRules>((ref) => loadNutritionRules());
+final nutritionRulesProvider = FutureProvider<NutritionRules>(
+  (ref) => loadNutritionRules(),
+);
 
 /// Catatan makan HARI INI untuk anak terpilih (waktu perangkat).
 ///
 /// Query dibatasi 00.00 sampai 24.00 hari ini, sehingga aplikasi tidak
 /// menarik seluruh riwayat setiap kali dibuka dan target otomatis kembali
 /// ke 0 saat hari berganti (PRD §3.7).
-final foodLogsProvider = AsyncNotifierProvider
-    .family<FoodLogsNotifier, List<FoodLog>, String>(
-  FoodLogsNotifier.new,
-);
+final foodLogsProvider =
+    AsyncNotifierProvider.family<FoodLogsNotifier, List<FoodLog>, String>(
+      FoodLogsNotifier.new,
+    );
 
 class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
   FoodLogsNotifier(this.childId);
@@ -42,11 +43,9 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
   Future<List<FoodLog>> build() {
     final now = ref.watch(clockProvider)();
     final range = localDayRange(now);
-    return ref.watch(foodLogRepositoryProvider).listLogs(
-          childId,
-          from: range.from,
-          to: range.to,
-        );
+    return ref
+        .watch(foodLogRepositoryProvider)
+        .listLogs(childId, from: range.from, to: range.to);
   }
 
   /// Riwayat 30 hari terakhir, untuk strip dan ringkasan. Dibaca terpisah
@@ -98,11 +97,7 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
         mealType: mealType,
         source: FoodLogSource.manual,
         items: [
-          FoodLogItem(
-            name: trimmed,
-            groups: canonical,
-            portion: portion,
-          ),
+          FoodLogItem(name: trimmed, groups: canonical, portion: portion),
         ],
         groups: canonical,
       ),
@@ -194,6 +189,31 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
     return log;
   }
 
+  /// Catat resep sebagai satu log `source = recipe` (PRD §6.6).
+  ///
+  /// Draft disusun oleh fitur Resep (RecipeUseCases.toFoodLog); notifier ini
+  /// hanya memvalidasi, menyimpan, lalu menyegarkan state hari ini + riwayat
+  /// agar Piring Hari Ini langsung menghitung kelompok resep.
+  Future<FoodLog> addRecipeLog(FoodLog draft) async {
+    if (draft.source != FoodLogSource.recipe) {
+      throw StateError('Sumber catatan resep tidak valid.');
+    }
+    final child = ref.read(selectedChildProvider).value;
+    if (child == null) throw StateError('Tidak ada anak yang dipilih.');
+    if (draft.childId != child.id) {
+      throw StateError('Resep harus dicatat untuk anak yang dipilih.');
+    }
+    final canonical = PiringDayEvaluator.canonicalOrder(draft.groups);
+    if (canonical.isEmpty) {
+      throw StateError('Kelompok pangan tidak dikenal.');
+    }
+    final repo = ref.read(foodLogRepositoryProvider);
+    final log = await repo.addLog(draft.copyWith(groups: canonical));
+    state = AsyncData([..._ordered, log]);
+    _refreshHistory();
+    return log;
+  }
+
   /// Catat satu kelompok pangan secara manual (ketuk cepat, PRD §6.4).
   ///
   /// Jenis makan tidak ditanyakan - kelompok pangan bukan sesi makan.
@@ -216,12 +236,7 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
         eatenAt: now,
         mealType: _inferMealType(now),
         source: FoodLogSource.manual,
-        items: [
-          FoodLogItem(
-            name: groupLabel,
-            groups: canonical,
-          ),
-        ],
+        items: [FoodLogItem(name: groupLabel, groups: canonical)],
         groups: canonical,
       ),
     );
@@ -246,8 +261,9 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
     );
     final now = ref.read(clockProvider)();
     if (_isSameDay(restored.eatenAt.toLocal(), now)) {
-      state = AsyncData([..._ordered, restored]
-        ..sort((a, b) => a.eatenAt.compareTo(b.eatenAt)));
+      state = AsyncData(
+        [..._ordered, restored]..sort((a, b) => a.eatenAt.compareTo(b.eatenAt)),
+      );
     }
     _refreshHistory();
   }
@@ -361,44 +377,43 @@ class FoodLogsNotifier extends AsyncNotifier<List<FoodLog>> {
 /// di Beranda (strip 7 hari) dan Makan (Riwayat); sengaja tanpa
 /// `autoDispose` agar ticker mode saat pindah tab tidak memicu rebuild di
 /// tengah build Riverpod.
-final historyLogsProvider = FutureProvider.family<List<FoodLog>, String>(
-  (ref, childId) {
-    final now = ref.watch(clockProvider)();
-    final range = localRecentDaysRange(
-      now,
-      HistoryEvaluator.defaultWindowDays,
-    );
-    return ref.watch(foodLogRepositoryProvider).listLogs(
-          childId,
-          from: range.from,
-          to: range.to,
-        );
-  },
-);
+final historyLogsProvider = FutureProvider.family<List<FoodLog>, String>((
+  ref,
+  childId,
+) {
+  final now = ref.watch(clockProvider)();
+  final range = localRecentDaysRange(now, HistoryEvaluator.defaultWindowDays);
+  return ref
+      .watch(foodLogRepositoryProvider)
+      .listLogs(childId, from: range.from, to: range.to);
+});
 
 /// Ringkasan 30 hari terakhir untuk anak terpilih (ulang, kosong, protein
 /// hewani). Evaluasi murni ada di [HistoryEvaluator].
-final historySummaryProvider =
-    FutureProvider.family<HistorySummary?, String>((ref, childId) async {
-    final child = ref.watch(selectedChildProvider).value;
-    if (child == null) return null;
-    final rules = await ref.watch(nutritionRulesProvider.future);
-    final logs = await ref.watch(historyLogsProvider(childId).future);
-    final now = ref.watch(clockProvider)();
-    return HistoryEvaluator.build(
-      logs: logs,
-      today: now,
-      ageMonthsAt: child.ageInCompletedMonths,
-      profiles: rules.profiles,
-    );
-  },
-);
+final historySummaryProvider = FutureProvider.family<HistorySummary?, String>((
+  ref,
+  childId,
+) async {
+  final child = ref.watch(selectedChildProvider).value;
+  if (child == null) return null;
+  final rules = await ref.watch(nutritionRulesProvider.future);
+  final logs = await ref.watch(historyLogsProvider(childId).future);
+  final now = ref.watch(clockProvider)();
+  return HistoryEvaluator.build(
+    logs: logs,
+    today: now,
+    ageMonthsAt: child.ageInCompletedMonths,
+    profiles: rules.profiles,
+  );
+});
 
 /// Ringkasan Piring Hari Ini (anak terpilih, hari ini, waktu perangkat).
 ///
 /// Menggabungkan logs + aturan + usia; re-evaluasi saat logs berubah.
-final piringTodayProvider =
-    FutureProvider.family<PiringDay?, String>((ref, childId) async {
+final piringTodayProvider = FutureProvider.family<PiringDay?, String>((
+  ref,
+  childId,
+) async {
   final child = ref.watch(selectedChildProvider).value;
   if (child == null) return null;
   final rules = await ref.watch(nutritionRulesProvider.future);

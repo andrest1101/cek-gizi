@@ -952,13 +952,82 @@ abstract final class AppStrings {
   static const recipesEyebrow = 'RESEP';
   static const recipesTitle = 'Resep';
   static const recipesSubtitle = 'Ide masakan rumahan sesuai usia anak.';
-  static const recipesPendingTitle = 'Katalog resep sedang disiapkan';
-  static const recipesPendingBody =
-      'Setiap resep ditinjau ahli gizi dan bidan lebih dulu agar porsi serta '
-      'bahannya sesuai usia anak. Kami tidak menampilkan resep sebelum '
-      'tinjauan itu selesai.';
-  static const recipesPendingNote =
-      'Sementara itu, kamu bisa mencatat makan anak di tab Makan.';
+  static const recipesSearchHint = 'Cari resep atau bahan';
+  static const recipesSearchSemantics = 'Cari resep atau bahan';
+  static const recipesSearchClear = 'Hapus pencarian';
+  static const recipesFilterAll = 'Semua usia';
+  static const recipesFilterAllSemantics = 'Tampilkan resep untuk semua usia';
+  static const recipesProteinFilter = 'Protein hewani';
+  static const recipesProteinFilterSemantics =
+      'Saring resep yang mengandung protein hewani';
+  static const recipesEmptyTitle = 'Tidak ada resep yang cocok';
+  static const recipesEmptyBody =
+      'Coba ubah kata kunci, rentang usia, atau saring protein hewani.';
+  static const recipesEmptyReset = 'Atur ulang filter';
+  static const recipesLoadError = 'Katalog resep belum bisa dimuat. Coba lagi.';
+  static const recipesReviewPendingNote =
+      'Konten resep belum ditinjau ahli gizi atau bidan. Selalu sesuaikan '
+      'dengan saran tenaga kesehatan.';
+  static const recipesReviewPendingShort = 'Belum ditinjau ahli gizi';
+  static String recipesReviewedBy(String name, String date) =>
+      'Ditinjau oleh $name · $date';
+  static String recipesReviewedByName(String name) => 'Ditinjau oleh $name';
+  static String recipesMinutes(int minutes) => '$minutes menit';
+  static String recipesGroupCount(int count) => '$count kelompok pangan';
+  static const recipesProteinBadge = 'Protein hewani';
+  static String recipesResultCount(int count) => '$count resep';
+  static String recipesFilterBandLabel(String code) => switch (code) {
+    '6-8' => '6–8 bln',
+    '9-11' => '9–11 bln',
+    '12-23' => '12–23 bln',
+    '24+' => '24+ bln',
+    _ => code,
+  };
+  static String recipesFilterBandSemantics(String code) => switch (code) {
+    '6-8' => 'Resep untuk usia 6 sampai 8 bulan',
+    '9-11' => 'Resep untuk usia 9 sampai 11 bulan',
+    '12-23' => 'Resep untuk usia 12 sampai 23 bulan',
+    '24+' => 'Resep untuk usia 24 bulan ke atas',
+    _ => code,
+  };
+  static String recipesCardSemantics(
+    String title,
+    int minutes,
+    String bandLabel,
+  ) => '$title. $minutes menit. Usia $bandLabel. Buka detail resep.';
+  static String recipesThumbSemantics(String groups) =>
+      'Kelompok pangan resep: $groups.';
+  static const recipesDetailTitle = 'Detail resep';
+  static const recipesIngredientsTitle = 'Bahan';
+  static const recipesStepsTitle = 'Langkah memasak';
+  static const recipesSafetyTitle = 'Catatan keamanan';
+  static const recipesTextureLabel = 'Tekstur sesuai usia';
+  static const recipesAllergenLabel = 'Alergen & keamanan';
+  static const recipesNoAllergenNote =
+      'Tidak ada catatan alergen umum untuk resep ini.';
+  static String recipesStepSemantics(int number) => 'Langkah $number';
+  static String recipesIngredientSemantics(String name, String amount) =>
+      '$name, $amount';
+  static const recipesLogCta = 'Catat sebagai makan';
+  static const recipesLogSheetTitle = 'Catat sebagai makan';
+  static const recipesLogSheetSubtitle =
+      'Pilih waktu makan. Resep ini akan masuk ke Piring Hari Ini.';
+  static const recipesLogSaved = 'Resep dicatat sebagai makan.';
+  static const recipesLogError = 'Resep belum bisa dicatat. Coba lagi.';
+  static const recipesLogNoChild =
+      'Tambahkan profil anak dulu untuk mencatat resep.';
+  static const recipesNoChildTitle = 'Belum ada anak';
+  static const recipesNoChildBody =
+      'Tambahkan profil anak agar resep bisa disesuaikan dengan usianya.';
+  static const recipesNoChildCta = 'Tambah anak';
+  static const recipesNotFoundTitle = 'Resep tidak ditemukan';
+  static const recipesNotFoundBody =
+      'Resep ini mungkin sudah diperbarui. Kembali ke katalog untuk melihat '
+      'daftar terbaru.';
+  static const recipesBackToCatalog = 'Kembali ke katalog';
+  static const recipesDisclaimer =
+      'Sesuaikan tekstur dan porsi dengan kemampuan makan anak. Informasi '
+      'ini bukan pengganti saran tenaga kesehatan.';
 
   // ── Pemindai di tab Makan (PRD §6.4) ──────────────────────────────
   static const capturePanelTitle = 'Kenali isi piring';

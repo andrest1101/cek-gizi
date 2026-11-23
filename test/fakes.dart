@@ -13,11 +13,12 @@ import 'package:cekgizi/features/chat/domain/repositories/chat_repository.dart';
 import 'package:cekgizi/features/meals/domain/entities/food_log.dart';
 import 'package:cekgizi/features/meals/domain/repositories/food_log_repository.dart';
 import 'package:cekgizi/features/meals/domain/services/dietary_diversity.dart';
+import 'package:cekgizi/features/recipes/domain/entities/recipe.dart';
+import 'package:cekgizi/features/recipes/domain/repositories/recipe_repository.dart';
 
 /// Fake repositories IN-MEMORY untuk widget test (tanpa jaringan).
 final class FakeChildRepository implements ChildRepository {
-  FakeChildRepository([List<ChildProfile>? seed])
-      : _children = [...?seed];
+  FakeChildRepository([List<ChildProfile>? seed]) : _children = [...?seed];
 
   final List<ChildProfile> _children;
   int _counter = 1000;
@@ -58,7 +59,7 @@ final class FakeChildRepository implements ChildRepository {
 
 final class FakeGrowthRepository implements GrowthRepository {
   FakeGrowthRepository([List<GrowthMeasurement>? seed])
-      : _measurements = [...?seed];
+    : _measurements = [...?seed];
 
   final List<GrowthMeasurement> _measurements;
   int _counter = 2000;
@@ -156,15 +157,13 @@ final class FakeAnthropometryTables implements AnthropometryReferenceTables {
     required Sex sex,
     required double lengthHeightCmStep,
     required int ageMonths,
-  }) =>
-      wazFixture;
+  }) => wazFixture;
 
   @override
   ({double start, double step, int length}) whzTableInfo({
     required Sex sex,
     required int ageMonths,
-  }) =>
-      (start: 45.0, step: 0.5, length: 131);
+  }) => (start: 45.0, step: 0.5, length: 131);
 }
 
 GrowthMeasurement fakeMeasurement({
@@ -228,10 +227,10 @@ FoodLog fakeFoodLog({
     eatenAt: eatenAt ?? DateTime.now(),
     mealType: mealType,
     source: source,
-    items: items ??
+    items:
+        items ??
         [
-          for (final group in groups)
-            FoodLogItem(name: group, groups: [group]),
+          for (final group in groups) FoodLogItem(name: group, groups: [group]),
         ],
     groups: groups,
   );
@@ -252,9 +251,9 @@ final class FakeFoodLogRepository implements FoodLogRepository {
   int get logCount => _logs.length;
 
   List<FoodLog> logs(String childId) => [
-        for (final log in _logs)
-          if (log.childId == childId) log,
-      ];
+    for (final log in _logs)
+      if (log.childId == childId) log,
+  ];
 
   @override
   Future<List<FoodLog>> listLogs(
@@ -415,5 +414,53 @@ NutritionRules fakeNutritionRules({bool reviewed = true}) {
     },
     reviewedBy: reviewed ? 'Test Ahli Gizi' : null,
     reviewedOn: reviewed ? '2026-11-11' : null,
+  );
+}
+
+/// Fake repository resep in-memory (tanpa jaringan/asset).
+final class FakeRecipeRepository implements RecipeRepository {
+  FakeRecipeRepository([List<Recipe>? seed]) : _recipes = [...?seed];
+
+  final List<Recipe> _recipes;
+
+  /// Bila diisi, [listRecipes] melempar galat ini (untuk uji kartu galat).
+  Object? loadError;
+
+  /// Tambah resep setelah konstruksi (untuk uji pulih dari galat).
+  void addRecipes(List<Recipe> recipes) => _recipes.addAll(recipes);
+
+  @override
+  Future<List<Recipe>> listRecipes() async {
+    if (loadError != null) throw loadError!;
+    return List.of(_recipes);
+  }
+}
+
+/// Resep PALSU untuk widget test (bukan dari `recipes.json`).
+Recipe fakeRecipe({
+  String id = 'resep-uji',
+  String title = 'Bubur Uji',
+  RecipeAgeBand band = RecipeAgeBand.months12to23,
+  int minutes = 30,
+  List<String> groups = const ['grains_tubers', 'flesh', 'vit_a_fruit_veg'],
+  bool animalProtein = true,
+  String? reviewedBy,
+}) {
+  return Recipe(
+    id: id,
+    title: title,
+    ageBand: band,
+    minutes: minutes,
+    ingredients: const [
+      RecipeIngredient(name: 'Beras putih', amount: '2 sdm'),
+      RecipeIngredient(name: 'Hati ayam', amount: '20 gram'),
+    ],
+    steps: const ['Masak semua bahan sampai lunak.', 'Haluskan dan sajikan.'],
+    groups: groups,
+    animalProtein: animalProtein,
+    textureNote: 'Lumat dan kental.',
+    allergenNote: '',
+    reviewedBy: reviewedBy,
+    reviewedOn: reviewedBy == null ? null : '2026-11-23',
   );
 }
