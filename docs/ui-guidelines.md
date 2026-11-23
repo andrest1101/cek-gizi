@@ -231,6 +231,10 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
   tetap: **header ringkas** (tutup · avatar · "Tanya Gizi" + "Asisten edukasi
   gizi" · menu ⋮ berisi *Hapus riwayat chat*) → **percakapan editorial** →
   **disclaimer tetap** → **kotak tulis**.
+  - **Avatar di header** = mark AI asli (`tanya_gizi_mono_white_1024.png`,
+    24dp, di-tint ke `colors.primary` via `BlendMode.srcIn` di dalam lingkaran
+    `primaryContainer` 36dp), bukan ikon Material generik. Varian duotone
+    (`tanya_gizi_duotone_1024.png`) disimpan untuk brand besar di tema terang.
   - Jawaban asisten berupa **lembar `surface` ber-border hairline** (radius
     `card` 20, padding 16, tanpa shadow), **tanpa avatar dan tanpa nama**:
     identitas cukup di header, peran dibedakan lewat bentuk — lembar penuh di

@@ -1422,3 +1422,32 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
 - Perlu uji perangkat: gulir katalog panjang, keyboard saat pencarian,
   sheet catat + Urungkan, dan tampilan dark mode.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-19 — Mark AI Tanya Gizi menggantikan ikon generik (2026-11-23)
+
+### Konteks & keputusan
+- Header Tanya Gizi sebelumnya memakai `Icons.spa_rounded` (Material generik).
+- Pemilik menyediakan dua PNG 1024×1024 transparan hasil AI Studio:
+  `tanya_gizi_mono_white_1024.png` (simbol putih) dan
+  `tanya_gizi_duotone_1024.png` (hijau `#1F6F54` + aksen oranye `#E9893B`).
+- Dipilih **mono-white + runtime tint** ke `colors.primary` (BlendMode.srcIn):
+  satu aset otomatis pas di light (hijau tua) & dark (mint), kontras ≥ 4,5:1,
+  tetap terbaca di 24dp. Varian duotone dibundel untuk kebutuhan brand besar.
+
+### Perubahan
+- `TanyaAiMark` (`features/chat/presentation/widgets`): `Image.asset` mono +
+  `color: colors.primary`, `BlendMode.srcIn`, `excludeFromSemantics`,
+  `errorBuilder` fallback; ukuran default 24dp.
+- `ChatHeader`: ikon spa diganti `TanyaAiMark(size: 24)` di lingkaran
+  `primaryContainer` 36dp; label "Asisten {AppName}" tetap di induk.
+- `pubspec.yaml`: daftarkan dua PNG mark di `assets/logo/`. Tanpa dependency
+  baru (PNG, bukan SVG → tidak perlu `flutter_svg`).
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **412/412 passed** (+2 `chat_header_test`: light & dark —
+  aset dipakai, tint = token primary, ikon generik hilang, Semantics induk ada).
+- `flutter build apk --debug` → **OK Built**
+- Pratinjau render nyata light & dark: mark tampil, warna mengikuti tema,
+  ukuran proporsional di header.
+- Commit belum dijalankan (manual oleh pemilik).
