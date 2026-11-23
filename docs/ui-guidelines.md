@@ -1,4 +1,4 @@
-# CekGizi — Spesifikasi Visual (v3.0, Batch UX-16)
+# CekGizi — Spesifikasi Visual (v3.1, Batch UX-18)
 
 Dokumen ini adalah **kontrak visual** untuk seluruh layar. PRD v2.0 tetap
 sumber kebenaran fitur; dokumen ini hanya mengatur bagaimana fitur tampil.
@@ -209,7 +209,42 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
   (drag/pinch zoom, panduan lingkaran, tombol ≥48dp) sebelum disimpan;
   tombol Ambil foto/Galeri tetap di form. Avatar default memakai aset
   `assets/avatars` sesuai jenis kelamin; error izin/kompresi tampil inline.
-- **Tanya**: banner disclaimer tetap, area pesan, input bar, chip cepat.
+- **Tanya / ruang konsultasi** (v3.1): bukan bubble-bubble setara. Susunan
+  tetap: **header ringkas** (tutup · avatar · "Tanya Gizi" + "Asisten edukasi
+  gizi" · menu ⋮ berisi *Hapus riwayat chat*) → **percakapan editorial** →
+  **disclaimer tetap** → **kotak tulis**.
+  - Jawaban asisten berupa **lembar `surface` ber-border hairline** (radius
+    `card` 20, padding 16, tanpa shadow), **tanpa avatar dan tanpa nama**:
+    identitas cukup di header, peran dibedakan lewat bentuk — lembar penuh di
+    kiri vs pil `primary` di kanan. Jam `HH.mm` diletakkan **di luar** lembar.
+    Pembaca layar tetap tahu perannya lewat `Semantics`
+    (`tanyaAnswerSemantics` / `tanyaUserMessageSemantics`).
+  - Pengelompokan: pesan berurutan dari peran sama dalam ≤ 5 menit berbagi
+    jarak rapat dan satu label jam.
+  - Pembatas hari (`Hari ini` / `Kemarin` / `16 Nov 2026`) memakai pil
+    `surfaceVariant`; jam `HH.mm` di bawah pesan terakhir grup
+    (`tanyaTimeSemantics`).
+  - Indikator mengetik = lembar kecil berisi tiga titik (tanpa avatar, tanpa
+    teks), tetap berlabel `tanyaAssistantTyping`.
+  - Jawaban dirender `ChatMarkdown`: tebal, miring, bullet, daftar bernomor,
+    heading. Tabel jadi baris `·`; tautan/gambar jadi teks; tidak ada HTML,
+    gambar, atau tautan yang dieksekusi dari keluaran model.
+  - Keadaan awal: ilustrasi + judul + body + **kartu saran vertikal**
+    (ikon tonal 36dp, label, chevron) — bukan chip sempit; tetap memakai
+    `Key('tanya-empty-list')` agar tes bisa menggulir.
+  - Pertanyaan lanjutan (`ChatFollowups`) tampil sebagai kartu baris di bawah
+    jawaban terakhir, bukan chip.
+  - Disclaimer **selalu terlihat** tepat di atas kotak tulis, teks utuh tanpa
+    ellipsis; tidak bisa ditutup. Galat kirim tampil ringkas di atas composer
+    dengan tombol Coba lagi; peringatan sinkronisasi memakai baris `cloud_off`.
+  - Kotak tulis: pil `surface` + border, `TextField` 1–5 baris, tombol kirim
+    bulat 48dp. Baris konteks di atasnya: "Untuk {nama} · {usia}" dan sisa
+    kuota (informasi tampilan; server tetap penentu, input tidak dikunci).
+  - Safety card tetap kartu status (ikon + teks + warna). Setelah "Mengerti"
+    kartu menyusut jadi baris "Panduan sudah dibaca", tidak hilang tanpa jejak.
+  - Long-press pesan → sheet "Salin teks". Gulir otomatis hanya saat pengguna
+    dekat dasar; tombol "Ke pesan terbaru" muncul saat membaca ke atas.
+    Konten dibatasi 720dp pada tablet.
 - **Onboarding** (v2.4): 3 halaman geser. Top bar merek (`AppLogoMark` 40dp
   + nama app + "Lewati" target 48dp) → **stage ilustrasi full-bleed**
   (tinggi 50% area, `surfaceVariant`, sudut bawah `card`, ring + titik
