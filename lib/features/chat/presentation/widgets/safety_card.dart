@@ -7,12 +7,14 @@ import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/features/chat/domain/entities/chat_message.dart';
+import 'package:cekgizi/shared/widgets/tonal_icon_circle.dart';
 
 /// Kartu khusus untuk jawaban dengan `safety_flag` (PRD §3.8, §6.7).
 ///
 /// Bukan bubble biasa: warna status selalu berpasangan dengan ikon dan
 /// teks, dan aksi tersedia langsung (darurat → hubungi 112; sebaliknya →
-/// konfirmasi mengerti).
+/// konfirmasi mengerti). Setelah dikonfirmasi, kartu mengecil menjadi satu
+/// baris penanda - tidak hilang tanpa jejak.
 class SafetyCard extends StatefulWidget {
   const SafetyCard({super.key, required this.flag});
 
@@ -30,12 +32,47 @@ class _SafetyCardState extends State<SafetyCard> {
     final colors = AppTheme.colorsOf(context);
     final isEmergency = widget.flag == ChatSafetyFlag.emergency;
 
-    if (_acknowledged) return const SizedBox.shrink();
+    if (_acknowledged) {
+      return Semantics(
+        container: true,
+        label: AppStrings.tanyaSafetyReferAckDone,
+        child: Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: colors.surfaceVariant,
+            borderRadius: BorderRadius.circular(AppRadius.control),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.check_circle_rounded,
+                size: 18,
+                color: colors.statusGood,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  AppStrings.tanyaSafetyReferAckDone,
+                  style: AppTextStyles.label.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
-    final accent = isEmergency ? colors.statusAlert : colors.statusWatchText;
+    final accent = isEmergency ? colors.statusAlert : colors.onAccentContainer;
     final fill = isEmergency
-        ? colors.statusAlert.withValues(alpha: 0.12)
-        : colors.statusWatch.withValues(alpha: 0.16);
+        ? colors.statusAlert.withValues(alpha: 0.10)
+        : colors.accentContainer;
 
     return Semantics(
       container: true,
@@ -44,22 +81,27 @@ class _SafetyCardState extends State<SafetyCard> {
           : AppStrings.tanyaSafetyReferSemantics,
       child: Container(
         width: double.infinity,
-        margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+        margin: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: fill,
           borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(color: accent.withValues(alpha: 0.55), width: 1),
+          border: Border.all(color: accent.withValues(alpha: 0.45), width: 1),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              isEmergency
+            TonalIconCircle(
+              icon: isEmergency
                   ? Icons.emergency_rounded
                   : Icons.medical_information_rounded,
-              color: accent,
-              size: 28,
+              iconSemantics: isEmergency
+                  ? AppStrings.tanyaSafetyEmergencyTitle
+                  : AppStrings.tanyaSafetyReferTitle,
+              size: 40,
+              iconSize: 20,
+              backgroundColor: accent.withValues(alpha: 0.16),
+              iconColor: accent,
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(

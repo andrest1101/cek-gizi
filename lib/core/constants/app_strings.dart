@@ -709,8 +709,9 @@ abstract final class AppStrings {
   };
 
   // â”€â”€ Tanya Gizi (PRD Â§6.7) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  static const tanyaEyebrow = 'EDUKASI GIZI UMUM';
   static const tanyaTitle = 'Tanya Gizi';
+  static const tanyaHeaderSubtitle = 'Asisten edukasi gizi';
+  static const tanyaMenuSemantics = 'Menu Tanya Gizi';
   static const tanyaDisclaimerBanner =
       'Informasi umum, bukan pengganti tenaga kesehatan.';
   static String tanyaAssistantTyping() =>
@@ -745,9 +746,22 @@ abstract final class AppStrings {
   static const tanyaSyncFailed =
       'Riwayat belum tersimpan. Periksa koneksi internet kamu.';
   static const tanyaSyncRetry = 'Simpan lagi';
-  static const tanyaFollowupsTitle = 'Pertanyaan lanjutan';
+  static const tanyaFollowupsTitle = 'Lanjutkan bertanya';
+  static const tanyaCopy = 'Salin teks';
+  static const tanyaCopyDone = 'Teks disalin.';
+  static const tanyaToday = 'Hari ini';
+  static const tanyaYesterday = 'Kemarin';
+  static const tanyaScrollToLatest = 'Ke pesan terbaru';
+  static const tanyaPrivacyNote =
+      'Percakapan tersimpan di akun ini dan bisa dihapus kapan saja.';
+  static String tanyaComposerContext(String name, String age) =>
+      'Untuk $name · $age';
+  static String tanyaTimeSemantics(String time) => 'Pukul $time';
+  static String tanyaAnswerSemantics() =>
+      'Jawaban dari asisten ${AppConfig.appName}';
+  static const tanyaUserMessageSemantics = 'Pesanmu';
   static String tanyaQuotaRemaining(int remaining) =>
-      'Sisa $remaining/${AppConfig.chatDailyLimit} hari ini.';
+      'Sisa $remaining/${AppConfig.chatDailyLimit}';
   static const tanyaQuotaSemantics = 'Sisa kuota Tanya Gizi hari ini';
 
   /// Kode dari Edge Function â†’ kalimat ramah (PRD Â§6.9). Tidak ada detail
@@ -775,6 +789,7 @@ abstract final class AppStrings {
       'kesehatan. Hubungi Posyandu, puskesmas, atau dokter. Ini bukan '
       'diagnosis.';
   static const tanyaSafetyReferAck = 'Mengerti';
+  static const tanyaSafetyReferAckDone = 'Panduan sudah dibaca';
   static const tanyaSafetyReferSemantics = 'Saran menghubungi tenaga kesehatan';
   static const tanyaSafetyEmergencyTitle = 'Ini darurat';
   static const tanyaSafetyEmergencyBody =

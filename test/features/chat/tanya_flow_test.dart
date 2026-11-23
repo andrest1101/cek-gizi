@@ -230,7 +230,9 @@ void main() {
 
     expect(find.text('Pertanyaan lama'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.delete_outline_rounded));
+    await tester.tap(find.byIcon(Icons.more_vert_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppStrings.tanyaDeleteHistory));
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.tanyaDeleteConfirmTitle), findsOneWidget);
 

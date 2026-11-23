@@ -1308,3 +1308,68 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
 - Perlu uji perangkat: tanya saat aplikasi baru dibuka (sesi belum siap) dan
   pastikan kartu error memakai copy baru bila fungsi/secret bermasalah.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-18 — Tanya Gizi: ruang konsultasi editorial (2026-11-22)
+
+### Masalah
+- Jawaban model tampil apa adanya: `**tebal**`, `- bullet`, `1.` terlihat
+  sebagai karakter mentah di tengah percakapan.
+- Header masih bergaya halaman marketing (eyebrow + judul besar + ikon hapus
+  langsung), bukan header percakapan.
+- Banner disclaimer terpotong di 360dp, kuota melayang tanpa konteks, semua
+  pesan berbentuk bubble setara sehingga asisten dan pengguna sulit dibedakan.
+- Keadaan awal memakai chip sempit (label panjang terpotong), kartu galat dan
+  safety card terlalu besar, dan kotak tulis terasa datar.
+
+### Perubahan
+- **Struktur baru** `TanyaScreen`: header ringkas (`ChatHeader`) → percakapan
+  → disclaimer tetap (`ChatDisclaimer`) → kotak tulis (`ChatComposer`),
+  konten dibatasi 720dp. Hapus riwayat pindah ke menu ⋮.
+- **Percakapan editorial** (`ChatMessageTile`): jawaban asisten berupa lembar
+  `surface` ber-border hairline (radius `card`, padding 16, tanpa shadow) —
+  **tanpa avatar dan tanpa nama berulang** karena identitas sudah di header;
+  peran dibedakan lewat bentuk. Pengguna = pil `primary` kanan. Jam `HH.mm`
+  di luar lembar, pengelompokan peran sama ≤ 5 menit, long-press → "Salin
+  teks". Peran tetap diumumkan lewat `Semantics`. Pembatas hari
+  (`ChatDayDivider`) memakai `Hari ini` / `Kemarin` / tanggal Indonesia.
+- **Renderer lokal** `ChatMarkdown` + `ChatMarkdownParser` (tanpa dependency
+  baru): paragraf, tebal, miring, kode, bullet, daftar bernomor, heading;
+  tabel jadi baris `·`; tautan/gambar jadi teks. Tidak ada HTML/gambar/tautan
+  yang dieksekusi dari keluaran model.
+- **Keadaan awal** `ChatEmptyState`: ilustrasi + saran vertikal berikon
+  (target 48dp) + catatan privasi; tetap memakai `Key('tanya-empty-list')`.
+- **Pertanyaan lanjutan** `ChatFollowups` sebagai kartu baris di bawah
+  jawaban terakhir; judul copy menjadi "Lanjutkan bertanya".
+- **Kotak tulis** `ChatComposer`: baris konteks "Untuk {nama} · {usia}" +
+  sisa kuota (informasi tampilan saja; server tetap penentu sehingga input
+  tidak dikunci saat kuota 0), pil input `surface`, tombol kirim 48dp.
+- **Galat & sinkronisasi** `ChatInlineError` / `ChatSyncNotice` ringkas di
+  atas composer dengan aksi Coba lagi; tetap memakai `AppStrings.retry`,
+  `tanyaSyncFailed`, `tanyaSyncRetry`.
+- **Gulir**: otomatis hanya bila pengguna dekat dasar; tombol "Ke pesan
+  terbaru" muncul saat membaca ke atas. `TypingIndicator` mengikuti bentuk
+  lembar (tiga titik, tanpa avatar) dan tetap menghormati `disableAnimations`.
+  `ChatFollowups` memakai `surfaceVariant` agar tidak terbaca sebagai jawaban
+  kedua.
+- **Safety card**: setelah "Mengerti" menyusut jadi baris "Panduan sudah
+  dibaca" (tidak hilang tanpa jejak); jalur darurat tetap tombol 112.
+- Helper waktu murni Dart `lib/core/time/chat_dates.dart` (label hari, jam,
+  tanggal Indonesia) agar copy tetap di `AppStrings`.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **354/354 passed** (sebelumnya 330; +7 chat_dates,
+  +8 chat_markdown, +6 chat_layout light/dark, +3 chat_message_tile).
+- Kontrak visual dikunci tes: lembar jawaban memakai `surface` + border di
+  light & dark, tanpa avatar/nama asisten di pesan, label peran tetap ada.
+- `flutter build apk --debug` → **OK Built**
+- DoD grep: gradien = 0; `Colors.*` di `lib/features` + `lib/shared` hanya
+  `Colors.transparent`; `GEMINI_API_KEY` di repo = 0.
+- Tes regresi: 360dp @1,3 light & dark untuk keadaan awal, jawaban markdown
+  panjang, dan galat kuota — tanpa overflow; penanda markdown mentah tidak
+  tampil.
+- Tidak menyentuh Edge Function, prompt Gemini, kuota, RLS, repository, atau
+  provider. Tanpa dependency baru.
+- Perlu uji perangkat: rasa gulir saat jawaban panjang, long-press salin,
+  keyboard saat composer multi-baris, dan tampilan dark mode.
+- Commit belum dijalankan (manual oleh pemilik).
