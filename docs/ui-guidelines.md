@@ -1,4 +1,4 @@
-# CekGizi — Spesifikasi Visual (v3.2, Batch Resep)
+# CekGizi — Spesifikasi Visual (v3.3, Resep photo-led)
 
 Dokumen ini adalah **kontrak visual** untuk seluruh layar. PRD v2.0 tetap
 sumber kebenaran fitur; dokumen ini hanya mengatur bagaimana fitur tampil.
@@ -310,3 +310,34 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
 - Semua teks di `AppStrings`; suara "kamu", hangat, tanpa menghakimi.
 - Angka & tanggal memakai format Indonesia (`IdDateFormat`, koma desimal).
 - Nama aplikasi selalu dari `AppConfig.appName`.
+
+## 11. Resep photo-led (v3.3)
+
+- **Aset**: `assets/recipes/images/<id-resep>.jpg` (1280px, q82 progressive,
+  EXIF/GPS dibuang, total 1,87 MB untuk 24 foto). Nama berkas = `id` di
+  `recipes.json`. Sumber resolusi penuh tidak dibundel. Bila foto gagal dimuat,
+  tampil fallback kolase logo kelompok — bukan kotak rusak.
+- **Katalog**:
+  - Kartu unggulan "Ide hari ini" di puncak, dipilih deterministik dari
+    tanggal perangkat. Foto 16:10 di atas, lalu eyebrow hijau, judul
+    `titleLarge` (maks. 3 baris), meta, dan chip. Resep yang sama tidak
+    diulang di daftar bawah; unggulan tidak tampil saat mencari.
+  - Kartu biasa memakai foto 16:9 penuh lebar di atas judul. Judul tidak
+    dipaksa jadi satu baris. Meta `menit · jumlah kelompok` memakai `Wrap`.
+  - Hasil dari beberapa rentang usia dikelompokkan; judul seksi memakai
+    `titleMedium` + garis rambut. Bila hanya satu rentang, judul seksi
+    dihilangkan karena chip filter di atas sudah menjelaskan.
+  - Chip kelompok (maks. 3) memakai `AppSurfaces.sunken`; sisanya "+N".
+    Pil usia memakai `primaryContainer`, protein hewani `accentContainer`.
+- **Detail**:
+  - Foto square penuh lebar konten sebagai hero; kartu judul (`AppSurfaces.card`)
+    menumpuk 20 dp di bawahnya. **Teks tidak pernah ditaruh di atas foto** —
+    kontras aman di light & dark tanpa scrim/gradien.
+  - Meta (waktu, usia, protein) ditempatkan di bawah kartu judul, bukan di
+    dalamnya, supaya foto tidak tertutup terlalu banyak pada text scale 1,3.
+  - Checklist bahan: baris ≥ 56 dp, kotak centang 24 dp berisi ikon `check`,
+    teks dicoret saat selesai, progres "$done dari $total bahan disiapkan"
+    dan tombol "Atur ulang". Status hanya lokal, tidak disimpan/dikirim.
+- **Aksesibilitas**: foto bertanda `excludeFromSemantics`; kartu & checklist
+  memiliki `Semantics` (button/checkbox + label lengkap). Semua penanda
+  memakai ikon + teks, bukan warna saja.

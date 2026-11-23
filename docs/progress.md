@@ -1451,3 +1451,45 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
 - Pratinjau render nyata light & dark: mark tampil, warna mengikuti tema,
   ukuran proporsional di header.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-20 — Foto resep asli & katalog photo-led (2026-11-23)
+
+### Konteks & keputusan
+- 24 foto asli 2816x1536 (~62 MB) di `assets/recipes/recipes_image/`
+  **tidak dibundel** dan tidak masuk git. Nama sumber yang tidak konsisten
+  (spasi, koma, garis bawah) dinormalisasi menjadi `<id-resep>.jpg`,
+  memakai slug stabil dari `recipes.json`.
+- `tool/optimize_recipe_images.py`: resize 1280px, JPEG q82 progressive,
+  EXIF/GPS dibuang → **1,87 MB total** (24 berkas, 56–109 KB per berkas).
+- **Dependency dev (bukan Flutter)**: Pillow 12.3.0 dipakai hanya oleh script
+  pengolah aset. Alasan: `magick`/`ffmpeg`/`cwebp` tidak tersedia di mesin ini;
+  Pillow satu-satunya jalan untuk resize + strip EXIF + progressive JPEG.
+  Tidak masuk APK dan tidak mengubah `pubspec.lock`.
+- `recipes.json` sengaja tidak diubah: skema PRD §9.1 tidak memiliki field
+  `image`, jadi path diturunkan dari `recipe.id` di layer presentasi.
+- `pubspec.yaml` mendaftarkan `assets/recipes/images/`; folder sumber foto
+  masuk `.gitignore`. Kolase logo kelompok dipertahankan sebagai fallback.
+
+### Perubahan
+- `RecipeImage`: satu sumber kebenaran `assetFor(id)`, `cacheWidth`, fade-in,
+  `excludeFromSemantics`, fallback kolase saat berkas tidak ada.
+- Katalog: kartu unggulan "Ide hari ini" deterministik per tanggal
+  (`RecipeCatalog.featured`, indeks UTC agar kebal zona waktu/DST), seksi
+  rentang usia, kartu foto 16:9, chip diringkas "+N". Resep unggulan tidak
+  diulang di daftar; unggulan disembunyikan saat mencari.
+- Detail: foto **square hero** dengan kartu judul menumpuk 20 dp (teks tidak
+  pernah di atas foto), meta di bawah hero, dan `IngredientChecklist`
+  interaktif (centang + progres + "Atur ulang") untuk status lokal saja.
+- Tema: `headlineSmall` dipetakan ke Plus Jakarta Sans; chip kelompok pakai
+  `AppSurfaces.sunken` agar tetap terbaca di dark. Copy baru di `AppStrings`.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **418/418 passed** (diulang 3×; +6 tes: aset foto,
+  determinisme unggulan, kontrak katalog, checklist & foto hero detail).
+- `flutter build apk --debug` → **OK Built** (warning x86 di PowerShell bukan
+  kegagalan build).
+- DoD: gradien 0, `Colors.*` mentah 0, kunci Gemini hardcode 0.
+- Pratinjau render nyata light & dark @1,3: foto terlihat jelas, judul tidak
+  tertutup, checklist dan CTA terbaca, tanpa overflow.
+- Commit belum dijalankan (manual oleh pemilik).
