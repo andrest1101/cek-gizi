@@ -952,6 +952,21 @@ abstract final class AppStrings {
   static const recipesEyebrow = 'RESEP';
   static const recipesTitle = 'Resep';
   static const recipesSubtitle = 'Ide masakan rumahan sesuai usia anak.';
+  static const recipesFeaturedEyebrow = 'Ide hari ini';
+  static String recipesFeaturedSemantics(
+    String title,
+    int minutes,
+    String bandLabel,
+  ) =>
+      'Ide hari ini: $title. $minutes menit. Usia $bandLabel. '
+      'Buka detail resep.';
+  static String recipesBandTitle(String code) => switch (code) {
+    '6-8' => '6–8 bulan',
+    '9-11' => '9–11 bulan',
+    '12-23' => '12–23 bulan',
+    '24+' => '24 bulan ke atas',
+    _ => code,
+  };
   static const recipesSearchHint = 'Cari resep atau bahan';
   static const recipesSearchSemantics = 'Cari resep atau bahan';
   static const recipesSearchClear = 'Hapus pencarian';
@@ -974,6 +989,8 @@ abstract final class AppStrings {
   static String recipesReviewedByName(String name) => 'Ditinjau oleh $name';
   static String recipesMinutes(int minutes) => '$minutes menit';
   static String recipesGroupCount(int count) => '$count kelompok pangan';
+  static String recipesGroupCountShort(int count) => '$count kelompok';
+  static String recipesMoreGroups(int count) => '+$count';
   static const recipesProteinBadge = 'Protein hewani';
   static String recipesResultCount(int count) => '$count resep';
   static String recipesFilterBandLabel(String code) => switch (code) {
@@ -1008,6 +1025,11 @@ abstract final class AppStrings {
   static String recipesStepSemantics(int number) => 'Langkah $number';
   static String recipesIngredientSemantics(String name, String amount) =>
       '$name, $amount';
+  static const recipesIngredientsHint =
+      'Tandai bahan yang sudah disiapkan sebelum mulai memasak.';
+  static String recipesChecklistProgress(int done, int total) =>
+      '$done dari $total bahan disiapkan';
+  static const recipesChecklistReset = 'Atur ulang';
   static const recipesLogCta = 'Catat sebagai makan';
   static const recipesLogSheetTitle = 'Catat sebagai makan';
   static const recipesLogSheetSubtitle =

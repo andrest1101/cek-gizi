@@ -47,6 +47,20 @@ abstract final class RecipeCatalog {
     return sorted(filter(recipes, band: band));
   }
 
+  /// Resep unggulan "Ide hari ini" - deterministik per tanggal perangkat.
+  ///
+  /// Tidak memakai acak agar tampilan stabil sepanjang hari dan bisa diuji
+  /// dengan jam palsu. [recipes] sebaiknya sudah tersaring & terurut.
+  static Recipe? featured(List<Recipe> recipes, DateTime at) {
+    if (recipes.isEmpty) return null;
+    // Tanggal kalender murni (UTC) agar indeks tidak bergeser oleh zona waktu
+    // atau pergantian DST di perangkat pengguna.
+    final day = DateTime.utc(at.year, at.month, at.day);
+    final startOfYear = DateTime.utc(at.year, 1, 1);
+    final dayOfYear = day.difference(startOfYear).inDays;
+    return recipes[dayOfYear % recipes.length];
+  }
+
   static bool _matches(Recipe recipe, String needle) {
     if (normalize(recipe.title).contains(needle)) return true;
     for (final ingredient in recipe.ingredients) {

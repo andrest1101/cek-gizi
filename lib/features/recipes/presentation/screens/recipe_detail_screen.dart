@@ -12,7 +12,8 @@ import 'package:cekgizi/features/children/domain/entities/child_profile.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/recipes/domain/entities/recipe.dart';
 import 'package:cekgizi/features/recipes/presentation/providers/recipe_providers.dart';
-import 'package:cekgizi/features/recipes/presentation/widgets/recipe_group_thumb.dart';
+import 'package:cekgizi/features/recipes/presentation/widgets/ingredient_checklist.dart';
+import 'package:cekgizi/features/recipes/presentation/widgets/recipe_image.dart';
 import 'package:cekgizi/features/recipes/presentation/widgets/recipe_log_sheet.dart';
 import 'package:cekgizi/features/recipes/presentation/widgets/recipe_meta.dart';
 import 'package:cekgizi/features/recipes/presentation/widgets/recipe_notices.dart';
@@ -22,6 +23,10 @@ import 'package:cekgizi/shared/widgets/skeleton.dart';
 
 /// Detail resep (PRD §6.6): bahan, langkah, catatan keamanan, dan aksi
 /// "Catat sebagai makan". Seluruh teks berasal dari berkas resep terkurasi.
+///
+/// Foto asli menjadi hero di puncak halaman; kartu judul menumpuk di bagian
+/// bawah foto (tanpa teks di atas foto, agar kontras tetap aman). Checklist
+/// bahan hanya menyimpan status centang lokal di layar ini.
 class RecipeDetailScreen extends ConsumerWidget {
   const RecipeDetailScreen({super.key, required this.recipeId});
 
@@ -64,134 +69,183 @@ class _DetailBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
-    return ListView(
+    return CustomScrollView(
       key: const Key('recipe-detail-list'),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenPadding,
-        AppSpacing.md,
-        AppSpacing.screenPadding,
-        AppSpacing.xxl,
-      ),
-      children: [
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          decoration: AppSurfaces.sunken(context, radius: AppRadius.card),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              RecipeGroupThumb(groups: recipe.groups, size: 96),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      slivers: [
+        SliverToBoxAdapter(child: _PhotoHero(recipe: recipe)),
+        // Foto + kartu judul saling menumpuk 20dp; beri ruang sebelum isi.
+        const SliverToBoxAdapter(
+          child: SizedBox(height: AppSpacing.xl + AppSpacing.md),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.screenPadding,
+            0,
+            AppSpacing.screenPadding,
+            AppSpacing.xxl,
+          ),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate.fixed([
+              Wrap(
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xs,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  RecipeMinutesMeta(minutes: recipe.minutes),
+                  RecipeBandPill(bandCode: recipe.ageBand.code),
+                  if (recipe.animalProtein) const RecipeProteinPill(),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              const _SectionTitle(
+                icon: Icons.shopping_basket_outlined,
+                text: AppStrings.recipesIngredientsTitle,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              IngredientChecklist(ingredients: recipe.ingredients),
+              const SizedBox(height: AppSpacing.xl),
+              const _SectionTitle(
+                icon: Icons.format_list_numbered_rounded,
+                text: AppStrings.recipesStepsTitle,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              for (var i = 0; i < recipe.steps.length; i++) ...[
+                if (i > 0) const SizedBox(height: AppSpacing.md),
+                _StepRow(number: i + 1, text: recipe.steps[i]),
+              ],
+              const SizedBox(height: AppSpacing.xl),
+              const _SectionTitle(
+                icon: Icons.health_and_safety_outlined,
+                text: AppStrings.recipesSafetyTitle,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              _SafetyNote(
+                icon: Icons.soup_kitchen_rounded,
+                iconColor: colors.primary,
+                label: AppStrings.recipesTextureLabel,
+                note: recipe.textureNote,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _SafetyNote(
+                icon: recipe.hasAllergenNote
+                    ? Icons.warning_amber_rounded
+                    : Icons.info_outline_rounded,
+                iconColor: recipe.hasAllergenNote
+                    ? colors.onAccentContainer
+                    : colors.textSecondary,
+                label: AppStrings.recipesAllergenLabel,
+                note: recipe.hasAllergenNote
+                    ? recipe.allergenNote
+                    : AppStrings.recipesNoAllergenNote,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              if (recipe.isReviewed)
+                Row(
                   children: [
-                    Semantics(
-                      header: true,
+                    Icon(
+                      Icons.verified_outlined,
+                      size: 18,
+                      color: colors.statusGood,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
                       child: Text(
-                        recipe.title,
-                        style: AppTextStyles.titleLarge.copyWith(
-                          color: colors.textPrimary,
+                        recipe.reviewedOn != null
+                            ? AppStrings.recipesReviewedBy(
+                                recipe.reviewedBy!,
+                                recipe.reviewedOn!,
+                              )
+                            : AppStrings.recipesReviewedByName(
+                                recipe.reviewedBy!,
+                              ),
+                        style: AppTextStyles.label.copyWith(
+                          color: colors.textSecondary,
                         ),
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.xs,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        RecipeMinutesMeta(minutes: recipe.minutes),
-                        RecipeBandPill(bandCode: recipe.ageBand.code),
-                        if (recipe.animalProtein) const RecipeProteinPill(),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      AppStrings.recipesGroupCount(recipe.groupCount),
-                      style: AppTextStyles.label.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
                   ],
+                )
+              else
+                const RecipeReviewNotice(compact: true),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                AppStrings.recipesDisclaimer,
+                style: AppTextStyles.label.copyWith(
+                  color: colors.textSecondary,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        const _SectionTitle(
-          icon: Icons.shopping_basket_outlined,
-          text: AppStrings.recipesIngredientsTitle,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        _IngredientsCard(ingredients: recipe.ingredients),
-        const SizedBox(height: AppSpacing.xl),
-        const _SectionTitle(
-          icon: Icons.format_list_numbered_rounded,
-          text: AppStrings.recipesStepsTitle,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        for (var i = 0; i < recipe.steps.length; i++) ...[
-          if (i > 0) const SizedBox(height: AppSpacing.md),
-          _StepRow(number: i + 1, text: recipe.steps[i]),
-        ],
-        const SizedBox(height: AppSpacing.xl),
-        const _SectionTitle(
-          icon: Icons.health_and_safety_outlined,
-          text: AppStrings.recipesSafetyTitle,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        _SafetyNote(
-          icon: Icons.soup_kitchen_rounded,
-          iconColor: colors.primary,
-          label: AppStrings.recipesTextureLabel,
-          note: recipe.textureNote,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        _SafetyNote(
-          icon: recipe.hasAllergenNote
-              ? Icons.warning_amber_rounded
-              : Icons.info_outline_rounded,
-          iconColor: recipe.hasAllergenNote
-              ? colors.onAccentContainer
-              : colors.textSecondary,
-          label: AppStrings.recipesAllergenLabel,
-          note: recipe.hasAllergenNote
-              ? recipe.allergenNote
-              : AppStrings.recipesNoAllergenNote,
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        if (recipe.isReviewed)
-          Row(
-            children: [
-              Icon(Icons.verified_outlined, size: 18, color: colors.statusGood),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  recipe.reviewedOn != null
-                      ? AppStrings.recipesReviewedBy(
-                          recipe.reviewedBy!,
-                          recipe.reviewedOn!,
-                        )
-                      : AppStrings.recipesReviewedByName(recipe.reviewedBy!),
-                  style: AppTextStyles.label.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                ),
-              ),
-            ],
-          )
-        else
-          const RecipeReviewNotice(compact: true),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          AppStrings.recipesDisclaimer,
-          style: AppTextStyles.label.copyWith(
-            color: colors.textSecondary,
-            fontWeight: FontWeight.w400,
+            ]),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Foto resep selebar konten dengan kartu judul yang menumpuk di bawahnya.
+class _PhotoHero extends StatelessWidget {
+  const _PhotoHero({required this.recipe});
+
+  final Recipe recipe;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          AspectRatio(
+            aspectRatio: 1,
+            child: RecipeImage(
+              recipeId: recipe.id,
+              groups: recipe.groups,
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(AppRadius.card),
+              ),
+            ),
+          ),
+          Positioned(
+            left: AppSpacing.sm,
+            right: AppSpacing.sm,
+            bottom: -AppSpacing.xl,
+            child: _TitleCard(recipe: recipe),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TitleCard extends StatelessWidget {
+  const _TitleCard({required this.recipe});
+
+  final Recipe recipe;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: AppSurfaces.card(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              recipe.title,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.titleLarge.copyWith(
+                color: colors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -219,75 +273,6 @@ class _SectionTitle extends StatelessWidget {
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _IngredientsCard extends StatelessWidget {
-  const _IngredientsCard({required this.ingredients});
-
-  final List<RecipeIngredient> ingredients;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppTheme.colorsOf(context);
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: colors.outline, width: 1),
-      ),
-      child: Column(
-        children: [
-          for (var i = 0; i < ingredients.length; i++) ...[
-            if (i > 0)
-              Divider(
-                height: 1,
-                color: colors.outline,
-                indent: AppSpacing.lg,
-                endIndent: AppSpacing.lg,
-              ),
-            Semantics(
-              label: AppStrings.recipesIngredientSemantics(
-                ingredients[i].name,
-                ingredients[i].amount,
-              ),
-              excludeSemantics: true,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        ingredients[i].name,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: colors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Flexible(
-                      child: Text(
-                        ingredients[i].amount,
-                        textAlign: TextAlign.end,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: colors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -485,7 +470,7 @@ class _DetailSkeleton extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.screenPadding),
       children: const [
-        Skeleton(height: 120, radius: AppRadius.card),
+        Skeleton(height: 220, radius: AppRadius.card),
         SizedBox(height: AppSpacing.xl),
         Skeleton(width: 120, height: 18),
         SizedBox(height: AppSpacing.md),

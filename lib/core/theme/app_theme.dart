@@ -40,17 +40,22 @@ abstract final class AppTheme {
         );
 
     final textTheme = TextTheme(
-      displaySmall: AppTextStyles.heroNumber.copyWith(color: colors.textPrimary),
+      displaySmall: AppTextStyles.heroNumber.copyWith(
+        color: colors.textPrimary,
+      ),
+      headlineSmall: AppTextStyles.titleLarge.copyWith(
+        color: colors.textPrimary,
+      ),
       titleLarge: AppTextStyles.titleLarge.copyWith(color: colors.textPrimary),
-      titleMedium: AppTextStyles.titleMedium.copyWith(color: colors.textPrimary),
+      titleMedium: AppTextStyles.titleMedium.copyWith(
+        color: colors.textPrimary,
+      ),
       bodyLarge: AppTextStyles.body.copyWith(color: colors.textPrimary),
       bodyMedium: AppTextStyles.body.copyWith(color: colors.textPrimary),
-      bodySmall:
-          AppTextStyles.bodySmall.copyWith(color: colors.textSecondary),
+      bodySmall: AppTextStyles.bodySmall.copyWith(color: colors.textSecondary),
       labelLarge: AppTextStyles.label.copyWith(color: colors.textPrimary),
       labelMedium: AppTextStyles.label.copyWith(color: colors.textSecondary),
-      labelSmall:
-          AppTextStyles.label.copyWith(color: colors.textSecondary),
+      labelSmall: AppTextStyles.label.copyWith(color: colors.textSecondary),
     );
 
     final controlShape = RoundedRectangleBorder(
@@ -231,10 +236,12 @@ abstract final class AppTheme {
           horizontal: 16,
           vertical: 14,
         ),
-        labelStyle:
-            AppTextStyles.bodySmall.copyWith(color: colors.textSecondary),
-        hintStyle:
-            AppTextStyles.bodySmall.copyWith(color: colors.textSecondary),
+        labelStyle: AppTextStyles.bodySmall.copyWith(
+          color: colors.textSecondary,
+        ),
+        hintStyle: AppTextStyles.bodySmall.copyWith(
+          color: colors.textSecondary,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.control),
           borderSide: BorderSide(color: colors.outline, width: 1),

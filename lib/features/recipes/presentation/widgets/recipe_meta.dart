@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_radius.dart';
 import 'package:cekgizi/core/theme/app_spacing.dart';
+import 'package:cekgizi/core/theme/app_surfaces.dart';
 import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 
@@ -91,10 +92,7 @@ class RecipeGroupChip extends StatelessWidget {
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
       ),
-      decoration: BoxDecoration(
-        color: colors.surfaceVariant,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
+      decoration: AppSurfaces.sunken(context, radius: AppRadius.pill),
       child: Text(
         AppStrings.groupShortLabel(code),
         style: _pillStyle.copyWith(
@@ -102,6 +100,62 @@ class RecipeGroupChip extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
+    );
+  }
+}
+
+/// Penanda jumlah kelompok yang tidak ditampilkan sebagai chip (mis. "+2").
+class RecipeGroupOverflowChip extends StatelessWidget {
+  const RecipeGroupOverflowChip({super.key, required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: AppSurfaces.sunken(context, radius: AppRadius.pill),
+      child: Text(
+        AppStrings.recipesMoreGroups(count),
+        style: _pillStyle.copyWith(
+          color: colors.textSecondary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+/// Satu baris meta: waktu memasak · jumlah kelompok pangan.
+///
+/// Memakai [Wrap] agar tetap aman di 360dp pada text scale 1,3.
+class RecipeMetaRow extends StatelessWidget {
+  const RecipeMetaRow({
+    super.key,
+    required this.minutes,
+    required this.groupCount,
+  });
+
+  final int minutes;
+  final int groupCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    final style = _pillStyle.copyWith(color: colors.textSecondary);
+    return Wrap(
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        RecipeMinutesMeta(minutes: minutes),
+        Text('·', style: style),
+        Text(AppStrings.recipesGroupCountShort(groupCount), style: style),
+      ],
     );
   }
 }
