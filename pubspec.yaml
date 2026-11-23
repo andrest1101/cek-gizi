@@ -81,9 +81,16 @@ flutter:
     - assets/audio/
     - assets/reference/
     - assets/rules/
+    - assets/recipes/
+    # Foto resep hasil tool/optimize_recipe_images.py (nama = id resep).
+    - assets/recipes/images/
     # Hanya versi mark yang dibundel; master & foreground hanya dipakai
     # saat generate ikon launcher (tidak perlu ikut ke dalam APK).
     - assets/logo/logo_cek-gizi_mark.png
+    # Mark asisten Tanya Gizi: mono putih untuk di-tint per tema, duotone
+    # untuk penempatan brand berukuran besar di permukaan terang.
+    - assets/logo/tanya_gizi_mono_white_1024.png
+    - assets/logo/tanya_gizi_duotone_1024.png
     - assets/logo_kelompok_norm/
     # Dua avatar default (ilustrasi milik pemilik) untuk anak tanpa foto.
     - assets/avatars/

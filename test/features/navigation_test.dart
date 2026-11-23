@@ -79,7 +79,7 @@ void main() {
 
     await tester.tap(find.text(AppStrings.navRecipe));
     await tester.pumpAndSettle();
-    expect(find.text(AppStrings.recipesPendingTitle), findsOneWidget);
+    expect(find.text(AppStrings.recipesSubtitle), findsOneWidget);
 
     await tester.tap(find.text(AppStrings.navGrowth));
     await tester.pumpAndSettle();

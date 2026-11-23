@@ -1,4 +1,4 @@
-# CekGizi — Spesifikasi Visual (v3.1, Batch UX-18)
+# CekGizi — Spesifikasi Visual (v3.3, Resep photo-led)
 
 Dokumen ini adalah **kontrak visual** untuk seluruh layar. PRD v2.0 tetap
 sumber kebenaran fitur; dokumen ini hanya mengatur bagaimana fitur tampil.
@@ -182,7 +182,25 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
   footer sticky dengan pratinjau Piring Hari Ini berbasis aturan (bukan AI).
   Porsi memakai `Wrap` selebar konten — dilarang `Wrap` di dalam `Row`
   (penyebab overflow 7,2 px).
-- **Resep**: empty state jujur sampai `recipes.json` tersedia.
+- **Resep** (v3.2): katalog terkurasi dari `assets/recipes/recipes.json`
+  (offline, tanpa jaringan). `ScreenHeader` + `ChildSwitcherButton` →
+  penanda jujur **belum ditinjau ahli gizi/bidan** bila `reviewed_by` null
+  (PRD §9.1, tidak bisa ditutup) → pencarian (judul/bahan) → chip usia
+  horizontal (Semua · 6–8 · 9–11 · 12–23 · 24+ bln, target 48dp; default
+  mengikuti usia anak) → saring **Protein hewani** + jumlah hasil.
+  - Kartu resep: sampul **kolase logo kelompok pangan** (aset yang sudah ada,
+    bukan foto karangan), judul 2 baris, meta jam + pil usia + pil protein
+    hewani (ikon + teks), lalu chip kelompok. Seluruh kartu = satu tombol.
+  - Detail (`/recipes/:id`, layar penuh tanpa nav bawah): blok hero tonal
+    (sampul + judul + meta) → **Bahan** (kartu berhairline, takaran rata
+    kanan) → **Langkah memasak** (lingkaran nomor tonal) → **Catatan keamanan**
+    (tekstur + alergen, selalu ikon + teks) → status tinjauan → disclaimer.
+    Footer sticky **Catat sebagai makan** → sheet pilih jenis makan →
+    satu `food_logs` `source=recipe` (union kelompok masuk Piring Hari Ini)
+    + snackbar Urungkan. Tanpa anak: CTA nonaktif + ajakan tambah profil.
+  - Anak < 6 bulan: catatan ASI eksklusif; katalog tetap bisa dijelajahi.
+    Empty state filter punya tombol "Atur ulang filter"; galat memuat punya
+    kartu Coba lagi.
 - **Tumbuh** (v2.3–v2.8): ringkasan `ZScoreSummaryStrip` (3 ubin, sekaligus
   pemilih indeks) → grafik pita SD **full-bleed** dengan judul sumbu + satuan
   (X: usia/panjang-tinggi, Y: tinggi/berat), **tap titik** → kartu detail
@@ -213,6 +231,10 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
   tetap: **header ringkas** (tutup · avatar · "Tanya Gizi" + "Asisten edukasi
   gizi" · menu ⋮ berisi *Hapus riwayat chat*) → **percakapan editorial** →
   **disclaimer tetap** → **kotak tulis**.
+  - **Avatar di header** = mark AI asli (`tanya_gizi_mono_white_1024.png`,
+    24dp, di-tint ke `colors.primary` via `BlendMode.srcIn` di dalam lingkaran
+    `primaryContainer` 36dp), bukan ikon Material generik. Varian duotone
+    (`tanya_gizi_duotone_1024.png`) disimpan untuk brand besar di tema terang.
   - Jawaban asisten berupa **lembar `surface` ber-border hairline** (radius
     `card` 20, padding 16, tanpa shadow), **tanpa avatar dan tanpa nama**:
     identitas cukup di header, peran dibedakan lewat bentuk — lembar penuh di
@@ -288,3 +310,34 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
 - Semua teks di `AppStrings`; suara "kamu", hangat, tanpa menghakimi.
 - Angka & tanggal memakai format Indonesia (`IdDateFormat`, koma desimal).
 - Nama aplikasi selalu dari `AppConfig.appName`.
+
+## 11. Resep photo-led (v3.3)
+
+- **Aset**: `assets/recipes/images/<id-resep>.jpg` (1280px, q82 progressive,
+  EXIF/GPS dibuang, total 1,87 MB untuk 24 foto). Nama berkas = `id` di
+  `recipes.json`. Sumber resolusi penuh tidak dibundel. Bila foto gagal dimuat,
+  tampil fallback kolase logo kelompok — bukan kotak rusak.
+- **Katalog**:
+  - Kartu unggulan "Ide hari ini" di puncak, dipilih deterministik dari
+    tanggal perangkat. Foto 16:10 di atas, lalu eyebrow hijau, judul
+    `titleLarge` (maks. 3 baris), meta, dan chip. Resep yang sama tidak
+    diulang di daftar bawah; unggulan tidak tampil saat mencari.
+  - Kartu biasa memakai foto 16:9 penuh lebar di atas judul. Judul tidak
+    dipaksa jadi satu baris. Meta `menit · jumlah kelompok` memakai `Wrap`.
+  - Hasil dari beberapa rentang usia dikelompokkan; judul seksi memakai
+    `titleMedium` + garis rambut. Bila hanya satu rentang, judul seksi
+    dihilangkan karena chip filter di atas sudah menjelaskan.
+  - Chip kelompok (maks. 3) memakai `AppSurfaces.sunken`; sisanya "+N".
+    Pil usia memakai `primaryContainer`, protein hewani `accentContainer`.
+- **Detail**:
+  - Foto square penuh lebar konten sebagai hero; kartu judul (`AppSurfaces.card`)
+    menumpuk 20 dp di bawahnya. **Teks tidak pernah ditaruh di atas foto** —
+    kontras aman di light & dark tanpa scrim/gradien.
+  - Meta (waktu, usia, protein) ditempatkan di bawah kartu judul, bukan di
+    dalamnya, supaya foto tidak tertutup terlalu banyak pada text scale 1,3.
+  - Checklist bahan: baris ≥ 56 dp, kotak centang 24 dp berisi ikon `check`,
+    teks dicoret saat selesai, progres "$done dari $total bahan disiapkan"
+    dan tombol "Atur ulang". Status hanya lokal, tidak disimpan/dikirim.
+- **Aksesibilitas**: foto bertanda `excludeFromSemantics`; kartu & checklist
+  memiliki `Semantics` (button/checkbox + label lengkap). Semua penanda
+  memakai ikon + teks, bukan warna saja.
