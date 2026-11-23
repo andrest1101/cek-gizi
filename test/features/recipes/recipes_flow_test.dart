@@ -15,6 +15,8 @@ import 'package:cekgizi/features/meals/domain/entities/food_log.dart';
 import 'package:cekgizi/features/meals/presentation/providers/meals_providers.dart';
 import 'package:cekgizi/features/recipes/domain/entities/recipe.dart';
 import 'package:cekgizi/features/recipes/presentation/providers/recipe_providers.dart';
+import 'package:cekgizi/features/recipes/presentation/widgets/recipe_featured_card.dart';
+import 'package:cekgizi/features/recipes/presentation/widgets/recipe_image.dart';
 
 import '../../fakes.dart';
 
@@ -64,9 +66,10 @@ void main() {
     required FakeFoodLogRepository foodRepo,
     List<ChildProfile>? children,
   }) async {
-    // Viewport tall agar seluruh kartu & detail ter-build tanpa perlu gulir
-    // (uji alur, bukan uji layout - layout diuji terpisah di 360dp @1,3).
-    tester.view.physicalSize = const Size(900, 1600);
+    // Viewport lebar realistis + sangat tinggi agar seluruh kartu & detail
+    // ter-build tanpa perlu gulir (uji alur, bukan uji layout - layout diuji
+    // terpisah di 360dp @1,3). Kartu unggulan "Ide hari ini" ikut ter-build.
+    tester.view.physicalSize = const Size(400, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
@@ -138,6 +141,53 @@ void main() {
     expect(find.text(AppStrings.recipesResultCount(5)), findsOneWidget);
   });
 
+  testWidgets('katalog menampilkan ide hari ini dan seksi rentang usia', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      recipeRepo: FakeRecipeRepository(seed()),
+      foodRepo: FakeFoodLogRepository(),
+    );
+    await tester.tap(find.text(AppStrings.recipesFilterAll));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(AppStrings.recipesFeaturedEyebrow.toUpperCase()),
+      findsOneWidget,
+    );
+    // Seksi mengikuti rentang usia yang ada di hasil (seed: 6–8, 12–23, 24+).
+    for (final code in ['6-8', '12-23', '24+']) {
+      expect(
+        find.text(AppStrings.recipesBandTitle(code)),
+        findsOneWidget,
+        reason: code,
+      );
+    }
+
+    // Unggulan deterministik 23 Nov 2026 (selisih hari % 5) = Bubur Ayam
+    // Sayur, dan resep yang sama tidak diulang di daftar bawahnya.
+    expect(find.text('Bubur Ayam Sayur'), findsOneWidget);
+
+    // Foto unggulan memakai aset sesuai id resep - bukan kolase logo.
+    final photo = tester.widget<Image>(
+      find
+          .descendant(
+            of: find.byType(RecipeFeaturedCard),
+            matching: find.byType(Image),
+          )
+          .first,
+    );
+    // `cacheWidth` membungkus provider dalam ResizeImage; ambil aset aslinya.
+    final provider = photo.image is ResizeImage
+        ? (photo.image as ResizeImage).imageProvider
+        : photo.image;
+    expect(
+      (provider as AssetImage).assetName,
+      RecipeImage.assetFor('bubur-ayam'),
+    );
+  });
+
   testWidgets('pencarian menyaring judul lalu bisa diatur ulang', (
     tester,
   ) async {
@@ -198,6 +248,50 @@ void main() {
     expect(find.text(AppStrings.recipesLogCta), findsOneWidget);
     // Belum ditinjau → penanda ringkas di detail.
     expect(find.text(AppStrings.recipesReviewPendingShort), findsOneWidget);
+  });
+
+  testWidgets('detail memakai foto resep dan checklist bahan interaktif', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      recipeRepo: FakeRecipeRepository(seed()),
+      foodRepo: FakeFoodLogRepository(),
+    );
+    await tester.tap(find.text('Nasi Tim Sapi'));
+    await tester.pumpAndSettle();
+
+    // Hero detail memakai aset foto sesuai id resep.
+    final hero = tester.widget<Image>(find.byType(Image).first);
+    expect(
+      (hero.image as AssetImage).assetName,
+      RecipeImage.assetFor('nasi-tim-sapi'),
+    );
+
+    final label = AppStrings.recipesIngredientSemantics('Beras putih', '2 sdm');
+    Semantics checkbox() => tester
+        .widgetList<Semantics>(find.byType(Semantics))
+        .firstWhere((widget) => widget.properties.label == label);
+    expect(checkbox().properties.checked, isFalse);
+
+    await tester.tap(
+      find
+          .ancestor(
+            of: find.text('Beras putih'),
+            matching: find.byType(InkWell),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
+    expect(checkbox().properties.checked, isTrue);
+    expect(
+      find.text(AppStrings.recipesChecklistProgress(1, 2)),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text(AppStrings.recipesChecklistReset));
+    await tester.pumpAndSettle();
+    expect(checkbox().properties.checked, isFalse);
   });
 
   testWidgets('catat sebagai makan menyimpan log recipe dan bisa diurungkan', (

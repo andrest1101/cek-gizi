@@ -119,4 +119,34 @@ void main() {
       expect(RecipeCatalog.forAge(recipes, 4), isEmpty);
     });
   });
+
+  group('RecipeCatalog.featured', () {
+    final recipes = [
+      for (var i = 0; i < 5; i++)
+        fakeRecipe(id: 'r$i', title: 'Resep $i', minutes: 20 + i),
+    ];
+
+    test('stabil sepanjang hari yang sama', () {
+      final morning = RecipeCatalog.featured(
+        recipes,
+        DateTime(2026, 11, 23, 6, 30),
+      );
+      final night = RecipeCatalog.featured(
+        recipes,
+        DateTime(2026, 11, 23, 22, 45),
+      );
+      expect(morning, isNotNull);
+      expect(night!.id, morning!.id);
+    });
+
+    test('berganti pada hari berikutnya', () {
+      final today = RecipeCatalog.featured(recipes, DateTime(2026, 11, 23));
+      final tomorrow = RecipeCatalog.featured(recipes, DateTime(2026, 11, 24));
+      expect(tomorrow!.id, isNot(today!.id));
+    });
+
+    test('katalog kosong menghasilkan null', () {
+      expect(RecipeCatalog.featured(const [], DateTime(2026, 1, 1)), isNull);
+    });
+  });
 }

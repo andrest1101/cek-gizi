@@ -5,6 +5,7 @@ import 'package:cekgizi/features/meals/domain/services/dietary_diversity.dart';
 import 'package:cekgizi/features/recipes/data/models/recipe_model.dart';
 import 'package:cekgizi/features/recipes/data/repositories/recipe_repository_impl.dart';
 import 'package:cekgizi/features/recipes/domain/entities/recipe.dart';
+import 'package:cekgizi/features/recipes/presentation/widgets/recipe_image.dart';
 
 /// Uji konten aset asli terhadap syarat PRD §9.1 (bukan data karangan).
 ///
@@ -68,5 +69,22 @@ void main() {
     // Berkas saat ini reviewed_by null; loader tidak boleh menolak, dan UI
     // wajib menampilkan penanda "belum ditinjau" (PRD §9.1).
     expect(recipes.every((r) => r.isReviewed), isFalse);
+  });
+
+  test('setiap resep punya foto teroptimasi yang dibundel', () async {
+    var total = 0;
+    for (final recipe in recipes) {
+      final data = await rootBundle.load(RecipeImage.assetFor(recipe.id));
+      expect(data.lengthInBytes, greaterThan(0), reason: recipe.id);
+      // Batas per foto: hero tetap tajam tanpa membengkakkan APK.
+      expect(
+        data.lengthInBytes,
+        lessThanOrEqualTo(300 * 1024),
+        reason: recipe.id,
+      );
+      total += data.lengthInBytes;
+    }
+    // Anggaran total 24 foto (hasil tool/optimize_recipe_images.py).
+    expect(total, lessThan(3 * 1024 * 1024));
   });
 }
