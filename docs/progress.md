@@ -1493,3 +1493,29 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
 - Pratinjau render nyata light & dark @1,3: foto terlihat jelas, judul tidak
   tertutup, checklist dan CTA terbaca, tanpa overflow.
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-21 — Windows desktop gagal di langkah cmake install (2026-11-24)
+
+### Konteks & penyebab
+- `flutter run -d windows` gagal dengan `MSB3073` dari `INSTALL.vcxproj`.
+- Penyebab aslinya: `windows/CMakeLists.txt` melakukan
+  `install(DIRECTORY "${NATIVE_ASSETS_DIR}")` tanpa syarat, tetapi Flutter
+  3.32.8 tidak membuat `build/native_assets/windows/` karena
+  `NativeAssetsManifest.json` berisi `{"native-assets":{}}` (proyek tidak
+  punya native asset). CMake menggagalkan install sebelum `flutter_assets`
+  tersalin. Bukan masalah toolset MSVC dan bukan efek perubahan aset resep.
+
+### Perubahan
+- `windows/CMakeLists.txt`: install native assets dibungkus
+  `if(EXISTS "${NATIVE_ASSETS_DIR}") ... endif()`, sehingga build tetap benar
+  bila suatu hari ada native asset, tetapi tidak gagal bila tidak ada.
+- Tidak ada dependency baru; tidak ada perubahan kode aplikasi.
+
+### Verifikasi
+- `flutter build windows --debug` → **OK**; `Debug/data/flutter_assets/`
+  berisi 24 foto resep.
+- `flutter build windows --release` → **OK**.
+- Smoke test `runner\Release\cekgizi.exe` → proses hidup > 6 detik tanpa crash.
+- `flutter analyze` bersih; `flutter test` **418/418**; `flutter build apk --debug`
+  **OK** (warning x86 di PowerShell bukan kegagalan).
+- Commit belum dijalankan (manual oleh pemilik).
