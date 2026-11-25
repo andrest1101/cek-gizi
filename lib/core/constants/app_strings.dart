@@ -539,10 +539,14 @@ abstract final class AppStrings {
     String day,
     int met,
     int total,
-    bool hasLogs,
-  ) => hasLogs
-      ? '$day, $met dari $total kelompok. Ketuk untuk melihat catatan.'
-      : '$day, belum ada catatan.';
+    bool hasLogs, {
+    bool reached = false,
+  }) {
+    if (!hasLogs) return '$day, belum ada catatan.';
+    final suffix = reached ? ' Target tercapai.' : '';
+    return '$day, $met dari $total kelompok.$suffix '
+        'Ketuk untuk melihat catatan.';
+  }
   static String makanHistoryDayProgress(int met, int total) =>
       '$met dari $total kelompok';
   static const makanHistoryLegendLogged = 'Ada catatan';

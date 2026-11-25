@@ -477,7 +477,7 @@ class _HistorySkeleton extends StatelessWidget {
         SizedBox(height: AppSpacing.md),
         Skeleton(height: 76, radius: AppRadius.card),
         SizedBox(height: AppSpacing.xl),
-        Skeleton(height: 230, radius: AppRadius.card),
+        Skeleton(height: 270, radius: AppRadius.card),
         SizedBox(height: AppSpacing.xl),
         Skeleton(height: 56),
         SizedBox(height: AppSpacing.sm),
