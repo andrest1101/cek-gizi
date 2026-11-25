@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/theme/app_motion.dart';
@@ -22,8 +21,8 @@ import 'package:cekgizi/features/growth/presentation/widgets/growth_status_card.
 import 'package:cekgizi/features/growth/presentation/widgets/status_copy.dart';
 import 'package:cekgizi/features/growth/presentation/widgets/zscore_summary_strip.dart';
 import 'package:cekgizi/features/chat/presentation/widgets/tanya_bubble.dart';
+import 'package:cekgizi/shared/widgets/child_gate.dart';
 import 'package:cekgizi/shared/widgets/child_switcher.dart';
-import 'package:cekgizi/shared/widgets/empty_state.dart';
 import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/screen_header.dart';
 import 'package:cekgizi/shared/widgets/section_header.dart';
@@ -44,38 +43,15 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final child = ref.watch(selectedChildProvider).value;
-
     return Scaffold(
       floatingActionButton: const TanyaBubble(),
       body: SafeArea(
-        child: child == null
-            ? const _NoChild()
-            : _GrowthBody(
-                child: child,
-                index: _index,
-                onIndexChanged: (value) => setState(() => _index = value),
-              ),
-      ),
-    );
-  }
-}
-
-class _NoChild extends StatelessWidget {
-  const _NoChild();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.screenPadding),
-        child: EmptyState(
-          icon: Icons.child_care_rounded,
-          title: AppStrings.growthNoChildTitle,
-          body: AppStrings.growthNoChildBody,
-          action: FilledButton(
-            onPressed: () => context.push('/children/add'),
-            child: const Text(AppStrings.growthNoChildCta),
+        // Memuat/gagal/kosong dibedakan oleh ChildGate.
+        child: ChildGate(
+          builder: (context, child) => _GrowthBody(
+            child: child,
+            index: _index,
+            onIndexChanged: (value) => setState(() => _index = value),
           ),
         ),
       ),

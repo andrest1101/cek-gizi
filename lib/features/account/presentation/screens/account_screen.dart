@@ -18,8 +18,10 @@ import 'package:cekgizi/features/account/presentation/widgets/account_privacy_ca
 import 'package:cekgizi/features/account/presentation/widgets/reminder_settings_section.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/chat/presentation/widgets/tanya_bubble.dart';
+import 'package:cekgizi/shared/widgets/error_card.dart';
 import 'package:cekgizi/shared/widgets/screen_header.dart';
 import 'package:cekgizi/shared/widgets/section_heading.dart';
+import 'package:cekgizi/shared/widgets/skeleton.dart';
 
 /// Tab Akun (PRD §6.8): identitas anak terpilih, foto profil lokal, daftar
 /// anak, pengingat, ringkasan privasi, dan sumber rujukan.
@@ -31,8 +33,7 @@ class AccountScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final child = ref.watch(selectedChildProvider).value;
-    final children = ref.watch(childrenListProvider).value ?? const [];
+    final childrenAsync = ref.watch(childrenListProvider);
     final now = ref.watch(clockProvider)();
 
     // Hapus Akun (UX-5): snackbar + pindah ke /opening setelah sukses atau
@@ -83,14 +84,32 @@ class AccountScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            if (child == null)
-              const _NoChildCard()
-            else
-              AccountIdentityCard(child: child, now: now),
-            if (children.length > 1) ...[
-              const SizedBox(height: AppSpacing.md),
-              AccountChildStrip(children: children, now: now),
-            ],
+            // Bedakan memuat / gagal / benar-benar kosong. Sebelumnya
+            // `.value` membuat keadaan memuat & galat tampil seolah
+            // "belum ada anak".
+            childrenAsync.when(
+              loading: () => const _AccountChildSkeleton(),
+              error: (error, stackTrace) => ErrorCard(
+                message: AppStrings.childListLoadError,
+                onRetry: () => ref.invalidate(childrenListProvider),
+              ),
+              data: (children) {
+                final child = ref.watch(selectedChildProvider).value;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (child == null)
+                      const _NoChildCard()
+                    else
+                      AccountIdentityCard(child: child, now: now),
+                    if (children.length > 1) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      AccountChildStrip(children: children, now: now),
+                    ],
+                  ],
+                );
+              },
+            ),
             const SizedBox(height: AppSpacing.xxl),
             const ReminderSettingsSection(),
             const SizedBox(height: AppSpacing.xxl),
@@ -108,9 +127,47 @@ class AccountScreen extends ConsumerWidget {
   }
 }
 
+/// Kerangka kartu identitas selama daftar anak masih dimuat.
+class _AccountChildSkeleton extends StatelessWidget {
+  const _AccountChildSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('account-child-loading'),
+      decoration: AppSurfaces.card(context),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Skeleton(width: 64, height: 64, radius: AppRadius.pill),
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Skeleton(width: 140, height: 18),
+                    SizedBox(height: AppSpacing.xs),
+                    Skeleton(width: 96, height: 14),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.lg),
+          Skeleton(height: 14),
+          SizedBox(height: AppSpacing.sm),
+          Skeleton(width: 180, height: 14),
+        ],
+      ),
+    );
+  }
+}
+
 class _NoChildCard extends StatelessWidget {
   const _NoChildCard();
-
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colorsOf(context);
