@@ -1519,3 +1519,44 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
 - `flutter analyze` bersih; `flutter test` **418/418**; `flutter build apk --debug`
   **OK** (warning x86 di PowerShell bukan kegagalan).
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-22 — Kalender Riwayat: angka tertutup indikator (2026-11-25)
+
+### Konteks & penyebab
+- Tanggal bertanda status terlihat "tertutup": ikon centang `size: 9` ditaruh
+  `bottom: 2` **di dalam** lingkaran 36 dp yang sama dengan angka, sehingga
+  bertumpuk dengan digit pada text scale 1,3. Titik 4 dp juga terlalu dekat.
+- `MonthCalendar` menyembunyikan status (`&& !isSelected`) saat tanggal
+  dipilih, jadi informasi "target tercapai" justru hilang ketika pengguna
+  membuka hari tersebut.
+- Latar lingkaran memakai `Container` di dalam `InkWell`; ripple tidak
+  konsisten terhadap teks. Diganti `Ink` agar latar + ripple berada di
+  lapisan Material, **di bawah** angka.
+
+### Perubahan
+- `month_calendar.dart`:
+  - Sel 48 → **56 dp**; lingkaran tetap 36 dp; status pindah ke **jalur
+    sendiri** 12 dp di bawah lingkaran (pola sama dengan `WeekStrip`).
+  - Status tetap tampil saat tanggal dipilih (titik/centang di luar
+    lingkaran, kontras aman di light & dark).
+  - Angka memakai `Ink` + `maxLines: 1` dan `softWrap: false`; teks tidak
+    pernah tertimpa ripple.
+  - Tanggal di luar jendela 30 hari sedikit lebih terbaca (alpha 0,55).
+  - Legenda jadi `Wrap` per item sehingga "Target tercapai" tidak terpotong
+    dua baris di 360 dp @1,3.
+  - `Semantics` tanggal menyebut "Target tercapai" (via
+    `AppStrings.makanHistoryDaySemantics(reached:)`).
+- `makan_history_view.dart`: tinggi skeleton kalender mengikuti sel baru.
+- Tes baru `test/features/calendar_layout_test.dart` (10 tes): geometri angka
+  vs indikator tidak beririsan (light & dark), status tetap ada saat dipilih,
+  label semantik, tinggi target ketuk ≥ 48 dp, tanggal masa depan nonaktif.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **428/428 passed** (418 + 10 tes kalender).
+- `flutter build apk --debug` → **OK Built**.
+- `flutter build windows --debug` → **OK Built**.
+- DoD: gradien 0, `Colors.*` mentah 0, kunci Gemini hardcode 0.
+- Pratinjau render nyata light & dark 360 dp @1,3: angka terpilih (24) tetap
+  terbaca, centang/titik berada di bawah lingkaran, legenda satu baris.
+- Tanpa dependency baru. Commit belum dijalankan (manual oleh pemilik).
