@@ -1,4 +1,4 @@
-# CekGizi — Spesifikasi Visual (v3.4, Riwayat & kalender)
+# CekGizi — Spesifikasi Visual (v3.5, state anak jujur)
 
 Dokumen ini adalah **kontrak visual** untuk seluruh layar. PRD v2.0 tetap
 sumber kebenaran fitur; dokumen ini hanya mengatur bagaimana fitur tampil.
@@ -133,6 +133,7 @@ Kedalaman berasal dari perbedaan tone 1 langkah + hairline, bukan shadow.
 | `SegmentControl` | pemilih 2 bagian (Hari ini/Riwayat) |
 | `TonalIconCircle` | ikon di lingkaran tonal, bukan emoji |
 | `ChildAvatar` / `ChildSwitcher` | identitas anak; avatar default 2 bentuk (siluet laki/perempuan, otomatis ikut jenis kelamin) atau foto profil **lokal** (opsional, tidak pernah diunggah) |
+| `ChildGate` | gerbang layar yang butuh profil anak: **memuat** → skeleton, **gagal** → `ErrorCard` + Coba lagi, **kosong** → `EmptyState` + CTA, **ada data** → konten. Dilarang memakai `.value` saja dan menampilkan "belum ada anak" untuk keadaan memuat/gagal |
 | `ChildPhotoAvatar` (features) | avatar yang memuat foto lokal (`ChildPhotoStore`) dengan fallback ilustrasi |
 | `ZScoreTable` | tabel z-score aksesibel |
 
