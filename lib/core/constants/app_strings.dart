@@ -521,6 +521,11 @@ abstract final class AppStrings {
       'Mulai catat makan hari ini. Riwayat akan muncul di sini.';
   static const makanHistoryEmptyCta = 'Catat makan hari ini';
   static const makanHistoryDayEmpty = 'Tidak ada catatan pada hari ini.';
+  static const makanHistoryDayOutsideWindow =
+      'Tanggal ini di luar 30 hari terakhir, jadi belum ada catatan yang '
+      'bisa ditampilkan.';
+  static const makanHistoryUnavailable =
+      'Riwayat belum bisa ditampilkan. Coba muat ulang.';
   static const makanHistoryWindowNote =
       'Riwayat yang tersedia: 30 hari terakhir.';
   static const makanHistorySummaryTitle = '30 hari terakhir';
@@ -539,10 +544,14 @@ abstract final class AppStrings {
     String day,
     int met,
     int total,
-    bool hasLogs,
-  ) => hasLogs
-      ? '$day, $met dari $total kelompok. Ketuk untuk melihat catatan.'
-      : '$day, belum ada catatan.';
+    bool hasLogs, {
+    bool reached = false,
+  }) {
+    if (!hasLogs) return '$day, belum ada catatan.';
+    final suffix = reached ? ' Target tercapai.' : '';
+    return '$day, $met dari $total kelompok.$suffix '
+        'Ketuk untuk melihat catatan.';
+  }
   static String makanHistoryDayProgress(int met, int total) =>
       '$met dari $total kelompok';
   static const makanHistoryLegendLogged = 'Ada catatan';

@@ -1,4 +1,4 @@
-# CekGizi — Spesifikasi Visual (v3.3, Resep photo-led)
+# CekGizi — Spesifikasi Visual (v3.5, state anak jujur)
 
 Dokumen ini adalah **kontrak visual** untuk seluruh layar. PRD v2.0 tetap
 sumber kebenaran fitur; dokumen ini hanya mengatur bagaimana fitur tampil.
@@ -133,6 +133,7 @@ Kedalaman berasal dari perbedaan tone 1 langkah + hairline, bukan shadow.
 | `SegmentControl` | pemilih 2 bagian (Hari ini/Riwayat) |
 | `TonalIconCircle` | ikon di lingkaran tonal, bukan emoji |
 | `ChildAvatar` / `ChildSwitcher` | identitas anak; avatar default 2 bentuk (siluet laki/perempuan, otomatis ikut jenis kelamin) atau foto profil **lokal** (opsional, tidak pernah diunggah) |
+| `ChildGate` | gerbang layar yang butuh profil anak: **memuat** → skeleton, **gagal** → `ErrorCard` + Coba lagi, **kosong** → `EmptyState` + CTA, **ada data** → konten. Dilarang memakai `.value` saja dan menampilkan "belum ada anak" untuk keadaan memuat/gagal |
 | `ChildPhotoAvatar` (features) | avatar yang memuat foto lokal (`ChildPhotoStore`) dengan fallback ilustrasi |
 | `ZScoreTable` | tabel z-score aksesibel |
 
@@ -175,6 +176,18 @@ saja; `OnboardingGuidanceIllustration` = gelembung tanya + lencana perisai.
   "Catat tanpa foto") → panel ringkasan → tur singkat → checklist kelompok →
   catatan hari ini. Pita protein hewani memakai `accentContainer` bila belum
   ada, `primaryContainer` bila sudah ada — selalu ikon + teks.
+- **Riwayat makan** (v3.4): ringkasan 30 hari → strip 7 hari → kalender
+  bulanan → detail hari terpilih.
+  - Kalender: sel **56 dp**, lingkaran 36 dp, angka `labelLarge` dengan
+    `tabularFigures`. Status menempati **jalur sendiri 12 dp** di bawah
+    lingkaran (titik 6 dp = ada catatan, centang 12 dp = target tercapai) —
+    dilarang menaruh indikator di dalam lingkaran angka. Status **tetap
+    tampil** saat tanggal dipilih; ripple/latar memakai `Ink` agar selalu di
+    bawah teks.
+  - Legenda memakai `Wrap` per item (ikon/titik + teks utuh), bukan `Row`
+    dengan teks yang boleh terpotong di tengah kata.
+  - Tanggal di luar jendela 30 hari atau masa depan tidak bisa dipilih;
+    opacity tetap ≥ 0,55 agar masih terbaca.
 - **Sheet hasil scan** (v2.9): review editorial "Periksa isi piring" — item
   tanpa kotak bertumpuk (logo kelompok, nama inline, badge "Perlu dicek",
   pill kelompok, porsi), `showScanGroupPicker` grid 2 kolom maks. 3

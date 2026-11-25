@@ -9,6 +9,13 @@ import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/core/utils/date_format.dart';
 import 'package:cekgizi/features/meals/domain/services/history_summary.dart';
 
+/// Tinggi satu sel tanggal. Isinya: lingkaran 36 dp + jarak 2 dp + jalur
+/// status 12 dp = 50 dp, menyisakan 6 dp agar target ketuk tetap tinggi.
+/// Angka dan status menempati jalur berbeda sehingga tidak pernah bertumpuk.
+const double _dayCellHeight = 56;
+const double _dayCircleSize = 36;
+const double _dayStatusLane = 12;
+
 /// Kalender satu bulan untuk Riwayat. Hanya tanggal yang masuk jendela data
 /// (30 hari terakhir) dan bukan masa depan yang bisa dipilih.
 class MonthCalendar extends StatelessWidget {
@@ -119,29 +126,20 @@ class MonthCalendar extends StatelessWidget {
               ],
             ),
           const SizedBox(height: AppSpacing.sm),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: AppSpacing.lg,
+            runSpacing: AppSpacing.xs,
             children: [
-              _LegendDot(color: colors.primary),
-              const SizedBox(width: AppSpacing.xs),
-              Flexible(
-                child: Text(
-                  AppStrings.makanHistoryLegendLogged,
-                  style: textTheme.labelMedium?.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                ),
+              _LegendItem(
+                color: colors.primary,
+                label: AppStrings.makanHistoryLegendLogged,
               ),
-              const SizedBox(width: AppSpacing.md),
-              Icon(Icons.check_circle_rounded, size: 12, color: colors.primary),
-              const SizedBox(width: AppSpacing.xs),
-              Flexible(
-                child: Text(
-                  AppStrings.makanHistoryLegendReached,
-                  style: textTheme.labelMedium?.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                ),
+              _LegendItem(
+                color: colors.primary,
+                icon: Icons.check_circle_rounded,
+                label: AppStrings.makanHistoryLegendReached,
               ),
             ],
           ),
@@ -181,7 +179,7 @@ class _DayCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final dayNumber = index - leading + 1;
     if (dayNumber < 1 || dayNumber > daysInMonth) {
-      return const SizedBox(height: 48);
+      return const SizedBox(height: _dayCellHeight);
     }
 
     final day = DateTime(month.year, month.month, dayNumber);
@@ -205,7 +203,31 @@ class _DayCell extends StatelessWidget {
         ? colors.onPrimary
         : canSelect
             ? colors.textPrimary
-            : colors.textSecondary.withValues(alpha: 0.45);
+            : colors.textSecondary.withValues(alpha: 0.55);
+
+    final dayKey = '${day.year}-${day.month}-${day.day}';
+
+    // Status punya jalur sendiri di bawah lingkaran (pola yang sama dengan
+    // WeekStrip) supaya tidak pernah menimpa angka. Status tetap ditampilkan
+    // pada tanggal terpilih agar informasinya tidak hilang.
+    final status = data?.targetReached == true
+        ? Icon(
+            Icons.check_circle_rounded,
+            key: ValueKey('calendar-day-status-$dayKey'),
+            size: 12,
+            color: colors.primary,
+          )
+        : data?.hasLogs == true
+            ? Container(
+                key: ValueKey('calendar-day-status-$dayKey'),
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: colors.primary,
+                  shape: BoxShape.circle,
+                ),
+              )
+            : null;
 
     return Semantics(
       button: canSelect,
@@ -215,67 +237,97 @@ class _DayCell extends StatelessWidget {
         data?.metCount ?? 0,
         data?.targetCount ?? 0,
         data?.hasLogs ?? false,
+        reached: data?.targetReached ?? false,
       ),
       excludeSemantics: true,
       child: SizedBox(
-        height: 48,
+        height: _dayCellHeight,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(AppRadius.pill),
             onTap: canSelect ? () => onSelect(day) : null,
-            child: Center(
-              child: Container(
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: background,
-                  shape: BoxShape.circle,
-                  border: isToday && !isSelected
-                      ? Border.all(color: colors.primary, width: 1.5)
-                      : null,
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Text(
-                      '$dayNumber',
-                      style: textTheme.labelLarge?.copyWith(
-                        color: foreground,
-                        fontWeight:
-                            isSelected || isToday ? FontWeight.w700 : FontWeight.w500,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: _dayCircleSize,
+                  height: _dayCircleSize,
+                  // `Ink` menaruh latar lingkaran di lapisan Material,
+                  // sehingga ripple berada di bawah teks dan angka tetap
+                  // terbaca saat tanggal ditekan.
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      color: background,
+                      shape: BoxShape.circle,
+                      border: isToday && !isSelected
+                          ? Border.all(color: colors.primary, width: 1.5)
+                          : null,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$dayNumber',
+                        key: ValueKey('calendar-day-number-$dayKey'),
+                        maxLines: 1,
+                        softWrap: false,
+                        textAlign: TextAlign.center,
+                        style: textTheme.labelLarge?.copyWith(
+                          color: foreground,
+                          fontWeight: isSelected || isToday
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
                       ),
                     ),
-                    if (data?.targetReached == true && !isSelected)
-                      Positioned(
-                        bottom: 2,
-                        child: Icon(
-                          Icons.check_circle_rounded,
-                          size: 9,
-                          color: colors.primary,
-                        ),
-                      )
-                    else if (data?.hasLogs == true && !isSelected)
-                      Positioned(
-                        bottom: 3,
-                        child: Container(
-                          width: 4,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: colors.primary,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                  ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 2),
+                SizedBox(
+                  height: _dayStatusLane,
+                  child: status == null ? null : Center(child: status),
+                ),
+              ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  const _LegendItem({
+    required this.color,
+    required this.label,
+    this.icon,
+  });
+
+  final Color color;
+  final String label;
+
+  /// Bila null, dipakai titik ([_LegendDot]) sebagai penanda "ada catatan".
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon == null)
+          _LegendDot(color: color)
+        else
+          Icon(icon, size: 12, color: color),
+        const SizedBox(width: AppSpacing.xs),
+        Flexible(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: AppTheme.colorsOf(context).textSecondary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

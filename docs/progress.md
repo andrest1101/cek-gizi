@@ -1519,3 +1519,82 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
 - `flutter analyze` bersih; `flutter test` **418/418**; `flutter build apk --debug`
   **OK** (warning x86 di PowerShell bukan kegagalan).
 - Commit belum dijalankan (manual oleh pemilik).
+
+## UX-22 — Kalender Riwayat: angka tertutup indikator (2026-11-25)
+
+### Konteks & penyebab
+- Tanggal bertanda status terlihat "tertutup": ikon centang `size: 9` ditaruh
+  `bottom: 2` **di dalam** lingkaran 36 dp yang sama dengan angka, sehingga
+  bertumpuk dengan digit pada text scale 1,3. Titik 4 dp juga terlalu dekat.
+- `MonthCalendar` menyembunyikan status (`&& !isSelected`) saat tanggal
+  dipilih, jadi informasi "target tercapai" justru hilang ketika pengguna
+  membuka hari tersebut.
+- Latar lingkaran memakai `Container` di dalam `InkWell`; ripple tidak
+  konsisten terhadap teks. Diganti `Ink` agar latar + ripple berada di
+  lapisan Material, **di bawah** angka.
+
+### Perubahan
+- `month_calendar.dart`:
+  - Sel 48 → **56 dp**; lingkaran tetap 36 dp; status pindah ke **jalur
+    sendiri** 12 dp di bawah lingkaran (pola sama dengan `WeekStrip`).
+  - Status tetap tampil saat tanggal dipilih (titik/centang di luar
+    lingkaran, kontras aman di light & dark).
+  - Angka memakai `Ink` + `maxLines: 1` dan `softWrap: false`; teks tidak
+    pernah tertimpa ripple.
+  - Tanggal di luar jendela 30 hari sedikit lebih terbaca (alpha 0,55).
+  - Legenda jadi `Wrap` per item sehingga "Target tercapai" tidak terpotong
+    dua baris di 360 dp @1,3.
+  - `Semantics` tanggal menyebut "Target tercapai" (via
+    `AppStrings.makanHistoryDaySemantics(reached:)`).
+- `makan_history_view.dart`: tinggi skeleton kalender mengikuti sel baru.
+- Tes baru `test/features/calendar_layout_test.dart` (10 tes): geometri angka
+  vs indikator tidak beririsan (light & dark), status tetap ada saat dipilih,
+  label semantik, tinggi target ketuk ≥ 48 dp, tanggal masa depan nonaktif.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **428/428 passed** (418 + 10 tes kalender).
+- `flutter build apk --debug` → **OK Built**.
+- `flutter build windows --debug` → **OK Built**.
+- DoD: gradien 0, `Colors.*` mentah 0, kunci Gemini hardcode 0.
+- Pratinjau render nyata light & dark 360 dp @1,3: angka terpilih (24) tetap
+  terbaca, centang/titik berada di bawah lingkaran, legenda satu baris.
+- Tanpa dependency baru. Commit belum dijalankan (manual oleh pemilik).
+
+## UX-23 — Memuat / gagal / kosong tidak lagi disamakan (2026-11-25)
+
+### Konteks & penyebab
+- `AccountScreen`, `MakanScreen`, dan `GrowthScreen` memakai
+  `ref.watch(selectedChildProvider).value`. Nilainya `null` bukan hanya saat
+  benar-benar tidak ada anak, tetapi juga saat daftar anak **masih dimuat**
+  atau **gagal dimuat**. Akibatnya pengguna melihat kartu "Belum ada anak"
+  (dan CTA tambah anak) pada keadaan yang seharusnya skeleton / `ErrorCard`.
+
+### Perubahan
+- `shared/widgets/child_gate.dart` (baru): satu gerbang profil anak untuk
+  Makan & Tumbuh — `loading` → skeleton statis, `error` → `ErrorCard` dengan
+  retry, `data` kosong → `EmptyState` + CTA, `data` berisi → `builder`.
+  Retry memanggil `ref.invalidate(childrenListProvider)`.
+- `makan_screen.dart` & `growth_screen.dart`: memakai `ChildGate`; hapus
+  empty state lokal yang menyesatkan.
+- `account_screen.dart`: bagian identitas anak memakai `childrenAsync.when`
+  dengan skeleton kartu, `ErrorCard`, lalu data. Seksi pengingat/privasi/
+  sumber rujukan tetap tampil di semua keadaan.
+- `makan_history_view.dart`: `summary == null` tidak lagi memunculkan layar
+  kosong tanpa penjelasan — kini `ErrorCard` + retry. Tanggal di luar jendela
+  30 hari memakai pesan spesifik `_DayNote` (bukan duplikat catatan jendela).
+- `AppStrings`: tambah `makanHistoryDayOutsideWindow` &
+  `makanHistoryUnavailable`.
+- Tes baru `test/features/child_gate_test.dart` (6 tes): error + retry,
+  skeleton memuat, empty state asli, untuk Akun/Makan/Tumbuh.
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **434/434 passed** (428 + 6 tes state anak).
+- `flutter build apk --debug` → **OK Built**.
+- `flutter build windows --debug` → **tidak bisa menimpa exe** karena proses
+  `cekgizi.exe` masih berjalan di mesin (LNK1168, bukan error kode); build
+  Windows terakhir yang berhasil tetap dari UX-22/UX-21. Tutup aplikasi
+  desktop lalu jalankan ulang build bila ingin memperbarui exe.
+- DoD: gradien 0, `Colors.*` mentah 0, kunci Gemini hardcode 0.
+- Tanpa dependency baru. Commit belum dijalankan (manual oleh pemilik).

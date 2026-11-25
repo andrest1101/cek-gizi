@@ -54,7 +54,17 @@ class MakanHistoryView extends ConsumerWidget {
         },
       ),
       data: (summary) {
-        if (summary == null) return const SizedBox.shrink();
+        // Null berarti profil anak belum siap (mis. baru dihapus). Jangan
+        // biarkan layar kosong tanpa penjelasan.
+        if (summary == null) {
+          return ErrorCard(
+            message: AppStrings.makanHistoryUnavailable,
+            onRetry: () {
+              ref.invalidate(historyLogsProvider(child.id));
+              ref.invalidate(historySummaryProvider(child.id));
+            },
+          );
+        }
         return _HistoryData(
           summary: summary,
           selectedDay: selectedDay,
@@ -341,34 +351,16 @@ class _DayDetail extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     if (day == null) {
-      return Text(
-        AppStrings.makanHistoryWindowNote,
-        style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
+      return const _DayNote(
+        icon: Icons.event_busy_rounded,
+        message: AppStrings.makanHistoryDayOutsideWindow,
       );
     }
 
     if (!day!.hasLogs) {
-      return Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: AppSurfaces.sunken(context),
-        child: Row(
-          children: [
-            Icon(
-              Icons.calendar_today_rounded,
-              size: 20,
-              color: colors.textSecondary,
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Text(
-                AppStrings.makanHistoryDayEmpty,
-                style: textTheme.bodySmall?.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-            ),
-          ],
-        ),
+      return const _DayNote(
+        icon: Icons.calendar_today_rounded,
+        message: AppStrings.makanHistoryDayEmpty,
       );
     }
 
@@ -463,6 +455,36 @@ class _DayDetail extends StatelessWidget {
   }
 }
 
+class _DayNote extends StatelessWidget {
+  const _DayNote({required this.icon, required this.message});
+
+  final IconData icon;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppTheme.colorsOf(context);
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: AppSurfaces.sunken(context),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: colors.textSecondary),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _HistorySkeleton extends StatelessWidget {
   const _HistorySkeleton();
 
@@ -477,7 +499,7 @@ class _HistorySkeleton extends StatelessWidget {
         SizedBox(height: AppSpacing.md),
         Skeleton(height: 76, radius: AppRadius.card),
         SizedBox(height: AppSpacing.xl),
-        Skeleton(height: 230, radius: AppRadius.card),
+        Skeleton(height: 270, radius: AppRadius.card),
         SizedBox(height: AppSpacing.xl),
         Skeleton(height: 56),
         SizedBox(height: AppSpacing.sm),
