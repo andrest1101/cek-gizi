@@ -1,4 +1,4 @@
-# CekGizi — Spesifikasi Visual (v3.5, state anak jujur)
+# CekGizi — Spesifikasi Visual (v3.6, tema & akun anonim)
 
 Dokumen ini adalah **kontrak visual** untuk seluruh layar. PRD v2.0 tetap
 sumber kebenaran fitur; dokumen ini hanya mengatur bagaimana fitur tampil.
@@ -26,6 +26,17 @@ menulis angka/warna baru di widget.
 - Bayangan tebal sebagai satu-satunya pembeda kedalaman.
 - Glassmorphism, blob, ikon tanpa label, emoji sebagai ikon UI.
 - Klaim klinis ("mencegah stunting", "mendiagnosis", "bebas stunting").
+
+### Tema
+
+- **Default aplikasi = terang** (`ThemeMode.light`), bukan mengikuti sistem.
+- Tab Akun → **Tampilan** menyediakan `SegmentedButton` tiga pilihan:
+  Terang / Gelap / Sistem. Nilai tersimpan di `LocalPrefs` dan dibaca
+  `themeModeProvider` → `MaterialApp.themeMode`; tidak bergantung Supabase.
+- Nilai tersimpan tak dikenal selalu jatuh ke terang.
+- Kartu Privasi & data menyertakan catatan jujur bahwa akun masih anonim:
+  menghapus aplikasi / mengganti perangkat membuat data server tidak bisa
+  diakses kembali.
 
 ## 2. Warna
 

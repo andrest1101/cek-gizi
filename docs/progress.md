@@ -1598,3 +1598,42 @@ tetap** berisi checkbox, CTA 52dp, hint penolakan, dan error `liveRegion`.
   desktop lalu jalankan ulang build bila ingin memperbarui exe.
 - DoD: gradien 0, `Colors.*` mentah 0, kunci Gemini hardcode 0.
 - Tanpa dependency baru. Commit belum dijalankan (manual oleh pemilik).
+
+## UX-24 — Pilihan tema lokal & catatan akun anonim (2026-11-25)
+
+### Konteks & keputusan
+- `app.dart` sebelumnya memakai `ThemeMode.system` secara hardcode. Sesuai
+  permintaan pemilik, **default diubah menjadi terang**; opsi Gelap/Sistem
+  tetap tersedia agar pengguna bisa memilih sendiri.
+- Seluruhnya lokal: tidak ada Supabase, OAuth, maupun dependency baru.
+  Bila later dirasa tidak cocok, penghapusan fitur tidak mengubah data anak.
+
+### Perubahan
+- `LocalPrefs`: kunci `theme_mode` + getter/setter; nilai tak dikenal jatuh
+  ke `light`. `clearAll()` (hapus akun) ikut mereset tema ke terang.
+- `core/theme/theme_providers.dart` (baru): `themeModeProvider` memuat nilai
+  dari `LocalPrefs` dan menyimpan perubahan; kegagalan tulis tidak mengubah
+  tema aktif pada sesi berjalan.
+- `app.dart`: `themeMode: ref.watch(themeModeProvider)`.
+- `features/account/.../appearance_section.dart` (baru): kartu "Tampilan"
+  dengan `SegmentedButton<ThemeMode>` Terang/Gelap/Sistem, ikon + teks,
+  minimum 48 dp, `Semantics`.
+- `account_privacy_card.dart`: footnote jujur bahwa akun masih anonim dan
+  data server tidak bisa diakses lagi bila aplikasi dihapus/perangkat diganti.
+- `AppStrings`: 6 string baru (tampilan + catatan anonim).
+- Tes baru `test/features/appearance_test.dart` (7 tes): default terang,
+  persistensi Gelap/Sistem/Terang, fallback nilai asing, layout 360dp @1,3
+  light & dark, footnote privasi.
+- `navigation_test.dart`: perbaikan brittle test — seksi Pengingat sekarang
+  di-scroll dulu dan dicari sebagai turutan `ReminderSettingsSection`
+  (`ListView` membuild anak secara lazy).
+
+### Verifikasi
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **441/441 passed** (434 + 7 tes tema + perbaikan navigasi).
+- `flutter build apk --debug` → **OK Built**.
+- `flutter build windows --debug` → dilewati: proses `cekgizi.exe` masih
+  berjalan (PID 20580) sehingga `.exe` terkunci (LNK1168). Tutup aplikasi
+  desktop untuk memperbarui build Windows.
+- DoD: gradien 0, `Colors.*` mentah 0, kunci Gemini hardcode 0.
+- Tanpa dependency baru. Commit belum dijalankan (manual oleh pemilik).
