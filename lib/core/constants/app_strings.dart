@@ -895,6 +895,13 @@ abstract final class AppStrings {
   static const accountEyebrow = 'AKUN';
   static const accountTitle = 'Akun';
   static const accountSubtitle = 'Profil anak, foto, dan pengingat kamu.';
+  static const accountAppearanceTitle = 'Tampilan';
+  static const accountAppearanceBody =
+      'Pilih tema yang nyaman untuk kamu.';
+  static const accountAppearanceSemantics = 'Pilih tema tampilan';
+  static const accountThemeLight = 'Terang';
+  static const accountThemeDark = 'Gelap';
+  static const accountThemeSystem = 'Sistem';
   static const accountChildSection = 'Profil anak';
   static const accountChildManage = 'Kelola anak';
   static const accountChildEmptyTitle = 'Belum ada anak';
@@ -915,6 +922,9 @@ abstract final class AppStrings {
   static const accountMeasurementYesterday = 'Kemarin';
   static String accountMeasurementDaysAgo(int days) => '$days hari lalu';
   static const accountPrivacyTitle = 'Privasi & data';
+  static const accountPrivacyAnonymousNote =
+      'Akun ini masih anonim. Bila aplikasi dihapus atau perangkat diganti, '
+      'data di server tidak bisa diakses kembali.';
   static const accountPrivacyChildTitle = 'Profil anak';
   static const accountPrivacyChildBody =
       'Tersimpan di akun anonim kamu dan hanya bisa diakses dari akun ini.';

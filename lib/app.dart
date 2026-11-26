@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/config/app_config.dart';
 import 'core/router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_providers.dart';
 
 /// Root widget aplikasi. Navigasi go_router; tema light/dark (PRD §7).
 /// Gate: onboarding & consent wajib lebih dulu (PRD §6.1).
@@ -21,7 +22,7 @@ class CekGiziApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: ref.watch(themeModeProvider),
       routerConfig: router,
     );
   }

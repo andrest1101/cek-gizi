@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cekgizi/app.dart';
 import 'package:cekgizi/core/constants/app_strings.dart';
 import 'package:cekgizi/core/storage/local_prefs.dart';
+import 'package:cekgizi/features/account/presentation/widgets/reminder_settings_section.dart';
 import 'package:cekgizi/features/chat/presentation/providers/chat_providers.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/growth/presentation/providers/growth_providers.dart';
@@ -121,9 +123,24 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(AppStrings.accountChildSection), findsOneWidget);
-    expect(find.text(AppStrings.settingsRemindersTitle), findsOneWidget);
     expect(find.text(AppStrings.accountChildManage), findsOneWidget);
 
+    // Seksi Pengingat ada di bawah Tampilan. ListView membuild anak secara
+    // lazy, jadi gulir dulu sebelum mencari teksnya, lalu kembali ke atas
+    // untuk tombol "Kelola anak".
+    final accountList = find.byKey(const Key('account-list'));
+    await tester.dragFrom(tester.getCenter(accountList), const Offset(0, -720));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(ReminderSettingsSection),
+        matching: find.text(AppStrings.settingsRemindersTitle),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.dragFrom(tester.getCenter(accountList), const Offset(0, 720));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(AppStrings.accountChildManage));
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.childListTitle), findsOneWidget);
