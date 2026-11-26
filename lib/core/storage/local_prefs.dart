@@ -17,6 +17,12 @@ final class LocalPrefs {
   static const _keyReminderDailyEnabled = 'reminder_daily_enabled';
   static const _keyReminderDailyHour = 'reminder_daily_hour';
   static const _keyReminderDailyMinute = 'reminder_daily_minute';
+  static const _keyThemeMode = 'theme_mode';
+
+  /// Nilai tersimpan untuk tiga pilihan tema.
+  static const themeModeLight = 'light';
+  static const themeModeDark = 'dark';
+  static const themeModeSystem = 'system';
 
   /// Versi teks consent terkini - bila dinaikkan, pengguna diminta setuju lagi.
   /// v2 (2026-11-19): teks consent menambahkan baris "Foto profil (opsional)"
@@ -45,6 +51,22 @@ final class LocalPrefs {
   bool get isPiringTourSeen => _prefs.getBool(_keyPiringTourSeen) ?? false;
 
   Future<void> setPiringTourSeen() => _prefs.setBool(_keyPiringTourSeen, true);
+
+  /// Tema default aplikasi = terang. Nilai tak dikenal dianggap terang agar
+  /// pengguna tidak pernah mendapat tema gelap tanpa sengaja.
+  String get themeMode {
+    final value = _prefs.getString(_keyThemeMode);
+    return value == themeModeDark || value == themeModeSystem
+        ? value!
+        : themeModeLight;
+  }
+
+  Future<void> setThemeMode(String value) => _prefs.setString(
+    _keyThemeMode,
+    value == themeModeDark || value == themeModeSystem
+        ? value
+        : themeModeLight,
+  );
 
   /// Hapus SEMUA flag lokal (first-run, consent, tur singkat, reminder).
   /// Dipakai saat akun dihapus (UX-5): pengguna kembali ke mulai pertama.

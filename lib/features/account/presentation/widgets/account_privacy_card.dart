@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:cekgizi/core/constants/app_strings.dart';
+import 'package:cekgizi/core/theme/app_spacing.dart';
 import 'package:cekgizi/core/theme/app_surfaces.dart';
+import 'package:cekgizi/core/theme/app_text_styles.dart';
 import 'package:cekgizi/core/theme/app_theme.dart';
 import 'package:cekgizi/shared/widgets/settings_tile.dart';
 
@@ -52,6 +54,22 @@ class AccountPrivacyCard extends StatelessWidget {
             title: AppStrings.accountDeleteTitle,
             subtitle: AppStrings.accountDeleteTileSubtitle,
             onTap: onDelete,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.lg,
+            ),
+            child: Text(
+              AppStrings.accountPrivacyAnonymousNote,
+              style: AppTextStyles.label.copyWith(
+                color: colors.textSecondary,
+                fontWeight: FontWeight.w400,
+                height: 1.4,
+              ),
+            ),
           ),
         ],
       ),

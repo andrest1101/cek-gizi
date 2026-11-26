@@ -15,6 +15,7 @@ import 'package:cekgizi/features/account/presentation/widgets/account_child_stri
 import 'package:cekgizi/features/account/presentation/widgets/account_delete_dialog.dart';
 import 'package:cekgizi/features/account/presentation/widgets/account_identity_card.dart';
 import 'package:cekgizi/features/account/presentation/widgets/account_privacy_card.dart';
+import 'package:cekgizi/features/account/presentation/widgets/appearance_section.dart';
 import 'package:cekgizi/features/account/presentation/widgets/reminder_settings_section.dart';
 import 'package:cekgizi/features/children/presentation/providers/children_providers.dart';
 import 'package:cekgizi/features/chat/presentation/widgets/tanya_bubble.dart';
@@ -110,6 +111,8 @@ class AccountScreen extends ConsumerWidget {
                 );
               },
             ),
+            const SizedBox(height: AppSpacing.xxl),
+            const AppearanceSection(),
             const SizedBox(height: AppSpacing.xxl),
             const ReminderSettingsSection(),
             const SizedBox(height: AppSpacing.xxl),
